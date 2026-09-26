@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import ScrollReveal from '@/components/shared/ScrollReveal';
 
 interface AuthCardProps {
   initialMode?: 'login' | 'signup';
@@ -121,7 +122,7 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
             </div>
 
             {/* Form Content */}
-            <div className="max-w-md w-full mx-auto my-auto py-3">
+            <ScrollReveal direction="up" delay={100} className="max-w-md w-full mx-auto my-auto py-3">
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 rounded-full border border-[#d8bb93] flex items-center justify-center bg-[#faf6ee] shadow-2xs">
@@ -309,7 +310,7 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   </div>
                 </form>
               )}
-            </div>
+            </ScrollReveal>
 
             {/* Bottom Note */}
             <div className="pt-2 text-center text-[10px] text-[#9a897b] font-light flex items-center justify-center gap-1.5">
@@ -369,7 +370,7 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
             </div>
 
             {/* Form Content */}
-            <div className="max-w-md w-full mx-auto my-auto py-4">
+            <ScrollReveal direction="up" delay={100} className="max-w-md w-full mx-auto my-auto py-4">
               <div className="mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 rounded-full border border-[#d8bb93] flex items-center justify-center bg-[#faf6ee] shadow-2xs">
@@ -526,7 +527,7 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   </div>
                 </form>
               )}
-            </div>
+            </ScrollReveal>
 
             {/* Bottom Note */}
             <div className="pt-3 text-center text-[10.5px] text-[#9a897b] font-light flex items-center justify-center gap-1.5">
