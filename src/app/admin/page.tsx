@@ -419,8 +419,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div
-      style={{ zoom: '80%' }}
-      className={`h-screen max-h-screen overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
+      className={`min-h-screen h-screen w-full overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
     >
       {/* MOBILE HEADER BAR */}
       <header className={`md:hidden flex items-center justify-between px-4 py-3 ${sidebarBg} border-b sticky top-0 z-40`}>
@@ -679,7 +678,7 @@ export default function AdminDashboardPage() {
                   : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
               }`}
             >
-              <span>{isLight ? '☀️ Light Mode (80% Zoom)' : '🌙 Dark Mode (80% Zoom)'}</span>
+              <span>{isLight ? '☀️ Light Mode' : '🌙 Dark Mode'}</span>
             </button>
 
             <span className={`inline-flex items-center px-3 py-1.5 rounded-[5px] text-xs border ${badgeBg}`}>

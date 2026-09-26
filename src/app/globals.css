@@ -18,35 +18,25 @@ body {
 /* Custom Luxury Golden Scrollbar */
 html {
   scrollbar-width: thin;
-  scrollbar-color: #d8bb93 #140f0c;
+  scrollbar-color: #c5a059 transparent;
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 0px;
-}
-
-/* Never show horizontal webkit scrollbar anywhere on mobile/touch */
-@media (max-width: 1024px) {
-  ::-webkit-scrollbar:horizontal {
-    display: none !important;
-    height: 0px !important;
-    width: 0px !important;
-  }
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #140f0c;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #dec29b 0%, #d8bb93 50%, #cba37b 100%);
+  background: #c5a059;
   border-radius: 9999px;
-  border: 2px solid #140f0c;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #e7d2b8 0%, #e0c5a3 50%, #d8bb93 100%);
+  background: #b38b40;
 }
 
 body {
