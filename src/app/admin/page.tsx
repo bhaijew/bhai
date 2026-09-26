@@ -31,6 +31,43 @@ export default function AdminDashboardPage() {
   const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
   const [loginAttemptsLogs, setLoginAttemptsLogs] = useState<any[]>([]);
   const [userTabMode, setUserTabMode] = useState<'users' | 'security'>('users');
+  const [userStatusFilter, setUserStatusFilter] = useState<'all' | 'active' | 'inactive' | 'banned' | 'locked'>('all');
+  const [userSearchText, setUserSearchText] = useState('');
+  const [userActionMsg, setUserActionMsg] = useState('');
+  const [userLoadingId, setUserLoadingId] = useState<string | null>(null);
+
+  const handleUpdateUserStatus = async (userId: string, email: string, newStatus: string, actionName: string) => {
+    try {
+      setUserLoadingId(userId);
+      const res = await fetch('/api/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, email, status: newStatus, action: actionName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setRegisteredUsers((prev) =>
+          prev.map((u) =>
+            u.id === userId
+              ? {
+                  ...u,
+                  status: newStatus,
+                  isBanned: newStatus === 'banned',
+                  isLocked: actionName === 'unlock' || newStatus === 'active' ? false : u.isLocked,
+                  failedAttempts: actionName === 'unlock' || newStatus === 'active' ? 0 : u.failedAttempts,
+                }
+              : u
+          )
+        );
+        setUserActionMsg(`User "${email}" successfully marked as ${newStatus.toUpperCase()}`);
+        setTimeout(() => setUserActionMsg(''), 3500);
+      }
+    } catch (err) {
+      console.error('Error updating user status:', err);
+    } finally {
+      setUserLoadingId(null);
+    }
+  };
 
   // Real-Time Hero Section Form State
   const [heroForm, setHeroForm] = useState({
@@ -2059,75 +2096,260 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* TAB MODE 1: REGISTERED USER ACCOUNTS TABLE */}
+            {/* TAB MODE 1: REGISTERED USER ACCOUNTS TABLE WITH BAN & STATUS MANAGEMENT */}
             {userTabMode === 'users' && (
-              <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
-                      <tr>
-                        <th className="p-4">User ID</th>
-                        <th className="p-4">Full Name</th>
-                        <th className="p-4">Email Address</th>
-                        <th className="p-4">Phone</th>
-                        <th className="p-4">Role</th>
-                        <th className="p-4">Security Status</th>
-                        <th className="p-4">Failed Logins</th>
-                        <th className="p-4">Registered Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className={`divide-y ${tableRowHover}`}>
-                      {registeredUsers.length === 0 ? (
+              <div className="space-y-4">
+                {/* Success Notification Banner */}
+                {userActionMsg && (
+                  <div className="p-3.5 rounded-[5px] bg-emerald-700 text-white text-xs font-semibold flex items-center justify-between shadow-md animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                      <span>✓</span>
+                      <span>{userActionMsg}</span>
+                    </div>
+                    <button type="button" onClick={() => setUserActionMsg('')} className="text-white hover:text-gray-200">
+                      ✕
+                    </button>
+                  </div>
+                )}
+
+                {/* Users Filter & Search Toolbar */}
+                <div className={`${cardBg} p-4 rounded-[5px] flex flex-col sm:flex-row sm:items-center justify-between gap-3`}>
+                  {/* Status Filter Pills */}
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                    {(['all', 'active', 'inactive', 'banned', 'locked'] as const).map((st) => (
+                      <button
+                        key={st}
+                        type="button"
+                        onClick={() => setUserStatusFilter(st)}
+                        className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold capitalize transition-all whitespace-nowrap border ${
+                          userStatusFilter === st
+                            ? isLight
+                              ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-xs'
+                              : 'bg-[#dec29b] text-[#140e0b] border-[#dec29b] shadow-xs'
+                            : isLight
+                            ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5] hover:bg-[#ebdcb9]/40'
+                            : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23] hover:bg-[#261a14]'
+                        }`}
+                      >
+                        {st === 'all'
+                          ? `All (${registeredUsers.length})`
+                          : st === 'active'
+                          ? `Active (${registeredUsers.filter((u) => u.status !== 'banned' && u.status !== 'inactive').length})`
+                          : st === 'banned'
+                          ? `Banned (${registeredUsers.filter((u) => u.status === 'banned' || u.isBanned).length})`
+                          : st === 'inactive'
+                          ? `Inactive (${registeredUsers.filter((u) => u.status === 'inactive').length})`
+                          : `Locked (${registeredUsers.filter((u) => u.isLocked).length})`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Search by Name/Email */}
+                  <div className="relative w-full sm:w-64">
+                    <input
+                      type="text"
+                      value={userSearchText}
+                      onChange={(e) => setUserSearchText(e.target.value)}
+                      placeholder="Search by client or email..."
+                      className={`w-full px-3 py-1.5 text-xs rounded-[5px] focus:outline-none ${inputBg}`}
+                    />
+                    {userSearchText && (
+                      <button
+                        type="button"
+                        onClick={() => setUserSearchText('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Users Table */}
+                <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
                         <tr>
-                          <td colSpan={8} className="p-8 text-center text-xs text-gray-500 italic">
-                            No registered users found.
-                          </td>
+                          <th className="p-4">User ID</th>
+                          <th className="p-4">Client Name</th>
+                          <th className="p-4">Email & Phone</th>
+                          <th className="p-4">Role</th>
+                          <th className="p-4">Account Status</th>
+                          <th className="p-4">Security / Lockout</th>
+                          <th className="p-4 text-right">Admin Actions</th>
                         </tr>
-                      ) : (
-                        registeredUsers.map((u) => (
-                          <tr key={u.id} className="transition-colors">
-                            <td className={`p-4 font-mono ${accentGold} font-bold`}>{u.id}</td>
-                            <td className={`p-4 font-semibold ${titleColor}`}>
-                              <div className="flex items-center gap-2">
-                                <div className="w-6 h-6 rounded-full bg-[#1c1510] text-[#f5efe8] text-[10px] font-serif font-bold flex items-center justify-center">
-                                  {u.name.substring(0, 1).toUpperCase()}
-                                </div>
-                                <span>{u.name}</span>
-                              </div>
+                      </thead>
+                      <tbody className={`divide-y ${tableRowHover}`}>
+                        {registeredUsers
+                          .filter((u) => {
+                            if (userStatusFilter === 'active') return u.status !== 'banned' && u.status !== 'inactive';
+                            if (userStatusFilter === 'banned') return u.status === 'banned' || u.isBanned;
+                            if (userStatusFilter === 'inactive') return u.status === 'inactive';
+                            if (userStatusFilter === 'locked') return u.isLocked;
+                            return true;
+                          })
+                          .filter((u) => {
+                            if (!userSearchText.trim()) return true;
+                            const query = userSearchText.toLowerCase();
+                            return (
+                              u.name?.toLowerCase().includes(query) ||
+                              u.email?.toLowerCase().includes(query) ||
+                              u.phone?.toLowerCase().includes(query)
+                            );
+                          }).length === 0 ? (
+                          <tr>
+                            <td colSpan={7} className="p-8 text-center text-xs text-gray-500 italic">
+                              No client accounts match the current filter.
                             </td>
-                            <td className={`p-4 ${subtitleColor} font-mono`}>{u.email}</td>
-                            <td className={`p-4 ${subtitleColor}`}>{u.phone}</td>
-                            <td className="p-4">
-                              <span
-                                className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
-                                  u.role === 'admin'
-                                    ? 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950 dark:text-purple-300'
-                                    : badgeBg
-                                }`}
-                              >
-                                {u.role === 'admin' ? '👑 Admin' : '👤 Client'}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              {u.isLocked ? (
-                                <span className="px-2.5 py-1 rounded-[5px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-semibold text-[10px]">
-                                  🔒 15-Min Lockout Active
-                                </span>
-                              ) : (
-                                <span className="px-2.5 py-1 rounded-[5px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 font-semibold text-[10px]">
-                                  ✓ Active Account
-                                </span>
-                              )}
-                            </td>
-                            <td className={`p-4 font-mono font-bold ${u.failedAttempts > 0 ? 'text-amber-600' : subtitleColor}`}>
-                              {u.failedAttempts} / 5
-                            </td>
-                            <td className={`p-4 ${subtitleColor}`}>{u.registeredDate}</td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                        ) : (
+                          registeredUsers
+                            .filter((u) => {
+                              if (userStatusFilter === 'active') return u.status !== 'banned' && u.status !== 'inactive';
+                              if (userStatusFilter === 'banned') return u.status === 'banned' || u.isBanned;
+                              if (userStatusFilter === 'inactive') return u.status === 'inactive';
+                              if (userStatusFilter === 'locked') return u.isLocked;
+                              return true;
+                            })
+                            .filter((u) => {
+                              if (!userSearchText.trim()) return true;
+                              const query = userSearchText.toLowerCase();
+                              return (
+                                u.name?.toLowerCase().includes(query) ||
+                                u.email?.toLowerCase().includes(query) ||
+                                u.phone?.toLowerCase().includes(query)
+                              );
+                            })
+                            .map((u) => {
+                              const isBanned = u.status === 'banned' || u.isBanned;
+                              const isInactive = u.status === 'inactive';
+                              const isLoading = userLoadingId === u.id;
+
+                              return (
+                                <tr key={u.id} className="transition-colors">
+                                  <td className={`p-4 font-mono ${accentGold} font-bold`}>{u.id}</td>
+                                  <td className={`p-4 font-semibold ${titleColor}`}>
+                                    <div className="flex items-center gap-2.5">
+                                      <div className={`w-7 h-7 rounded-full ${isBanned ? 'bg-red-800' : isInactive ? 'bg-amber-800' : 'bg-[#1c1510]'} text-[#f5efe8] text-[11px] font-serif font-bold flex items-center justify-center flex-shrink-0 shadow-2xs`}>
+                                        {u.name.substring(0, 1).toUpperCase()}
+                                      </div>
+                                      <div>
+                                        <p>{u.name}</p>
+                                        <p className={`text-[10px] ${subtitleColor} font-normal`}>Reg: {u.registeredDate}</p>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="p-4">
+                                    <p className={`font-mono ${subtitleColor}`}>{u.email}</p>
+                                    <p className={`text-[10px] ${subtitleColor}`}>{u.phone}</p>
+                                  </td>
+                                  <td className="p-4">
+                                    <span
+                                      className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
+                                        u.role === 'admin'
+                                          ? 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950 dark:text-purple-300'
+                                          : badgeBg
+                                      }`}
+                                    >
+                                      {u.role === 'admin' ? '👑 Admin' : '👤 Client'}
+                                    </span>
+                                  </td>
+                                  <td className="p-4">
+                                    {isBanned ? (
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                                        🔴 Banned
+                                      </span>
+                                    ) : isInactive ? (
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                                        🟡 Inactive
+                                      </span>
+                                    ) : (
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                        🟢 Active
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="p-4">
+                                    {u.isLocked ? (
+                                      <span className="px-2 py-0.5 rounded-[4px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-semibold text-[10px] block">
+                                        🔒 IP Locked ({u.failedAttempts}/5)
+                                      </span>
+                                    ) : (
+                                      <span className={`text-[10.5px] font-mono ${u.failedAttempts > 0 ? 'text-amber-600' : subtitleColor}`}>
+                                        {u.failedAttempts > 0 ? `⚠️ ${u.failedAttempts} Failed Attempts` : '✓ 0 Security Issues'}
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="p-4 text-right">
+                                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
+                                      {/* Ban / Unban Toggle Button */}
+                                      {isBanned ? (
+                                        <button
+                                          type="button"
+                                          disabled={isLoading}
+                                          onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'activate')}
+                                          className="px-2.5 py-1 rounded-[4px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                        >
+                                          {isLoading ? '...' : '✓ Unban & Activate'}
+                                        </button>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          disabled={isLoading}
+                                          onClick={() => handleUpdateUserStatus(u.id, u.email, 'banned', 'ban')}
+                                          className="px-2.5 py-1 rounded-[4px] bg-red-600 hover:bg-red-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                        >
+                                          {isLoading ? '...' : '🚫 Ban User'}
+                                        </button>
+                                      )}
+
+                                      {/* Inactive / Activate Toggle */}
+                                      {!isBanned && (
+                                        isInactive ? (
+                                          <button
+                                            type="button"
+                                            disabled={isLoading}
+                                            onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'activate')}
+                                            className="px-2 py-1 rounded-[4px] bg-[#dec29b] text-[#1c1510] font-semibold text-[10.5px] hover:bg-[#c9ad84] transition-all shadow-2xs"
+                                          >
+                                            {isLoading ? '...' : '🟢 Activate'}
+                                          </button>
+                                        ) : (
+                                          <button
+                                            type="button"
+                                            disabled={isLoading}
+                                            onClick={() => handleUpdateUserStatus(u.id, u.email, 'inactive', 'deactivate')}
+                                            className="px-2 py-1 rounded-[4px] border border-amber-600 text-amber-700 dark:text-amber-400 font-semibold text-[10.5px] hover:bg-amber-100 dark:hover:bg-amber-950 transition-all"
+                                          >
+                                            {isLoading ? '...' : '⏸️ Inactive'}
+                                          </button>
+                                        )
+                                      )}
+
+                                      {/* Reset IP Lockout */}
+                                      {u.isLocked && (
+                                        <button
+                                          type="button"
+                                          disabled={isLoading}
+                                          onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'unlock')}
+                                          className="px-2 py-1 rounded-[4px] bg-purple-700 hover:bg-purple-800 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                        >
+                                          🔓 Unlock
+                                        </button>
+                                      )}
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}

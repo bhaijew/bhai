@@ -1,17 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 const defaultAnnouncements = [
-  'Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK',
-  'Complimentary luxury gift packaging on every order  |  Bespoke service',
-  'Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available',
+  { text: 'Free Insured Worldwide Delivery on Orders Over £150', tag: 'SHIPPING' },
+  { text: 'Handcrafted in Bradford, UK — Certified 21ct & 18k British Hallmarked Gold', tag: 'HERITAGE' },
+  { text: 'Complimentary Luxury Velvet Gift Packaging with Every Order', tag: 'BESPOKE' },
+  { text: 'Private Showroom Viewings Available in Bradford, West Yorkshire', tag: 'VISIT US' },
 ];
 
 export function AnnouncementBar() {
-  const [announcements, setAnnouncements] = useState<string[]>(defaultAnnouncements);
+  const [messages, setMessages] = useState(defaultAnnouncements);
   const [isEnabled, setIsEnabled] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     fetch('/api/announcement')
@@ -20,81 +25,113 @@ export function AnnouncementBar() {
         if (resData.success && resData.data) {
           setIsEnabled(resData.data.isEnabled ?? true);
           if (Array.isArray(resData.data.messages) && resData.data.messages.length > 0) {
-            setAnnouncements(resData.data.messages);
+            const formatted = resData.data.messages.map((m: string, idx: number) => ({
+              text: m,
+              tag: idx === 0 ? 'SPECIAL OFFER' : idx === 1 ? 'HERITAGE' : 'FEATURED',
+            }));
+            setMessages(formatted);
           }
         }
       })
       .catch((err) => console.error('Failed to fetch announcement bar config:', err));
   }, []);
 
+  // Auto-rotation timer every 4.5s
+  useEffect(() => {
+    if (!isEnabled || isPaused || messages.length <= 1) return;
+
+    timerRef.current = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % messages.length);
+    }, 4500);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isEnabled, isPaused, messages.length]);
+
   const handlePrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? announcements.length - 1 : prev - 1));
+    setCurrentIndex((prev) => (prev === 0 ? messages.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev === announcements.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) => (prev + 1) % messages.length);
   };
 
-  if (!isEnabled || announcements.length === 0) return null;
+  if (!isEnabled || dismissed || messages.length === 0) return null;
+
+  const currentMsg = messages[currentIndex] || messages[0];
 
   return (
-    <div className="hidden md:block relative z-50 w-full overflow-hidden bg-[#16120f] border-b border-[#2a221d] text-[#c9bfb5] text-xs tracking-wider transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-2.5 flex items-center justify-between">
-        {/* Empty left spacer to keep text perfectly centered */}
-        <div className="w-12 sm:w-16 hidden sm:block" />
+    <div
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      className="relative z-50 w-full overflow-hidden bg-gradient-to-r from-[#140e0b] via-[#1c140f] to-[#140e0b] border-b border-[#2e231b] text-[#d6c7ba] text-[11px] sm:text-xs tracking-wider transition-colors duration-300 select-none shadow-xs"
+    >
+      <div className="max-w-7xl mx-auto px-3 sm:px-8 py-2 flex items-center justify-between gap-3">
 
-        {/* Center rotating announcement */}
-        <div className="flex-1 text-center font-light select-none px-2 transition-all duration-300 min-w-0">
-          <span className="truncate block">{announcements[currentIndex]}</span>
+        {/* Left: Showroom / Trust Badge (Desktop) */}
+        <div className="hidden lg:flex items-center gap-2 text-[#a8998a] text-[10.5px]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#d8bb93] animate-ping" />
+          <span className="font-light tracking-widest uppercase text-[#dec29b]">Bradford Showroom</span>
+          <span className="text-[#5e4f42]">•</span>
+          <span className="font-light">Open Today</span>
         </div>
 
-        {/* Right chevron controls */}
-        {announcements.length > 1 && (
-          <div className="flex items-center gap-2 text-[#9e9387] pl-2">
-            <button
-              type="button"
-              onClick={handlePrev}
-              aria-label="Previous announcement"
-              className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        {/* Center: Animated Rotating Announcement Slide */}
+        <div className="flex-1 flex items-center justify-center gap-2 text-center font-light px-2 min-w-0">
+          {/* Badge Tag */}
+          <span className="hidden sm:inline-block px-2 py-0.5 rounded-[4px] bg-[#dec29b]/15 text-[#dec29b] border border-[#dec29b]/30 text-[9.5px] font-semibold tracking-widest uppercase flex-shrink-0 animate-fadeIn">
+            {currentMsg.tag}
+          </span>
+
+          <span
+            key={currentIndex}
+            className="truncate text-[#f0e8df] font-normal transition-all duration-500 animate-slideUpFade"
+          >
+            {currentMsg.text}
+          </span>
+        </div>
+
+        {/* Right: Chevron Nav + Dismiss Button */}
+        <div className="flex items-center gap-2 text-[#a8998a] flex-shrink-0">
+          {messages.length > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handlePrev}
+                aria-label="Previous announcement"
+                className="w-5 h-5 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.75}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              onClick={handleNext}
-              aria-label="Next announcement"
-              className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+                ‹
+              </button>
+
+              <span className="text-[9.5px] text-[#786757] font-mono">
+                {currentIndex + 1}/{messages.length}
+              </span>
+
+              <button
+                type="button"
+                onClick={handleNext}
+                aria-label="Next announcement"
+                className="w-5 h-5 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.75}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
-            </button>
-          </div>
-        )}
+                ›
+              </button>
+            </div>
+          )}
+
+          {/* Dismiss Button */}
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            aria-label="Dismiss announcement"
+            className="text-[#786757] hover:text-[#dec29b] text-xs p-1 transition-colors ml-1"
+          >
+            ✕
+          </button>
+        </div>
+
       </div>
     </div>
   );
 }
-

@@ -107,7 +107,6 @@ export async function POST(request: Request) {
     let isAuthenticated = false;
     let userRole = 'client';
     let userName = identifier.split('@')[0];
-
     let userPhone = '';
     let userCreatedAt = new Date().toISOString();
 
@@ -124,12 +123,37 @@ export async function POST(request: Request) {
         .eq('email', identifier)
         .single();
 
-      if (foundUser && foundUser.password_hash === inputHash) {
-        isAuthenticated = true;
-        userRole = foundUser.role || 'client';
-        userName = foundUser.full_name || userName;
-        userPhone = foundUser.phone || '';
-        userCreatedAt = foundUser.created_at || userCreatedAt;
+      if (foundUser) {
+        // Check if user is BANNED or INACTIVE
+        if (foundUser.status === 'banned' || foundUser.is_banned === true) {
+          return NextResponse.json(
+            {
+              success: false,
+              isBanned: true,
+              error: '🚫 ACCESS RESTRICTED: Your account has been suspended by the store administrator. Please contact info@bhaijeweller.co.uk.',
+            },
+            { status: 403 }
+          );
+        }
+
+        if (foundUser.status === 'inactive') {
+          return NextResponse.json(
+            {
+              success: false,
+              isInactive: true,
+              error: '⚠️ ACCOUNT DEACTIVATED: Your account is currently inactive. Please contact customer support.',
+            },
+            { status: 403 }
+          );
+        }
+
+        if (foundUser.password_hash === inputHash) {
+          isAuthenticated = true;
+          userRole = foundUser.role || 'client';
+          userName = foundUser.full_name || userName;
+          userPhone = foundUser.phone || '';
+          userCreatedAt = foundUser.created_at || userCreatedAt;
+        }
       }
     } else {
       // Offline fallback authentication if user input matches standard format
