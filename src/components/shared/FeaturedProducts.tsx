@@ -189,7 +189,7 @@ export function FeaturedProducts() {
     }));
 
     if (mapped.length <= 1) {
-      return { row1Products: mapped, row2Products: mapped };
+      return { row1Products: mapped, row2Products: [] };
     }
 
     const mid = Math.ceil(mapped.length / 2);
@@ -222,7 +222,7 @@ export function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Two Horizontal Scrollable Rows - Preserving Original 2-Row Style */}
+        {/* Horizontal Scrollable Rows without duplicates */}
         {row1Products.length === 0 && row2Products.length === 0 ? (
           <div className="bg-[#fdfaf3] rounded-2xl border border-[#e5dabf] p-8 sm:p-12 text-center shadow-2xs">
             <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#f6efdb] border border-[#e5dabf] flex items-center justify-center text-[#9e7d56]">
@@ -238,14 +238,18 @@ export function FeaturedProducts() {
         ) : (
           <div className="flex flex-col gap-5 sm:gap-8">
             {/* Row 1: Horizontal Scrollable */}
-            <div>
-              <ProductRow products={row1Products} />
-            </div>
+            {row1Products.length > 0 && (
+              <div>
+                <ProductRow products={row1Products} />
+              </div>
+            )}
 
-            {/* Row 2: Horizontal Scrollable */}
-            <div>
-              <ProductRow products={row2Products} />
-            </div>
+            {/* Row 2: Horizontal Scrollable (Shown when new products are added) */}
+            {row2Products.length > 0 && (
+              <div>
+                <ProductRow products={row2Products} />
+              </div>
+            )}
           </div>
         )}
 
