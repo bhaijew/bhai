@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScrollReveal } from './ScrollReveal';
 
 interface FeatureItem {
   icon: React.ReactNode;
@@ -54,25 +55,24 @@ export function TrustFeaturesBar() {
       {/* Mobile: 4 cols stacked icon+text, Desktop: horizontal with dividers */}
       <div className="max-w-7xl mx-auto px-3 sm:px-8 lg:px-12 py-4 sm:py-7 lg:py-9">
         <div className="grid grid-cols-4 divide-x divide-[#e5dacf]/60">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 px-1 sm:px-5 lg:px-6 py-2 sm:py-3 group cursor-default transition-all duration-300 text-center min-w-0"
-            >
-              {/* Icon */}
-              <div className="flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
-                {feature.icon}
+          {features.map((feature, idx) => (
+            <ScrollReveal key={feature.title} delay={idx * 100} direction="up">
+              <div className="flex flex-col items-center justify-center gap-1.5 sm:gap-2.5 px-1 sm:px-5 lg:px-6 py-2 sm:py-3 group cursor-default transition-all duration-300 text-center min-w-0">
+                {/* Icon */}
+                <div className="flex-shrink-0 transition-transform duration-300 group-hover:scale-105">
+                  {feature.icon}
+                </div>
+                {/* Text */}
+                <div className="flex flex-col items-center text-center w-full px-0.5 min-w-0">
+                  <h3 className="font-serif text-[10px] sm:text-sm lg:text-base font-medium text-[#1c1510] leading-tight truncate w-full">
+                    {feature.title}
+                  </h3>
+                  <p className="text-[8px] sm:text-xs text-[#736557] font-light mt-0.5 leading-tight truncate w-full">
+                    {feature.subtitle}
+                  </p>
+                </div>
               </div>
-              {/* Text */}
-              <div className="flex flex-col items-center text-center w-full px-0.5 min-w-0">
-                <h3 className="font-serif text-[10px] sm:text-sm lg:text-base font-medium text-[#1c1510] leading-tight truncate w-full">
-                  {feature.title}
-                </h3>
-                <p className="text-[8px] sm:text-xs text-[#736557] font-light mt-0.5 leading-tight truncate w-full">
-                  {feature.subtitle}
-                </p>
-              </div>
-            </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

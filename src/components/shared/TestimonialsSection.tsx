@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ScrollReveal } from './ScrollReveal';
 
 interface Testimonial {
   id: string;
@@ -49,14 +50,6 @@ function TestimonialCard({ t }: { t: Testimonial }) {
   );
 }
 
-/* 
- * Responsive page sizes:
- * mobile  (< sm):  1 card per page → 6 pages
- * tablet  (sm–lg): 2 cards per page → 3 pages
- * desktop (lg+):   3 cards per page → 2 pages
- * We use CSS grid cols + JS pages based on window breakpoints,
- * but to avoid hydration issues we handle it with separate mobile/tablet/desktop renders.
- */
 export function TestimonialsSection() {
   const [pageMobile, setPageMobile] = useState(0);
   const [pageTablet, setPageTablet] = useState(0);
@@ -75,75 +68,83 @@ export function TestimonialsSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
 
         {/* Header */}
-        <div className="text-center mb-7 sm:mb-10">
-          <p className="text-[10px] tracking-[0.32em] uppercase text-[#9e8875] font-medium mb-2">KIND WORDS</p>
-          <h2 className="font-serif text-[26px] sm:text-[34px] lg:text-[40px] text-[#f0ece6] font-normal tracking-tight">
-            What Our Customers Say
-          </h2>
-          <div className="w-8 h-[1.5px] bg-[#d8bb93]/40 mx-auto mt-3"/>
-        </div>
+        <ScrollReveal direction="up">
+          <div className="text-center mb-7 sm:mb-10">
+            <p className="text-[10px] tracking-[0.32em] uppercase text-[#9e8875] font-medium mb-2">KIND WORDS</p>
+            <h2 className="font-serif text-[26px] sm:text-[34px] lg:text-[40px] text-[#f0ece6] font-normal tracking-tight">
+              What Our Customers Say
+            </h2>
+            <div className="w-8 h-[1.5px] bg-[#d8bb93]/40 mx-auto mt-3"/>
+          </div>
+        </ScrollReveal>
 
         {/* ── Mobile: 1 card ── */}
         <div className="sm:hidden">
-          <div className="flex items-center gap-2">
-            <button type="button" onClick={() => setPageMobile(p => Math.max(0, p-1))} disabled={pageMobile === 0}
-              aria-label="Previous"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageMobile === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
-            <div className="flex-1">
-              <TestimonialCard t={visibleMobile[0]}/>
+          <ScrollReveal direction="up" delay={150}>
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setPageMobile(p => Math.max(0, p-1))} disabled={pageMobile === 0}
+                aria-label="Previous"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageMobile === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
+              <div className="flex-1">
+                <TestimonialCard t={visibleMobile[0]}/>
+              </div>
+              <button type="button" onClick={() => setPageMobile(p => Math.min(totalMobile-1, p+1))} disabled={pageMobile === totalMobile-1}
+                aria-label="Next"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageMobile === totalMobile-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <button type="button" onClick={() => setPageMobile(p => Math.min(totalMobile-1, p+1))} disabled={pageMobile === totalMobile-1}
-              aria-label="Next"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageMobile === totalMobile-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
-          </div>
-          <div className="flex justify-center gap-1.5 mt-5">
-            {Array.from({ length: totalMobile }).map((_, i) => (
-              <button key={i} type="button" onClick={() => setPageMobile(i)} aria-label={`Page ${i+1}`}
-                className={`rounded-full transition-all duration-300 ${i === pageMobile ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
-            ))}
-          </div>
+            <div className="flex justify-center gap-1.5 mt-5">
+              {Array.from({ length: totalMobile }).map((_, i) => (
+                <button key={i} type="button" onClick={() => setPageMobile(i)} aria-label={`Page ${i+1}`}
+                  className={`rounded-full transition-all duration-300 ${i === pageMobile ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* ── Tablet: 2 cards ── */}
         <div className="hidden sm:block lg:hidden">
-          <div className="flex items-center gap-3">
-            <button type="button" onClick={() => setPageTablet(p => Math.max(0, p-1))} disabled={pageTablet === 0}
-              aria-label="Previous"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageTablet === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              {visibleTablet.map(t => <TestimonialCard key={t.id} t={t}/>)}
+          <ScrollReveal direction="up" delay={150}>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => setPageTablet(p => Math.max(0, p-1))} disabled={pageTablet === 0}
+                aria-label="Previous"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageTablet === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
+              <div className="flex-1 grid grid-cols-2 gap-4">
+                {visibleTablet.map(t => <TestimonialCard key={t.id} t={t}/>)}
+              </div>
+              <button type="button" onClick={() => setPageTablet(p => Math.min(totalTablet-1, p+1))} disabled={pageTablet === totalTablet-1}
+                aria-label="Next"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageTablet === totalTablet-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <button type="button" onClick={() => setPageTablet(p => Math.min(totalTablet-1, p+1))} disabled={pageTablet === totalTablet-1}
-              aria-label="Next"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageTablet === totalTablet-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
-          </div>
-          <div className="flex justify-center gap-1.5 mt-6">
-            {Array.from({ length: totalTablet }).map((_, i) => (
-              <button key={i} type="button" onClick={() => setPageTablet(i)} aria-label={`Page ${i+1}`}
-                className={`rounded-full transition-all duration-300 ${i === pageTablet ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
-            ))}
-          </div>
+            <div className="flex justify-center gap-1.5 mt-6">
+              {Array.from({ length: totalTablet }).map((_, i) => (
+                <button key={i} type="button" onClick={() => setPageTablet(i)} aria-label={`Page ${i+1}`}
+                  className={`rounded-full transition-all duration-300 ${i === pageTablet ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
 
         {/* ── Desktop: 3 cards ── */}
         <div className="hidden lg:block">
-          <div className="flex items-center gap-4">
-            <button type="button" onClick={() => setPageDesktop(p => Math.max(0, p-1))} disabled={pageDesktop === 0}
-              aria-label="Previous"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageDesktop === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
-            <div className="flex-1 grid grid-cols-3 gap-4 lg:gap-5">
-              {visibleDesktop.map(t => <TestimonialCard key={t.id} t={t}/>)}
+          <ScrollReveal direction="up" delay={150}>
+            <div className="flex items-center gap-4">
+              <button type="button" onClick={() => setPageDesktop(p => Math.max(0, p-1))} disabled={pageDesktop === 0}
+                aria-label="Previous"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageDesktop === 0 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>‹</button>
+              <div className="flex-1 grid grid-cols-3 gap-4 lg:gap-5">
+                {visibleDesktop.map(t => <TestimonialCard key={t.id} t={t}/>)}
+              </div>
+              <button type="button" onClick={() => setPageDesktop(p => Math.min(totalDesktop-1, p+1))} disabled={pageDesktop === totalDesktop-1}
+                aria-label="Next"
+                className={`flex-shrink-0 text-xl px-1 transition-colors ${pageDesktop === totalDesktop-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <button type="button" onClick={() => setPageDesktop(p => Math.min(totalDesktop-1, p+1))} disabled={pageDesktop === totalDesktop-1}
-              aria-label="Next"
-              className={`flex-shrink-0 text-xl px-1 transition-colors ${pageDesktop === totalDesktop-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
-          </div>
-          <div className="flex justify-center gap-2 mt-7">
-            {Array.from({ length: totalDesktop }).map((_, i) => (
-              <button key={i} type="button" onClick={() => setPageDesktop(i)} aria-label={`Page ${i+1}`}
-                className={`rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
-            ))}
-          </div>
+            <div className="flex justify-center gap-2 mt-7">
+              {Array.from({ length: totalDesktop }).map((_, i) => (
+                <button key={i} type="button" onClick={() => setPageDesktop(i)} aria-label={`Page ${i+1}`}
+                  className={`rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+              ))}
+            </div>
+          </ScrollReveal>
         </div>
 
       </div>

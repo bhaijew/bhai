@@ -1,6 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ScrollReveal } from './ScrollReveal';
 
 function BotanicalDecoration() {
   return (
@@ -27,36 +28,40 @@ export function OurStory() {
 
           {/* Left: Editorial Photo (matches reference split) */}
           <div className="relative w-[38%] sm:w-[40%] flex-shrink-0 min-h-[220px] sm:min-h-[320px]">
-            <Image
-              src="/images/hero-model.jpg"
-              alt="A woman adorned with Bhai Jeweller pieces"
-              fill
-              sizes="(max-width: 640px) 40vw, (max-width: 1024px) 35vw, 420px"
-              className="object-cover object-[65%_25%]"
-              priority={false}
-            />
+            <ScrollReveal direction="right" duration={850} className="w-full h-full relative min-h-[220px] sm:min-h-[320px]">
+              <Image
+                src="/images/hero-model.jpg"
+                alt="A woman adorned with Bhai Jeweller pieces"
+                fill
+                sizes="(max-width: 640px) 40vw, (max-width: 1024px) 35vw, 420px"
+                className="object-cover object-[65%_25%]"
+                priority={false}
+              />
+            </ScrollReveal>
           </div>
 
           {/* Centre/Right: Text and Details */}
           <div className="flex-1 flex flex-col justify-center px-4 sm:px-8 lg:px-12 py-5 sm:py-8 bg-[#f6efe7] relative">
-            <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#a09080] font-medium mb-1.5 sm:mb-2">
-              OUR STORY
-            </p>
-            <h2 className="font-serif text-[18px] sm:text-[28px] lg:text-[34px] text-[#1c1510] font-normal leading-[1.15] tracking-tight mb-2 sm:mb-3">
-              Elegance is a feeling
-            </h2>
-            <p className="text-[11px] sm:text-xs lg:text-[13px] text-[#6b5e54] font-light leading-relaxed mb-4 sm:mb-6 max-w-md line-clamp-4 sm:line-clamp-none">
-              At <span className="font-medium text-[#4a3a2a] tracking-wide">BHAI JEWELLER</span>, we believe jewellery is more than an accessory — it&apos;s a reflection of who you are. Our mission is to create timeless pieces that carry your story, your style and your dreams.
-            </p>
-            <Link
-              href="/about"
-              className="inline-flex items-center gap-1.5 sm:gap-2 self-start px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[#c0a882] text-[#3d2e20] text-[11px] sm:text-xs tracking-wide font-light hover:border-[#9e7d56] hover:bg-[#ecdccc]/40 transition-all group"
-            >
-              Learn More
-              <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </Link>
+            <ScrollReveal direction="left" delay={150} duration={850}>
+              <p className="text-[9px] sm:text-[10px] tracking-[0.3em] uppercase text-[#a09080] font-medium mb-1.5 sm:mb-2">
+                OUR STORY
+              </p>
+              <h2 className="font-serif text-[18px] sm:text-[28px] lg:text-[34px] text-[#1c1510] font-normal leading-[1.15] tracking-tight mb-2 sm:mb-3">
+                Elegance is a feeling
+              </h2>
+              <p className="text-[11px] sm:text-xs lg:text-[13px] text-[#6b5e54] font-light leading-relaxed mb-4 sm:mb-6 max-w-md line-clamp-4 sm:line-clamp-none">
+                At <span className="font-medium text-[#4a3a2a] tracking-wide">BHAI JEWELLER</span>, we believe jewellery is more than an accessory — it&apos;s a reflection of who you are. Our mission is to create timeless pieces that carry your story, your style and your dreams.
+              </p>
+              <Link
+                href="/about"
+                className="inline-flex items-center gap-1.5 sm:gap-2 self-start px-4 sm:px-5 py-2 sm:py-2.5 rounded-full border border-[#c0a882] text-[#3d2e20] text-[11px] sm:text-xs tracking-wide font-light hover:border-[#9e7d56] hover:bg-[#ecdccc]/40 transition-all group"
+              >
+                Learn More
+                <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </Link>
+            </ScrollReveal>
 
             {/* Botanical Watermark on the Right */}
             <div className="hidden sm:flex absolute right-4 bottom-4 flex-col items-center pointer-events-none opacity-40">
