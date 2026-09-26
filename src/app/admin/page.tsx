@@ -1004,61 +1004,72 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredOrders.map((order) => (
-                <div key={order.id} className={`${cardBg} rounded-[5px] p-5 flex flex-col md:flex-row justify-between gap-4`}>
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <span className={`font-mono text-sm font-bold ${accentGold}`}>{order.id}</span>
-                      <span className={`text-xs ${subtitleColor}`}>• {order.date}</span>
-                      <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
-                        order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
-                        order.status === 'Shipped' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
-                        'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
-                      }`}>
-                        {order.status}
-                      </span>
-                    </div>
-                    <p className={`text-sm font-semibold ${titleColor}`}>{order.customer} <span className={`text-xs ${subtitleColor}`}>({order.email})</span></p>
-                    <p className={`text-xs ${subtitleColor}`}><span className="font-medium">Items:</span> {order.items}</p>
-                    <p className={`text-xs ${subtitleColor}`}><span className="font-medium">Ship to:</span> {order.address}</p>
+                <div key={order.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-[#b38b40]`}>
+                  {/* Order Box Header */}
+                  <div className="flex items-center justify-between border-b pb-2.5 border-opacity-30 border-current">
+                    <span className={`font-mono text-xs font-bold ${accentGold}`}>{order.id}</span>
+                    <span className={`px-2 py-0.5 rounded-[5px] text-[9px] font-semibold uppercase ${
+                      order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                      order.status === 'Shipped' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
+                      'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
+                    }`}>
+                      {order.status}
+                    </span>
                   </div>
 
-                  <div className={`flex flex-col justify-between items-end border-t md:border-t-0 md:border-l ${cardHeaderBorder} pt-3 md:pt-0 md:pl-6`}>
-                    <div className="text-right">
-                      <p className={`text-xs ${subtitleColor}`}>Total Amount</p>
-                      <p className={`text-xl font-serif ${accentGold} font-bold`}>${order.amount.toLocaleString()}</p>
-                      <p className={`text-[10px] ${subtitleColor}`}>{order.paymentMethod}</p>
-                    </div>
+                  {/* Customer & Details */}
+                  <div className="space-y-1 text-xs">
+                    <p className={`font-semibold ${titleColor} truncate`} title={order.customer}>{order.customer}</p>
+                    <p className={`text-[10px] ${subtitleColor} truncate`} title={order.email}>{order.email}</p>
+                    <p className={`text-[10px] ${subtitleColor} pt-1 truncate`} title={order.items}>
+                      <span className="font-semibold text-opacity-80">Item:</span> {order.items}
+                    </p>
+                    <p className={`text-[10px] ${subtitleColor} truncate`} title={order.address}>
+                      <span className="font-semibold text-opacity-80">Address:</span> {order.address}
+                    </p>
+                  </div>
 
-                    <div className="flex items-center space-x-2 mt-4">
-                      {order.status !== 'Processing' && (
-                        <button
-                          onClick={() => handleUpdateOrderStatus(order.id, 'Processing')}
-                          className={`px-2.5 py-1 border rounded-[5px] text-[10px] transition-colors ${
-                            isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
-                          }`}
-                        >
-                          Mark Processing
-                        </button>
-                      )}
-                      {order.status !== 'Shipped' && (
-                        <button
-                          onClick={() => handleUpdateOrderStatus(order.id, 'Shipped')}
-                          className="px-2.5 py-1 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-[5px] text-[10px] transition-colors"
-                        >
-                          Mark Shipped
-                        </button>
-                      )}
-                      {order.status !== 'Delivered' && (
-                        <button
-                          onClick={() => handleUpdateOrderStatus(order.id, 'Delivered')}
-                          className="px-2.5 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[10px] transition-colors"
-                        >
-                          Mark Delivered
-                        </button>
-                      )}
+                  {/* Price & Date */}
+                  <div className="pt-2 border-t border-opacity-20 border-current flex items-end justify-between">
+                    <div>
+                      <p className={`text-[9px] ${subtitleColor} uppercase`}>{order.date}</p>
+                      <p className={`text-[9px] ${subtitleColor}`}>{order.paymentMethod}</p>
                     </div>
+                    <div className="text-right">
+                      <p className={`text-base font-serif ${accentGold} font-bold`}>${order.amount.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="pt-1 flex flex-wrap gap-1">
+                    {order.status !== 'Processing' && (
+                      <button
+                        onClick={() => handleUpdateOrderStatus(order.id, 'Processing')}
+                        className={`flex-1 py-1 px-1.5 border rounded-[5px] text-[9px] font-semibold text-center transition-colors ${
+                          isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                        }`}
+                      >
+                        Processing
+                      </button>
+                    )}
+                    {order.status !== 'Shipped' && (
+                      <button
+                        onClick={() => handleUpdateOrderStatus(order.id, 'Shipped')}
+                        className="flex-1 py-1 px-1.5 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-[5px] text-[9px] font-semibold text-center transition-colors"
+                      >
+                        Shipped
+                      </button>
+                    )}
+                    {order.status !== 'Delivered' && (
+                      <button
+                        onClick={() => handleUpdateOrderStatus(order.id, 'Delivered')}
+                        className="flex-1 py-1 px-1.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[9px] font-semibold text-center transition-colors"
+                      >
+                        Delivered
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
