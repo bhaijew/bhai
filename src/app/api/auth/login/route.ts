@@ -3,7 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  '';
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
@@ -105,11 +108,15 @@ export async function POST(request: Request) {
     let userRole = 'client';
     let userName = identifier.split('@')[0];
 
+    let userPhone = '';
+    let userCreatedAt = new Date().toISOString();
+
     // Master Admin fallback check
     if (identifier === 'admin@bhaijeweller.com' && password === 'admin123') {
       isAuthenticated = true;
       userRole = 'admin';
       userName = 'Master Admin';
+      userPhone = '+44 (0) 1274 722 888';
     } else if (supabase) {
       const { data: foundUser } = await supabase
         .from('users')
@@ -121,6 +128,8 @@ export async function POST(request: Request) {
         isAuthenticated = true;
         userRole = foundUser.role || 'client';
         userName = foundUser.full_name || userName;
+        userPhone = foundUser.phone || '';
+        userCreatedAt = foundUser.created_at || userCreatedAt;
       }
     } else {
       // Offline fallback authentication if user input matches standard format
@@ -207,7 +216,9 @@ export async function POST(request: Request) {
       id: `usr-${Date.now()}`,
       email: identifier,
       name: userName,
+      phone: userPhone,
       role: userRole,
+      createdAt: userCreatedAt,
       loginTime: new Date().toISOString(),
     };
 

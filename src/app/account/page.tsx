@@ -17,6 +17,8 @@ export default function AccountPage() {
   >('account');
 
   // User Session State (Connected to real database session)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{
     name: string;
     email: string;
@@ -24,23 +26,23 @@ export default function AccountPage() {
     memberSince: string;
     role: string;
   }>({
-    name: 'Valued Client',
-    email: 'client@example.com',
-    phone: '+44 (0) 1274 722 888',
-    memberSince: 'Member',
+    name: '',
+    email: '',
+    phone: '',
+    memberSince: '',
     role: 'client',
   });
 
-  const [loading, setLoading] = useState(true);
   const [realOrders, setRealOrders] = useState<any[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
-  // Check user session on mount from real Supabase / database auth
+  // Check user session on mount from real Supabase auth session
   useEffect(() => {
     fetch('/api/auth/session')
       .then((res) => res.json())
       .then((data) => {
         if (data.authenticated && data.user) {
+          setIsAuthenticated(true);
           setUser({
             name: data.user.name || data.user.fullName || 'Valued Client',
             email: data.user.email || '',
@@ -50,30 +52,41 @@ export default function AccountPage() {
               : 'Active Client',
             role: data.user.role || 'client',
           });
+
+          // Fetch orders for this authenticated user
+          fetch('/api/orders')
+            .then((res) => res.json())
+            .then((orderData) => {
+              if (orderData.success && Array.isArray(orderData.data)) {
+                // If user is client, filter to orders for their email (or show all if admin)
+                if (data.user.role === 'admin') {
+                  setRealOrders(orderData.data);
+                } else {
+                  const myOrders = orderData.data.filter(
+                    (o: any) => !o.email || o.email.toLowerCase() === data.user.email?.toLowerCase()
+                  );
+                  setRealOrders(myOrders);
+                }
+              } else {
+                setRealOrders([]);
+              }
+              setOrdersLoading(false);
+            })
+            .catch((err) => {
+              console.error('Fetch real orders error:', err);
+              setRealOrders([]);
+              setOrdersLoading(false);
+            });
+        } else {
+          setIsAuthenticated(false);
+          setOrdersLoading(false);
         }
         setLoading(false);
       })
       .catch((err) => {
         console.error('Session check error:', err);
+        setIsAuthenticated(false);
         setLoading(false);
-      });
-  }, []);
-
-  // Fetch real database orders
-  useEffect(() => {
-    fetch('/api/orders')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          setRealOrders(data.data);
-        } else {
-          setRealOrders([]);
-        }
-        setOrdersLoading(false);
-      })
-      .catch((err) => {
-        console.error('Fetch real orders error:', err);
-        setRealOrders([]);
         setOrdersLoading(false);
       });
   }, []);
@@ -164,6 +177,73 @@ export default function AccountPage() {
     },
   ];
 
+  // ── LOADING STATE ──
+  if (loading) {
+    return (
+      <div className="min-h-[75vh] bg-[#faf7f2] text-[#1c1510] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-3 border-[#dec29b] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="font-serif text-base text-[#7a6a5c] tracking-wide">Connecting to your account...</p>
+      </div>
+    );
+  }
+
+  // ── AUTHENTICATION REQUIRED (NEW WINDOW / LOGGED OUT USERS) ──
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[85vh] bg-[#faf7f2] text-[#1c1510] flex items-center justify-center px-4 py-16">
+        <div className="max-w-md w-full bg-[#fdfbf7] border border-[#ded3c5] rounded-3xl p-8 shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] font-serif font-bold italic text-2xl flex items-center justify-center mx-auto shadow-md">
+            B
+          </div>
+          <div className="space-y-2">
+            <span className="text-[10px] tracking-[0.3em] uppercase text-[#9e7d56] font-medium block">
+              BHAI JEWELLER — BRADFORD
+            </span>
+            <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1510]">
+              Sign In to Your Account
+            </h1>
+            <p className="text-xs text-[#7a6a5c] leading-relaxed max-w-xs mx-auto">
+              Please log in or create an account to view your past orders, active deliveries, and personal details.
+            </p>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            <Link
+              href="/login"
+              className="w-full py-3.5 rounded-full bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d] font-medium text-xs tracking-wider uppercase transition-all shadow-sm flex items-center justify-center gap-2"
+            >
+              <span>Sign In</span>
+              <span>→</span>
+            </Link>
+            <Link
+              href="/signup"
+              className="w-full py-3.5 rounded-full bg-[#ede4d8] text-[#1c1510] hover:bg-[#ded3c5] font-medium text-xs tracking-wider uppercase transition-all border border-[#ded3c5] shadow-xs flex items-center justify-center gap-2"
+            >
+              <span>Create New Account</span>
+            </Link>
+          </div>
+
+          <div className="pt-4 border-t border-[#ede4d8] flex items-center justify-center gap-4 text-[11px] text-[#8a796c]">
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Live Order Tracking
+            </span>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Secure 256-bit DB
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── AUTHENTICATED USER VIEW ──
   return (
     <div className="min-h-screen bg-[#faf7f2] text-[#1c1510] font-sans selection:bg-[#c5a059] selection:text-white flex flex-col justify-between overflow-x-hidden">
       
@@ -206,23 +286,40 @@ export default function AccountPage() {
                     </svg>
                     Verified Account
                   </span>
+                  {user.role === 'admin' && (
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-[10px] font-medium">
+                      Admin
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-[#7a6a5c] font-normal">
                   <span>{user.email}</span>
-                  <span className="hidden sm:inline">•</span>
-                  <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-                    </svg>
-                    {user.phone}
-                  </span>
+                  {user.phone && (
+                    <>
+                      <span className="hidden sm:inline">•</span>
+                      <span className="flex items-center gap-1">
+                        <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                        </svg>
+                        {user.phone}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Right: Actions */}
             <div className="flex items-center gap-2 self-start sm:self-end mt-2 sm:mt-0">
+              {user.role === 'admin' && (
+                <Link
+                  href="/admin"
+                  className="px-4 py-2 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-xs font-medium hover:bg-[#2b1f17] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span>Admin Panel</span>
+                </Link>
+              )}
               <button
                 type="button"
                 onClick={handleLogout}
