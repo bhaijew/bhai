@@ -9,6 +9,16 @@ import { MobileBottomNav } from './MobileBottomNav';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith('/admin');
+
+  if (isAdminPage) {
+    return (
+      <div className="min-h-screen w-full bg-[#0d0907] text-[#f4efe6] overflow-x-hidden">
+        {children}
+      </div>
+    );
+  }
+
   const isAuthPage = pathname === '/login' || pathname === '/register' || pathname === '/signup';
   if (isAuthPage) {
     return (
