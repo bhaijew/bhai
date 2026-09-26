@@ -13,7 +13,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isAdminPage) {
     return (
-      <div className="min-h-screen w-full bg-[#0d0907] text-[#f4efe6] overflow-x-hidden">
+      <div className="min-h-screen w-full overflow-x-hidden">
         {children}
       </div>
     );

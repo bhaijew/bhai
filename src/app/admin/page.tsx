@@ -214,6 +214,9 @@ const INITIAL_CUSTOMERS = [
 ];
 
 export default function AdminDashboardPage() {
+  // Theme State: Default is 'light' (White Theme) as requested!
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
@@ -372,14 +375,35 @@ export default function AdminDashboardPage() {
     { id: 'settings', label: 'Store Settings', icon: '⚙️', count: null },
   ];
 
+  // Theme-dependent styles helper
+  const isLight = theme === 'light';
+
+  const containerBg = isLight ? 'bg-[#faf8f5] text-[#1c1510]' : 'bg-[#0d0907] text-[#f4efe6]';
+  const sidebarBg = isLight ? 'bg-[#ffffff] border-[#e8dfd3]' : 'bg-[#140e0b] border-[#2a201a]';
+  const sidebarHeaderBorder = isLight ? 'border-[#e8dfd3]' : 'border-[#2a201a]';
+  const sidebarFooterBg = isLight ? 'bg-[#f7f3eb] border-[#e8dfd3]' : 'bg-[#100b08] border-[#2a201a]';
+  const cardBg = isLight ? 'bg-[#ffffff] border-[#e8dfd3] shadow-sm' : 'bg-[#140e0b] border-[#2a201a] shadow-lg';
+  const cardHeaderBorder = isLight ? 'border-[#eee7dc]' : 'border-[#261c16]';
+  const inputBg = isLight ? 'bg-[#ffffff] border-[#dcd3c5] text-[#1c1510] focus:border-[#b38b40]' : 'bg-[#1a120e] border-[#3a2c23] text-[#faf7f2] focus:border-[#dec29b]';
+  const tableHeaderBg = isLight ? 'bg-[#f7f3eb] border-[#e8dfd3] text-[#5c4d40]' : 'bg-[#1a120e] border-[#2a201a] text-[#a89b8c]';
+  const tableRowHover = isLight ? 'hover:bg-[#fcfaf7] divide-[#eee7dc]' : 'hover:bg-[#18110d] divide-[#211813]';
+  const titleColor = isLight ? 'text-[#1c1510]' : 'text-[#faf7f2]';
+  const accentGold = isLight ? 'text-[#a37d38]' : 'text-[#dec29b]';
+  const subtitleColor = isLight ? 'text-[#6e5d4f]' : 'text-[#a89b8c]';
+  const badgeBg = isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dfd5c4]' : 'bg-[#211611] text-[#dec29b] border-[#3a2c23]';
+  const primaryBtn = isLight ? 'bg-[#b38b40] hover:bg-[#99752b] text-[#ffffff]' : 'bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b]';
+
   return (
-    <div className="min-h-screen bg-[#0d0907] text-[#f4efe6] flex flex-col md:flex-row font-sans selection:bg-[#dec29b] selection:text-[#1c1510]">
+    <div
+      style={{ zoom: '80%' }}
+      className={`min-h-screen ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
+    >
       {/* MOBILE HEADER BAR */}
-      <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#140e0b] border-b border-[#2a201a] sticky top-0 z-40">
+      <header className={`md:hidden flex items-center justify-between px-4 py-3 ${sidebarBg} border-b sticky top-0 z-40`}>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setMobileDrawerOpen(true)}
-            className="p-2 text-[#dec29b] hover:bg-[#1f1612] rounded-[5px] transition-colors"
+            className={`p-2 ${accentGold} hover:bg-[#f4efe6] dark:hover:bg-[#1f1612] rounded-[5px] transition-colors`}
             aria-label="Open Admin Menu"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -387,37 +411,54 @@ export default function AdminDashboardPage() {
             </svg>
           </button>
           <div className="flex flex-col">
-            <span className="font-serif tracking-wider text-sm text-[#dec29b] uppercase font-bold">BHAI JEWELLER</span>
-            <span className="text-[10px] text-[#a89b8c] tracking-widest uppercase">Admin Portal</span>
+            <span className={`font-serif tracking-wider text-sm ${accentGold} uppercase font-bold`}>BHAI JEWELLER</span>
+            <span className={`text-[10px] ${subtitleColor} tracking-widest uppercase`}>Admin Portal</span>
           </div>
         </div>
-        <Link
-          href="/"
-          className="text-xs px-3 py-1.5 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] transition-colors flex items-center space-x-1"
-        >
-          <span>View Site</span>
-          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </Link>
+
+        <div className="flex items-center space-x-2">
+          {/* THEME TOGGLE BUTTON MOBILE */}
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className={`px-2.5 py-1.5 rounded-[5px] text-xs font-medium border transition-colors ${
+              isLight
+                ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5]'
+                : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+            }`}
+          >
+            {isLight ? '🌙 Dark' : '☀️ Light'}
+          </button>
+
+          <Link
+            href="/"
+            className={`text-xs px-3 py-1.5 ${
+              isLight ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+            } border rounded-[5px] transition-colors flex items-center space-x-1`}
+          >
+            <span>Site</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </Link>
+        </div>
       </header>
 
       {/* MOBILE DRAWER OVERLAY & SIDEBAR */}
       {mobileDrawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <aside className="relative w-72 max-w-[80vw] bg-[#140e0b] border-r border-[#2a201a] flex flex-col h-full z-10 shadow-2xl">
-            <div className="p-5 border-b border-[#2a201a] flex items-center justify-between">
+          <aside className={`relative w-72 max-w-[80vw] ${sidebarBg} border-r flex flex-col h-full z-10 shadow-2xl`}>
+            <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
               <div>
-                <h1 className="font-serif text-lg font-bold tracking-wider text-[#dec29b]">BHAI JEWELLER</h1>
-                <p className="text-xs text-[#a89b8c] tracking-widest uppercase mt-0.5">Admin Environment</p>
+                <h1 className={`font-serif text-lg font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
+                <p className={`text-xs ${subtitleColor} tracking-widest uppercase mt-0.5`}>Admin Environment</p>
               </div>
               <button
                 onClick={() => setMobileDrawerOpen(false)}
-                className="text-[#a89b8c] hover:text-[#dec29b] p-1 rounded-[5px]"
+                className={`${subtitleColor} hover:${accentGold} p-1 rounded-[5px]`}
               >
                 ✕
               </button>
@@ -432,7 +473,11 @@ export default function AdminDashboardPage() {
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[5px] text-sm font-medium transition-all ${
                     activeTab === item.id
-                      ? 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                      ? isLight
+                        ? 'bg-[#f4efe6] text-[#8c6b2d] border-l-2 border-[#b38b40] font-bold shadow-sm'
+                        : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                      : isLight
+                      ? 'text-[#4a3b2c] hover:bg-[#f7f4ee]'
                       : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
                   }`}
                 >
@@ -441,17 +486,19 @@ export default function AdminDashboardPage() {
                     <span>{item.label}</span>
                   </div>
                   {item.count !== null && (
-                    <span className="text-xs px-2 py-0.5 rounded-[5px] bg-[#1a120e] border border-[#3a2b22] text-[#dec29b]">
+                    <span className={`text-xs px-2 py-0.5 rounded-[5px] border ${badgeBg}`}>
                       {item.count}
                     </span>
                   )}
                 </button>
               ))}
             </nav>
-            <div className="p-4 border-t border-[#2a201a] bg-[#100b08]">
+            <div className={`p-4 ${sidebarFooterBg} border-t`}>
               <Link
                 href="/"
-                className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+                className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
+                  isLight ? 'bg-[#b38b40] text-white hover:bg-[#99752b]' : 'bg-[#1f1612] text-[#dec29b] border border-[#3a2c23] hover:bg-[#2c201a]'
+                } rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
               >
                 <span>Storefront Main Site</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -465,28 +512,53 @@ export default function AdminDashboardPage() {
 
       {/* DESKTOP SIDEBAR SLIDER DRAWER */}
       <aside
-        className={`hidden md:flex flex-col bg-[#140e0b] border-r border-[#2a201a] transition-all duration-300 relative z-30 ${
+        className={`hidden md:flex flex-col ${sidebarBg} border-r transition-all duration-300 relative z-30 ${
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
         {/* SIDEBAR HEADER */}
-        <div className="p-5 border-b border-[#2a201a] flex items-center justify-between">
+        <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
           {sidebarOpen ? (
             <div>
-              <h1 className="font-serif text-lg font-bold tracking-wider text-[#dec29b]">BHAI JEWELLER</h1>
-              <p className="text-[10px] text-[#a89b8c] tracking-widest uppercase mt-0.5">Admin Management System</p>
+              <h1 className={`font-serif text-lg font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
+              <p className={`text-[10px] ${subtitleColor} tracking-widest uppercase mt-0.5`}>Admin Management System</p>
             </div>
           ) : (
-            <div className="mx-auto font-serif text-lg font-bold text-[#dec29b]">BJ</div>
+            <div className={`mx-auto font-serif text-lg font-bold ${accentGold}`}>BJ</div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1.5 rounded-[5px] text-[#a89b8c] hover:text-[#dec29b] hover:bg-[#1c1410] transition-colors"
+            className={`p-1.5 rounded-[5px] ${subtitleColor} hover:${accentGold} transition-colors`}
             title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M13 5l7 7-7 7M5 5l7 7-7 7"} />
             </svg>
+          </button>
+        </div>
+
+        {/* THEME TOGGLE BUTTON DESKTOP SIDEBAR */}
+        <div className="px-3 pt-3">
+          <button
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            className={`w-full flex items-center ${
+              sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
+            } py-2.5 rounded-[5px] text-xs font-semibold border transition-all ${
+              isLight
+                ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5] hover:bg-[#e8e1d3]'
+                : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+            }`}
+            title="Toggle Admin Theme"
+          >
+            <div className="flex items-center space-x-2">
+              <span className="text-base">{isLight ? '☀️' : '🌙'}</span>
+              {sidebarOpen && <span>{isLight ? 'Light Theme (Default)' : 'Dark Theme'}</span>}
+            </div>
+            {sidebarOpen && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#b38b40] text-white">
+                Toggle
+              </span>
+            )}
           </button>
         </div>
 
@@ -500,7 +572,11 @@ export default function AdminDashboardPage() {
                 sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
               } py-3 rounded-[5px] text-sm font-medium transition-all ${
                 activeTab === item.id
-                  ? 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                  ? isLight
+                    ? 'bg-[#f4efe6] text-[#8c6b2d] border-l-2 border-[#b38b40] font-bold shadow-sm'
+                    : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                  : isLight
+                  ? 'text-[#4a3b2c] hover:bg-[#f7f4ee]'
                   : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
               }`}
               title={!sidebarOpen ? item.label : undefined}
@@ -510,7 +586,7 @@ export default function AdminDashboardPage() {
                 {sidebarOpen && <span>{item.label}</span>}
               </div>
               {sidebarOpen && item.count !== null && (
-                <span className="text-xs px-2 py-0.5 rounded-[5px] bg-[#1a120e] border border-[#3a2b22] text-[#dec29b]">
+                <span className={`text-xs px-2 py-0.5 rounded-[5px] border ${badgeBg}`}>
                   {item.count}
                 </span>
               )}
@@ -519,21 +595,25 @@ export default function AdminDashboardPage() {
         </nav>
 
         {/* ADMIN PROFILE FOOTER */}
-        <div className="p-4 border-t border-[#2a201a] bg-[#100b08] flex flex-col space-y-3">
+        <div className={`p-4 ${sidebarFooterBg} border-t flex flex-col space-y-3`}>
           {sidebarOpen ? (
             <>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-[5px] bg-[#dec29b] text-[#140e0b] font-serif font-bold flex items-center justify-center text-sm">
+                <div className={`w-8 h-8 rounded-[5px] ${isLight ? 'bg-[#b38b40] text-white' : 'bg-[#dec29b] text-[#140e0b]'} font-serif font-bold flex items-center justify-center text-sm`}>
                   AD
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className="text-xs font-semibold text-[#faf7f2] truncate">Master Admin</span>
-                  <span className="text-[10px] text-[#8c7d6c] truncate">admin@bhaijeweller.com</span>
+                  <span className={`text-xs font-semibold ${titleColor} truncate`}>Master Admin</span>
+                  <span className={`text-[10px] ${subtitleColor} truncate`}>admin@bhaijeweller.com</span>
                 </div>
               </div>
               <Link
                 href="/"
-                className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+                className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
+                  isLight
+                    ? 'bg-[#ffffff] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#f4efe6]'
+                    : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
               >
                 <span>Exit Admin</span>
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -544,7 +624,7 @@ export default function AdminDashboardPage() {
           ) : (
             <Link
               href="/"
-              className="w-full flex justify-center py-2 text-[#dec29b] hover:bg-[#1f1612] rounded-[5px]"
+              className={`w-full flex justify-center py-2 ${accentGold} hover:bg-opacity-10 rounded-[5px]`}
               title="Exit Admin"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -558,21 +638,33 @@ export default function AdminDashboardPage() {
       {/* MAIN CONTENT AREA */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
         {/* TOP STATUS BAR */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-[#2a201a] gap-4">
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b ${cardHeaderBorder} gap-4`}>
           <div>
-            <span className="text-xs uppercase tracking-widest text-[#c5a059] font-semibold">Luxury Management Suite</span>
-            <h1 className="font-serif text-2xl sm:text-3xl text-[#faf7f2] font-semibold tracking-wide capitalize mt-0.5">
+            <span className={`text-xs uppercase tracking-widest ${accentGold} font-semibold`}>Luxury Management Suite</span>
+            <h1 className={`font-serif text-2xl sm:text-3xl ${titleColor} font-semibold tracking-wide capitalize mt-0.5`}>
               {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab}
             </h1>
           </div>
           <div className="flex items-center space-x-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-[5px] text-xs bg-[#1f1612] text-[#dec29b] border border-[#3a2c23]">
+            {/* THEME SWITCH BUTTON TOP BAR */}
+            <button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold border flex items-center space-x-1.5 transition-all shadow-sm ${
+                isLight
+                  ? 'bg-[#ffffff] text-[#1c1510] border-[#dcd3c5] hover:bg-[#f4efe6]'
+                  : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+              }`}
+            >
+              <span>{isLight ? '☀️ Light Mode (80% Zoom)' : '🌙 Dark Mode (80% Zoom)'}</span>
+            </button>
+
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-[5px] text-xs border ${badgeBg}`}>
               <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-              System Status: Operational
+              Operational
             </span>
             <button
               onClick={() => setIsAddProductOpen(true)}
-              className="px-4 py-2 bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b] font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center space-x-1"
+              className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center space-x-1`}
             >
               <span>+ Add Product</span>
             </button>
@@ -584,54 +676,54 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-8">
             {/* KPI METRICS CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="bg-[#140e0b] border border-[#2a201a] p-5 rounded-[5px] shadow-lg">
+              <div className={`${cardBg} p-5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-[#a89b8c] uppercase tracking-wider font-semibold">Total Revenue</p>
-                    <p className="text-2xl sm:text-3xl font-serif text-[#dec29b] font-bold mt-2">${totalRevenue.toLocaleString()}</p>
+                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Total Revenue</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>${totalRevenue.toLocaleString()}</p>
                   </div>
-                  <span className="p-2 bg-[#211611] text-[#dec29b] rounded-[5px] text-lg">💰</span>
+                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>💰</span>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-emerald-400">
+                <div className="mt-4 flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>↑ +18.4% from last month</span>
                 </div>
               </div>
 
-              <div className="bg-[#140e0b] border border-[#2a201a] p-5 rounded-[5px] shadow-lg">
+              <div className={`${cardBg} p-5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-[#a89b8c] uppercase tracking-wider font-semibold">Active Orders</p>
-                    <p className="text-2xl sm:text-3xl font-serif text-[#faf7f2] font-bold mt-2">{activeOrdersCount}</p>
+                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Active Orders</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>{activeOrdersCount}</p>
                   </div>
-                  <span className="p-2 bg-[#211611] text-[#dec29b] rounded-[5px] text-lg">📦</span>
+                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>📦</span>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-[#a89b8c]">
+                <div className={`mt-4 flex items-center text-xs ${subtitleColor}`}>
                   <span>{orders.length} total orders recorded</span>
                 </div>
               </div>
 
-              <div className="bg-[#140e0b] border border-[#2a201a] p-5 rounded-[5px] shadow-lg">
+              <div className={`${cardBg} p-5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-[#a89b8c] uppercase tracking-wider font-semibold">Bespoke Requests</p>
-                    <p className="text-2xl sm:text-3xl font-serif text-[#dec29b] font-bold mt-2">{pendingEnquiriesCount}</p>
+                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Bespoke Requests</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>{pendingEnquiriesCount}</p>
                   </div>
-                  <span className="p-2 bg-[#211611] text-[#dec29b] rounded-[5px] text-lg">✨</span>
+                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>✨</span>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-amber-400">
+                <div className="mt-4 flex items-center text-xs text-amber-600 dark:text-amber-400 font-medium">
                   <span>Requires artisan consultation</span>
                 </div>
               </div>
 
-              <div className="bg-[#140e0b] border border-[#2a201a] p-5 rounded-[5px] shadow-lg">
+              <div className={`${cardBg} p-5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs text-[#a89b8c] uppercase tracking-wider font-semibold">Live 24K Gold Rate</p>
-                    <p className="text-2xl sm:text-3xl font-serif text-[#faf7f2] font-bold mt-2">Rs. {gold24kRate}</p>
+                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live 24K Gold Rate</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>Rs. {gold24kRate}</p>
                   </div>
-                  <span className="p-2 bg-[#211611] text-[#dec29b] rounded-[5px] text-lg">🪙</span>
+                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>🪙</span>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-[#dec29b]">
+                <div className={`mt-4 flex items-center text-xs ${accentGold}`}>
                   <span>PKR / Gram • Auto-sync on</span>
                 </div>
               </div>
@@ -640,34 +732,34 @@ export default function AdminDashboardPage() {
             {/* QUICK ACTIONS & RECENT ORDERS */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Orders List */}
-              <div className="lg:col-span-2 bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-5 shadow-lg">
-                <div className="flex items-center justify-between mb-4 border-b border-[#261c16] pb-3">
-                  <h3 className="font-serif text-lg text-[#dec29b] font-semibold">Recent Store Orders</h3>
-                  <button onClick={() => setActiveTab('orders')} className="text-xs text-[#c5a059] hover:underline">
+              <div className={`lg:col-span-2 ${cardBg} rounded-[5px] p-5`}>
+                <div className={`flex items-center justify-between mb-4 border-b ${cardHeaderBorder} pb-3`}>
+                  <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Recent Store Orders</h3>
+                  <button onClick={() => setActiveTab('orders')} className={`text-xs ${accentGold} hover:underline`}>
                     View All Orders →
                   </button>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-[#261c16] text-[#a89b8c] uppercase tracking-wider">
+                      <tr className={`border-b ${cardHeaderBorder} ${subtitleColor} uppercase tracking-wider`}>
                         <th className="pb-2">Order ID</th>
                         <th className="pb-2">Customer</th>
                         <th className="pb-2">Amount</th>
                         <th className="pb-2">Status</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#211813]">
+                    <tbody className={`divide-y ${tableRowHover}`}>
                       {orders.slice(0, 4).map((o) => (
-                        <tr key={o.id} className="hover:bg-[#1a120e] transition-colors">
-                          <td className="py-3 font-mono font-medium text-[#dec29b]">{o.id}</td>
-                          <td className="py-3 font-medium text-[#faf7f2]">{o.customer}</td>
-                          <td className="py-3 font-semibold text-[#dec29b]">${o.amount}</td>
+                        <tr key={o.id} className="transition-colors">
+                          <td className={`py-3 font-mono font-medium ${accentGold}`}>{o.id}</td>
+                          <td className={`py-3 font-medium ${titleColor}`}>{o.customer}</td>
+                          <td className={`py-3 font-semibold ${accentGold}`}>${o.amount}</td>
                           <td className="py-3">
                             <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
-                              o.status === 'Delivered' ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800' :
-                              o.status === 'Shipped' ? 'bg-blue-950/80 text-blue-300 border border-blue-800' :
-                              'bg-amber-950/80 text-amber-300 border border-amber-800'
+                              o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                              o.status === 'Shipped' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
+                              'bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                             }`}>
                               {o.status}
                             </span>
@@ -680,28 +772,28 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* Slider & Quick Banner Control Panel */}
-              <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-5 shadow-lg flex flex-col justify-between">
+              <div className={`${cardBg} rounded-[5px] p-5 flex flex-col justify-between`}>
                 <div>
-                  <div className="flex items-center justify-between mb-3 border-b border-[#261c16] pb-3">
-                    <h3 className="font-serif text-lg text-[#dec29b] font-semibold">Active Banners</h3>
-                    <span className="text-xs bg-[#211611] text-[#dec29b] px-2 py-0.5 rounded-[5px]">
+                  <div className={`flex items-center justify-between mb-3 border-b ${cardHeaderBorder} pb-3`}>
+                    <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Active Banners</h3>
+                    <span className={`text-xs ${badgeBg} px-2 py-0.5 rounded-[5px]`}>
                       {slides.filter(s => s.status === 'Active').length} Active
                     </span>
                   </div>
-                  <p className="text-xs text-[#a89b8c] mb-4">
-                    Manage the main homepage hero slider slides, subtitles, and call-to-action buttons.
+                  <p className={`text-xs ${subtitleColor} mb-4`}>
+                    Manage storefront hero slider slides, subtitles, and call-to-action buttons.
                   </p>
                   <div className="space-y-3">
                     {slides.map(slide => (
-                      <div key={slide.id} className="p-3 bg-[#1a120e] border border-[#2c201a] rounded-[5px] flex items-center justify-between">
+                      <div key={slide.id} className={`p-3 ${isLight ? 'bg-[#f9f6f0] border-[#e8dfd1]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
                         <div className="truncate pr-2">
-                          <p className="text-xs font-semibold text-[#faf7f2] truncate">{slide.title}</p>
-                          <p className="text-[10px] text-[#a89b8c] uppercase">{slide.status}</p>
+                          <p className={`text-xs font-semibold ${titleColor} truncate`}>{slide.title}</p>
+                          <p className={`text-[10px] ${subtitleColor} uppercase`}>{slide.status}</p>
                         </div>
                         <button
                           onClick={() => toggleSlideStatus(slide.id)}
                           className={`text-[10px] px-2 py-1 rounded-[5px] font-semibold transition-colors ${
-                            slide.status === 'Active' ? 'bg-emerald-950 text-emerald-300' : 'bg-red-950 text-red-300'
+                            slide.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
                           }`}
                         >
                           {slide.status === 'Active' ? 'Hide' : 'Publish'}
@@ -712,7 +804,9 @@ export default function AdminDashboardPage() {
                 </div>
                 <button
                   onClick={() => setActiveTab('slides')}
-                  className="mt-6 w-full py-2 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors"
+                  className={`mt-6 w-full py-2 ${
+                    isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#e8e1d3]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors`}
                 >
                   Manage Slider Banners →
                 </button>
@@ -724,23 +818,23 @@ export default function AdminDashboardPage() {
         {/* TAB 2: PRODUCTS CATALOG */}
         {activeTab === 'products' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#140e0b] p-4 border border-[#2a201a] rounded-[5px]">
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
               <div className="flex items-center space-x-2 w-full sm:w-auto">
                 <input
                   type="text"
                   placeholder="Search products by name or SKU..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#1a120e] border border-[#3a2c23] text-xs text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b] w-full sm:w-64"
+                  className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none w-full sm:w-64 ${inputBg}`}
                 />
               </div>
 
               <div className="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-end">
-                <span className="text-xs text-[#a89b8c]">Category:</span>
+                <span className={`text-xs ${subtitleColor}`}>Category:</span>
                 <select
                   value={productCategory}
                   onChange={(e) => setProductCategory(e.target.value)}
-                  className="bg-[#1a120e] border border-[#3a2c23] text-xs text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                  className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 >
                   <option value="All">All Categories</option>
                   <option value="Rings">Rings</option>
@@ -750,7 +844,7 @@ export default function AdminDashboardPage() {
                 </select>
                 <button
                   onClick={() => setIsAddProductOpen(true)}
-                  className="px-4 py-2 bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b] font-semibold text-xs rounded-[5px] transition-all"
+                  className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all`}
                 >
                   + Add Product
                 </button>
@@ -758,10 +852,10 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Products Table */}
-            <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] overflow-hidden shadow-xl">
+            <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#1a120e] border-b border-[#2a201a] text-[#a89b8c] uppercase tracking-wider">
+                  <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
                     <tr>
                       <th className="p-4">Product Info</th>
                       <th className="p-4">SKU</th>
@@ -772,31 +866,31 @@ export default function AdminDashboardPage() {
                       <th className="p-4">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#211813]">
+                  <tbody className={`divide-y ${tableRowHover}`}>
                     {filteredProducts.map((p) => (
-                      <tr key={p.id} className="hover:bg-[#18110d] transition-colors">
+                      <tr key={p.id} className="transition-colors">
                         <td className="p-4 flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#211611] flex-shrink-0 border border-[#3a2c23]">
+                          <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8dfd1] dark:bg-[#211611] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
                             <Image src={p.image} alt={p.name} fill className="object-cover" />
                           </div>
                           <div>
-                            <p className="font-semibold text-[#faf7f2]">{p.name}</p>
-                            <p className="text-[10px] text-[#a89b8c]">{p.id}</p>
+                            <p className={`font-semibold ${titleColor}`}>{p.name}</p>
+                            <p className={`text-[10px] ${subtitleColor}`}>{p.id}</p>
                           </div>
                         </td>
-                        <td className="p-4 font-mono text-[#c2b4a3]">{p.sku}</td>
+                        <td className={`p-4 font-mono ${subtitleColor}`}>{p.sku}</td>
                         <td className="p-4">
-                          <span className="px-2 py-0.5 bg-[#211611] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-[10px]">
+                          <span className={`px-2 py-0.5 border rounded-[5px] text-[10px] ${badgeBg}`}>
                             {p.category}
                           </span>
                         </td>
-                        <td className="p-4 text-[#c2b4a3]">{p.metal}</td>
-                        <td className="p-4 font-semibold text-[#dec29b]">${p.price.toLocaleString()}</td>
+                        <td className={`p-4 ${subtitleColor}`}>{p.metal}</td>
+                        <td className={`p-4 font-semibold ${accentGold}`}>${p.price.toLocaleString()}</td>
                         <td className="p-4">
                           <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold ${
-                            p.stock > 5 ? 'bg-emerald-950 text-emerald-300' :
-                            p.stock > 0 ? 'bg-amber-950 text-amber-300' :
-                            'bg-red-950 text-red-300'
+                            p.stock > 5 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+                            p.stock > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
+                            'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
                           }`}>
                             {p.stock} units ({p.status})
                           </span>
@@ -804,7 +898,7 @@ export default function AdminDashboardPage() {
                         <td className="p-4">
                           <button
                             onClick={() => handleDeleteProduct(p.id)}
-                            className="px-2.5 py-1 bg-red-950/80 hover:bg-red-900 text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-900"
+                            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
                           >
                             Delete
                           </button>
@@ -821,14 +915,14 @@ export default function AdminDashboardPage() {
         {/* TAB 3: ADMIN ENVIRONMENT SLIDER & BANNER MANAGER */}
         {activeTab === 'slides' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#140e0b] p-5 border border-[#2a201a] rounded-[5px]">
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-5 rounded-[5px]`}>
               <div>
-                <h2 className="font-serif text-lg font-semibold text-[#dec29b]">Homepage Banner & Hero Slider Controls</h2>
-                <p className="text-xs text-[#a89b8c]">Add, edit, toggle visibility, and reorder full-width banner slides for the storefront.</p>
+                <h2 className={`font-serif text-lg font-semibold ${accentGold}`}>Homepage Banner & Hero Slider Controls</h2>
+                <p className={`text-xs ${subtitleColor}`}>Add, edit, toggle visibility, and reorder full-width banner slides for the storefront.</p>
               </div>
               <button
                 onClick={() => setIsAddSlideOpen(true)}
-                className="px-4 py-2 bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b] font-semibold text-xs rounded-[5px] transition-all shadow-md"
+                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md`}
               >
                 + Add New Hero Slide
               </button>
@@ -837,47 +931,47 @@ export default function AdminDashboardPage() {
             {/* Slide Banners Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {slides.map((slide) => (
-                <div key={slide.id} className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] overflow-hidden shadow-lg flex flex-col justify-between">
+                <div key={slide.id} className={`${cardBg} rounded-[5px] overflow-hidden flex flex-col justify-between`}>
                   <div>
                     {/* Slide Image Preview */}
-                    <div className="relative w-full h-44 bg-[#1a120e] border-b border-[#2a201a]">
-                      <Image src={slide.image} alt={slide.title} fill className="object-cover opacity-80" />
+                    <div className="relative w-full h-44 bg-[#e8dfd1] dark:bg-[#1a120e] border-b border-[#e8dfd1] dark:border-[#2a201a]">
+                      <Image src={slide.image} alt={slide.title} fill className="object-cover opacity-90" />
                       <div className="absolute top-2 right-2">
                         <span className={`px-2.5 py-1 rounded-[5px] text-[10px] font-semibold uppercase tracking-wider ${
-                          slide.status === 'Active' ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-red-950 text-red-300 border border-red-700'
+                          slide.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-700'
                         }`}>
                           {slide.status}
                         </span>
                       </div>
-                      <div className="absolute bottom-2 left-2 bg-[#140e0b]/90 px-2 py-0.5 rounded-[5px] text-[10px] font-mono text-[#dec29b] border border-[#3a2c23]">
+                      <div className={`absolute bottom-2 left-2 ${isLight ? 'bg-white/90 text-[#8c6b2d] border-[#e8dfd1]' : 'bg-[#140e0b]/90 text-[#dec29b] border-[#3a2c23]'} px-2 py-0.5 rounded-[5px] text-[10px] font-mono border`}>
                         Order #{slide.order}
                       </div>
                     </div>
                     {/* Slide Content */}
                     <div className="p-4 space-y-2">
-                      <h3 className="font-serif font-bold text-[#faf7f2] text-sm leading-snug">{slide.title}</h3>
-                      <p className="text-xs text-[#a89b8c] line-clamp-2">{slide.subtitle}</p>
-                      <div className="pt-2 text-[10px] text-[#dec29b] flex items-center space-x-2">
-                        <span className="px-2 py-0.5 bg-[#1f1612] border border-[#3a2c23] rounded-[5px]">CTA: {slide.ctaText}</span>
-                        <span className="truncate text-[#8c7d6c]">→ {slide.ctaLink}</span>
+                      <h3 className={`font-serif font-bold ${titleColor} text-sm leading-snug`}>{slide.title}</h3>
+                      <p className={`text-xs ${subtitleColor} line-clamp-2`}>{slide.subtitle}</p>
+                      <div className={`pt-2 text-[10px] ${accentGold} flex items-center space-x-2`}>
+                        <span className={`px-2 py-0.5 border rounded-[5px] ${badgeBg}`}>CTA: {slide.ctaText}</span>
+                        <span className={`truncate ${subtitleColor}`}>→ {slide.ctaLink}</span>
                       </div>
                     </div>
                   </div>
                   {/* Actions */}
-                  <div className="p-4 border-t border-[#2a201a] bg-[#100b08] flex items-center justify-between gap-2">
+                  <div className={`p-4 border-t ${cardHeaderBorder} ${isLight ? 'bg-[#fdfbf7]' : 'bg-[#100b08]'} flex items-center justify-between gap-2`}>
                     <button
                       onClick={() => toggleSlideStatus(slide.id)}
-                      className={`flex-1 py-1.5 rounded-[5px] text-xs font-semibold transition-colors ${
+                      className={`flex-1 py-1.5 rounded-[5px] text-xs font-semibold transition-colors border ${
                         slide.status === 'Active'
-                          ? 'bg-[#1f1612] hover:bg-[#2c201a] text-amber-300 border border-amber-900/50'
-                          : 'bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-800'
+                          ? 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-[#1f1612] dark:text-amber-300 dark:border-amber-900/50'
+                          : 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800'
                       }`}
                     >
                       {slide.status === 'Active' ? 'Deactivate Slide' : 'Publish Live'}
                     </button>
                     <button
                       onClick={() => handleDeleteSlide(slide.id)}
-                      className="px-3 py-1.5 bg-red-950 hover:bg-red-900 text-red-200 rounded-[5px] text-xs transition-colors border border-red-900"
+                      className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-xs transition-colors border border-red-300 dark:border-red-900"
                     >
                       Delete
                     </button>
@@ -891,8 +985,8 @@ export default function AdminDashboardPage() {
         {/* TAB 4: ORDERS & SALES */}
         {activeTab === 'orders' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-[#140e0b] p-4 border border-[#2a201a] rounded-[5px]">
-              <span className="text-xs text-[#a89b8c]">Filter Status:</span>
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
+              <span className={`text-xs ${subtitleColor}`}>Filter Status:</span>
               <div className="flex items-center space-x-2">
                 {['All', 'Processing', 'Shipped', 'Delivered'].map((st) => (
                   <button
@@ -900,8 +994,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setOrderStatusFilter(st)}
                     className={`px-3 py-1.5 rounded-[5px] text-xs font-medium transition-all ${
                       orderStatusFilter === st
-                        ? 'bg-[#dec29b] text-[#140e0b] font-bold'
-                        : 'bg-[#1a120e] text-[#c2b4a3] border border-[#3a2c23] hover:text-[#faf7f2]'
+                        ? isLight ? 'bg-[#b38b40] text-white font-bold' : 'bg-[#dec29b] text-[#140e0b] font-bold'
+                        : isLight ? 'bg-[#f4efe6] text-[#5c4d40] border border-[#dcd3c5]' : 'bg-[#1a120e] text-[#c2b4a3] border border-[#3a2c23]'
                     }`}
                   >
                     {st}
@@ -912,36 +1006,38 @@ export default function AdminDashboardPage() {
 
             <div className="space-y-4">
               {filteredOrders.map((order) => (
-                <div key={order.id} className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-5 shadow-lg flex flex-col md:flex-row justify-between gap-4">
+                <div key={order.id} className={`${cardBg} rounded-[5px] p-5 flex flex-col md:flex-row justify-between gap-4`}>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-3">
-                      <span className="font-mono text-sm font-bold text-[#dec29b]">{order.id}</span>
-                      <span className="text-xs text-[#a89b8c]">• {order.date}</span>
+                      <span className={`font-mono text-sm font-bold ${accentGold}`}>{order.id}</span>
+                      <span className={`text-xs ${subtitleColor}`}>• {order.date}</span>
                       <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
-                        order.status === 'Delivered' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' :
-                        order.status === 'Shipped' ? 'bg-blue-950 text-blue-300 border border-blue-800' :
-                        'bg-amber-950 text-amber-300 border border-amber-800'
+                        order.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                        order.status === 'Shipped' ? 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800' :
+                        'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800'
                       }`}>
                         {order.status}
                       </span>
                     </div>
-                    <p className="text-sm font-semibold text-[#faf7f2]">{order.customer} <span className="text-xs text-[#a89b8c]">({order.email})</span></p>
-                    <p className="text-xs text-[#c2b4a3]"><span className="text-[#a89b8c]">Items:</span> {order.items}</p>
-                    <p className="text-xs text-[#a89b8c]"><span className="text-[#a89b8c]">Ship to:</span> {order.address}</p>
+                    <p className={`text-sm font-semibold ${titleColor}`}>{order.customer} <span className={`text-xs ${subtitleColor}`}>({order.email})</span></p>
+                    <p className={`text-xs ${subtitleColor}`}><span className="font-medium">Items:</span> {order.items}</p>
+                    <p className={`text-xs ${subtitleColor}`}><span className="font-medium">Ship to:</span> {order.address}</p>
                   </div>
 
-                  <div className="flex flex-col justify-between items-end border-t md:border-t-0 md:border-l border-[#261c16] pt-3 md:pt-0 md:pl-6">
+                  <div className={`flex flex-col justify-between items-end border-t md:border-t-0 md:border-l ${cardHeaderBorder} pt-3 md:pt-0 md:pl-6`}>
                     <div className="text-right">
-                      <p className="text-xs text-[#a89b8c]">Total Amount</p>
-                      <p className="text-xl font-serif text-[#dec29b] font-bold">${order.amount.toLocaleString()}</p>
-                      <p className="text-[10px] text-[#8c7d6c]">{order.paymentMethod}</p>
+                      <p className={`text-xs ${subtitleColor}`}>Total Amount</p>
+                      <p className={`text-xl font-serif ${accentGold} font-bold`}>${order.amount.toLocaleString()}</p>
+                      <p className={`text-[10px] ${subtitleColor}`}>{order.paymentMethod}</p>
                     </div>
 
                     <div className="flex items-center space-x-2 mt-4">
                       {order.status !== 'Processing' && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.id, 'Processing')}
-                          className="px-2.5 py-1 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-[10px] transition-colors"
+                          className={`px-2.5 py-1 border rounded-[5px] text-[10px] transition-colors ${
+                            isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                          }`}
                         >
                           Mark Processing
                         </button>
@@ -949,7 +1045,7 @@ export default function AdminDashboardPage() {
                       {order.status !== 'Shipped' && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.id, 'Shipped')}
-                          className="px-2.5 py-1 bg-blue-950 hover:bg-blue-900 text-blue-200 border border-blue-800 rounded-[5px] text-[10px] transition-colors"
+                          className="px-2.5 py-1 bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200 border border-blue-300 dark:border-blue-800 rounded-[5px] text-[10px] transition-colors"
                         >
                           Mark Shipped
                         </button>
@@ -957,7 +1053,7 @@ export default function AdminDashboardPage() {
                       {order.status !== 'Delivered' && (
                         <button
                           onClick={() => handleUpdateOrderStatus(order.id, 'Delivered')}
-                          className="px-2.5 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-800 rounded-[5px] text-[10px] transition-colors"
+                          className="px-2.5 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[10px] transition-colors"
                         >
                           Mark Delivered
                         </button>
@@ -975,73 +1071,75 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             <div className="space-y-4">
               {enquiries.map((enq) => (
-                <div key={enq.id} className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-5 shadow-lg space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[#261c16] pb-3 gap-2">
+                <div key={enq.id} className={`${cardBg} rounded-[5px] p-5 space-y-4`}>
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b ${cardHeaderBorder} pb-3 gap-2`}>
                     <div>
                       <div className="flex items-center space-x-2">
-                        <span className="font-mono text-xs text-[#dec29b] font-bold">{enq.id}</span>
-                        <span className="text-xs text-[#a89b8c]">• {enq.date}</span>
+                        <span className={`font-mono text-xs ${accentGold} font-bold`}>{enq.id}</span>
+                        <span className={`text-xs ${subtitleColor}`}>• {enq.date}</span>
                         <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
-                          enq.status === 'Completed' ? 'bg-emerald-950 text-emerald-300' :
-                          enq.status === 'In Design' ? 'bg-purple-950 text-purple-300' :
-                          'bg-amber-950 text-amber-300'
+                          enq.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+                          enq.status === 'In Design' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' :
+                          'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
                         }`}>
                           {enq.status}
                         </span>
                       </div>
-                      <h3 className="font-serif font-semibold text-lg text-[#faf7f2] mt-1">{enq.name}</h3>
+                      <h3 className={`font-serif font-semibold text-lg ${titleColor} mt-1`}>{enq.name}</h3>
                     </div>
                     <div className="text-left sm:text-right">
-                      <p className="text-xs text-[#a89b8c]">Estimated Budget</p>
-                      <p className="text-sm font-semibold text-[#dec29b]">{enq.budget}</p>
+                      <p className={`text-xs ${subtitleColor}`}>Estimated Budget</p>
+                      <p className={`text-sm font-semibold ${accentGold}`}>{enq.budget}</p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     <div>
-                      <p className="text-[#a89b8c]">Service Requested:</p>
-                      <p className="font-medium text-[#faf7f2]">{enq.service}</p>
+                      <p className={subtitleColor}>Service Requested:</p>
+                      <p className={`font-medium ${titleColor}`}>{enq.service}</p>
                     </div>
                     <div>
-                      <p className="text-[#a89b8c]">Contact Info:</p>
-                      <p className="font-medium text-[#faf7f2]">{enq.email}</p>
-                      <p className="font-medium text-[#dec29b]">{enq.phone}</p>
+                      <p className={subtitleColor}>Contact Info:</p>
+                      <p className={`font-medium ${titleColor}`}>{enq.email}</p>
+                      <p className={`font-medium ${accentGold}`}>{enq.phone}</p>
                     </div>
                     <div>
-                      <p className="text-[#a89b8c]">Design Notes:</p>
-                      <p className="italic text-[#c2b4a3]">"{enq.message}"</p>
+                      <p className={subtitleColor}>Design Notes:</p>
+                      <p className={`italic ${subtitleColor}`}>"{enq.message}"</p>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between pt-3 border-t border-[#261c16] gap-2">
+                  <div className={`flex flex-wrap items-center justify-between pt-3 border-t ${cardHeaderBorder} gap-2`}>
                     <div className="flex items-center space-x-2">
                       <a
                         href={`https://wa.me/${enq.phone.replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 rounded-[5px] text-xs transition-colors flex items-center space-x-1"
+                        className="px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-xs transition-colors flex items-center space-x-1"
                       >
                         <span>WhatsApp Client</span>
                       </a>
                       <a
                         href={`mailto:${enq.email}`}
-                        className="px-3 py-1 bg-[#1f1612] hover:bg-[#2c201a] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-xs transition-colors"
+                        className={`px-3 py-1 border rounded-[5px] text-xs transition-colors ${
+                          isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                        }`}
                       >
                         Send Email
                       </a>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <span className="text-[10px] text-[#a89b8c]">Status:</span>
+                      <span className={`text-[10px] ${subtitleColor}`}>Status:</span>
                       <button
                         onClick={() => handleUpdateEnquiryStatus(enq.id, 'In Design')}
-                        className="px-2.5 py-1 bg-purple-950 hover:bg-purple-900 text-purple-200 border border-purple-800 rounded-[5px] text-[10px] transition-colors"
+                        className="px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-[5px] text-[10px] transition-colors"
                       >
                         In Design
                       </button>
                       <button
                         onClick={() => handleUpdateEnquiryStatus(enq.id, 'Completed')}
-                        className="px-2.5 py-1 bg-emerald-950 hover:bg-emerald-900 text-emerald-200 border border-emerald-800 rounded-[5px] text-[10px] transition-colors"
+                        className="px-2.5 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[10px] transition-colors"
                       >
                         Completed
                       </button>
@@ -1056,10 +1154,10 @@ export default function AdminDashboardPage() {
         {/* TAB 6: VIP CUSTOMERS */}
         {activeTab === 'customers' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] overflow-hidden shadow-xl">
+            <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#1a120e] border-b border-[#2a201a] text-[#a89b8c] uppercase tracking-wider">
+                  <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
                     <tr>
                       <th className="p-4">Customer ID</th>
                       <th className="p-4">Name</th>
@@ -1069,16 +1167,16 @@ export default function AdminDashboardPage() {
                       <th className="p-4">VIP Tier</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#211813]">
+                  <tbody className={`divide-y ${tableRowHover}`}>
                     {customers.map((c) => (
-                      <tr key={c.id} className="hover:bg-[#18110d] transition-colors">
-                        <td className="p-4 font-mono text-[#dec29b] font-bold">{c.id}</td>
-                        <td className="p-4 font-semibold text-[#faf7f2]">{c.name}</td>
-                        <td className="p-4 text-[#c2b4a3]">{c.email}</td>
-                        <td className="p-4 text-[#faf7f2] font-semibold">{c.totalOrders}</td>
-                        <td className="p-4 font-serif text-[#dec29b] font-bold">${c.totalSpent.toLocaleString()}</td>
+                      <tr key={c.id} className="transition-colors">
+                        <td className={`p-4 font-mono ${accentGold} font-bold`}>{c.id}</td>
+                        <td className={`p-4 font-semibold ${titleColor}`}>{c.name}</td>
+                        <td className={`p-4 ${subtitleColor}`}>{c.email}</td>
+                        <td className={`p-4 ${titleColor} font-semibold`}>{c.totalOrders}</td>
+                        <td className={`p-4 font-serif ${accentGold} font-bold`}>${c.totalSpent.toLocaleString()}</td>
                         <td className="p-4">
-                          <span className="px-2.5 py-1 bg-[#211611] text-[#dec29b] border border-[#3a2c23] rounded-[5px] text-[10px] font-semibold">
+                          <span className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-semibold ${badgeBg}`}>
                             ✨ {c.tier}
                           </span>
                         </td>
@@ -1094,47 +1192,47 @@ export default function AdminDashboardPage() {
         {/* TAB 7: LIVE GOLD RATE MANAGER */}
         {activeTab === 'goldrates' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-6 shadow-xl max-w-2xl mx-auto space-y-6">
+            <div className={`${cardBg} rounded-[5px] p-6 max-w-2xl mx-auto space-y-6`}>
               <div>
-                <h2 className="font-serif text-xl font-bold text-[#dec29b]">Live Gold Bullion Pricing Engine</h2>
-                <p className="text-xs text-[#a89b8c] mt-1">
+                <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Live Gold Bullion Pricing Engine</h2>
+                <p className={`text-xs ${subtitleColor} mt-1`}>
                   Adjust per-gram rates in PKR to update catalog prices automatically across the entire site.
                 </p>
               </div>
 
               <div className="space-y-4 pt-2">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-[#a89b8c] mb-1 font-semibold">
+                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
                     24K Pure Gold Rate (PKR / Gram)
                   </label>
                   <input
                     type="text"
                     value={gold24kRate}
                     onChange={(e) => setGold24kRate(e.target.value)}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-sm text-[#faf7f2] px-4 py-2.5 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-[#a89b8c] mb-1 font-semibold">
+                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
                     22K Jewelry Gold Rate (PKR / Gram)
                   </label>
                   <input
                     type="text"
                     value={gold22kRate}
                     onChange={(e) => setGold22kRate(e.target.value)}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-sm text-[#faf7f2] px-4 py-2.5 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
 
-                <div className="p-4 bg-[#1a120e] border border-[#2c201a] rounded-[5px] text-xs text-[#c2b4a3]">
-                  <p className="font-semibold text-[#dec29b] mb-1">💡 Automated Pricing Formula:</p>
+                <div className={`p-4 ${isLight ? 'bg-[#f7f3eb] border-[#e8dfd3]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] text-xs ${subtitleColor}`}>
+                  <p className={`font-semibold ${accentGold} mb-1`}>💡 Automated Pricing Formula:</p>
                   <p>Catalog price = (Gold Weight × 22K Rate) + Artisan Making Charges + Diamond Carat Value.</p>
                 </div>
 
                 <button
                   onClick={() => alert("Gold Rates Updated Live!")}
-                  className="w-full py-3 bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b] font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md"
+                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md`}
                 >
                   Save & Push Gold Rates Live
                 </button>
@@ -1146,37 +1244,37 @@ export default function AdminDashboardPage() {
         {/* TAB 8: STORE SETTINGS */}
         {activeTab === 'settings' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] p-6 shadow-xl max-w-2xl mx-auto space-y-6">
-              <h2 className="font-serif text-xl font-bold text-[#dec29b]">Storewide Configuration</h2>
+            <div className={`${cardBg} rounded-[5px] p-6 max-w-2xl mx-auto space-y-6`}>
+              <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Storewide Configuration</h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-[#a89b8c] mb-1 font-semibold">
+                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
                     Free Shipping Threshold ($)
                   </label>
                   <input
                     type="text"
                     value={shippingThreshold}
                     onChange={(e) => setShippingThreshold(e.target.value)}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-sm text-[#faf7f2] px-4 py-2.5 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs uppercase tracking-wider text-[#a89b8c] mb-1 font-semibold">
+                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
                     Announcement Top Banner Text
                   </label>
                   <textarea
                     rows={2}
                     value={noticeBanner}
                     onChange={(e) => setNoticeBanner(e.target.value)}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-sm text-[#faf7f2] px-4 py-2.5 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
 
                 <button
                   onClick={() => alert("Store settings updated successfully!")}
-                  className="w-full py-3 bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b] font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md"
+                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md`}
                 >
                   Update Store Configuration
                 </button>
@@ -1188,31 +1286,31 @@ export default function AdminDashboardPage() {
 
       {/* MODAL: ADD PRODUCT */}
       {isAddProductOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-[#261c16] pb-3">
-              <h3 className="font-serif text-lg text-[#dec29b] font-bold">Add New Luxury Item</h3>
-              <button onClick={() => setIsAddProductOpen(false)} className="text-[#a89b8c] hover:text-[#faf7f2]">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`${cardBg} rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4`}>
+            <div className={`flex justify-between items-center border-b ${cardHeaderBorder} pb-3`}>
+              <h3 className={`font-serif text-lg ${accentGold} font-bold`}>Add New Luxury Item</h3>
+              <button onClick={() => setIsAddProductOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>✕</button>
             </div>
             <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#a89b8c] mb-1">Product Name</label>
+                <label className={`block ${subtitleColor} mb-1`}>Product Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Royal Ruby Ring"
                   value={newProduct.name}
                   onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                  className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">Category</label>
+                  <label className={`block ${subtitleColor} mb-1`}>Category</label>
                   <select
                     value={newProduct.category}
                     onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   >
                     <option value="Rings">Rings</option>
                     <option value="Necklaces">Necklaces</option>
@@ -1221,35 +1319,35 @@ export default function AdminDashboardPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">Metal Purity</label>
+                  <label className={`block ${subtitleColor} mb-1`}>Metal Purity</label>
                   <input
                     type="text"
                     value={newProduct.metal}
                     onChange={(e) => setNewProduct({ ...newProduct, metal: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">Price ($)</label>
+                  <label className={`block ${subtitleColor} mb-1`}>Price ($)</label>
                   <input
                     type="number"
                     required
                     placeholder="1200"
                     value={newProduct.price}
                     onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">Stock Qty</label>
+                  <label className={`block ${subtitleColor} mb-1`}>Stock Qty</label>
                   <input
                     type="number"
                     placeholder="10"
                     value={newProduct.stock}
                     onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
               </div>
@@ -1257,13 +1355,13 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddProductOpen(false)}
-                  className="px-4 py-2 bg-[#1f1612] text-[#c2b4a3] border border-[#3a2c23] rounded-[5px]"
+                  className={`px-4 py-2 ${isLight ? 'bg-[#f4efe6] text-[#5c4d40]' : 'bg-[#1f1612] text-[#c2b4a3]'} border border-opacity-50 rounded-[5px]`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#dec29b] text-[#140e0b] font-bold rounded-[5px]"
+                  className={`px-4 py-2 ${primaryBtn} font-bold rounded-[5px]`}
                 >
                   Save Product
                 </button>
@@ -1275,74 +1373,74 @@ export default function AdminDashboardPage() {
 
       {/* MODAL: ADD HERO SLIDE */}
       {isAddSlideOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#140e0b] border border-[#2a201a] rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4">
-            <div className="flex justify-between items-center border-b border-[#261c16] pb-3">
-              <h3 className="font-serif text-lg text-[#dec29b] font-bold">Add Hero Slide Banner</h3>
-              <button onClick={() => setIsAddSlideOpen(false)} className="text-[#a89b8c] hover:text-[#faf7f2]">✕</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className={`${cardBg} rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4`}>
+            <div className={`flex justify-between items-center border-b ${cardHeaderBorder} pb-3`}>
+              <h3 className={`font-serif text-lg ${accentGold} font-bold`}>Add Hero Slide Banner</h3>
+              <button onClick={() => setIsAddSlideOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>✕</button>
             </div>
             <form onSubmit={handleAddSlide} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[#a89b8c] mb-1">Slide Title</label>
+                <label className={`block ${subtitleColor} mb-1`}>Slide Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Royal Emerald Collection"
                   value={newSlide.title}
                   onChange={(e) => setNewSlide({ ...newSlide, title: e.target.value })}
-                  className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                  className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 />
               </div>
               <div>
-                <label className="block text-[#a89b8c] mb-1">Subtitle / Description</label>
+                <label className={`block ${subtitleColor} mb-1`}>Subtitle / Description</label>
                 <input
                   type="text"
                   placeholder="e.g. Handcrafted gold set with certified emeralds"
                   value={newSlide.subtitle}
                   onChange={(e) => setNewSlide({ ...newSlide, subtitle: e.target.value })}
-                  className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                  className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 />
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">CTA Button Text</label>
+                  <label className={`block ${subtitleColor} mb-1`}>CTA Button Text</label>
                   <input
                     type="text"
                     value={newSlide.ctaText}
                     onChange={(e) => setNewSlide({ ...newSlide, ctaText: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
                 <div>
-                  <label className="block text-[#a89b8c] mb-1">CTA Target Link</label>
+                  <label className={`block ${subtitleColor} mb-1`}>CTA Target Link</label>
                   <input
                     type="text"
                     value={newSlide.ctaLink}
                     onChange={(e) => setNewSlide({ ...newSlide, ctaLink: e.target.value })}
-                    className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-[#a89b8c] mb-1">Slide Image URL</label>
+                <label className={`block ${subtitleColor} mb-1`}>Slide Image URL</label>
                 <input
                   type="text"
                   value={newSlide.image}
                   onChange={(e) => setNewSlide({ ...newSlide, image: e.target.value })}
-                  className="w-full bg-[#1a120e] border border-[#3a2c23] text-[#faf7f2] px-3 py-2 rounded-[5px] focus:outline-none focus:border-[#dec29b]"
+                  className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 />
               </div>
               <div className="pt-2 flex justify-end space-x-2">
                 <button
                   type="button"
                   onClick={() => setIsAddSlideOpen(false)}
-                  className="px-4 py-2 bg-[#1f1612] text-[#c2b4a3] border border-[#3a2c23] rounded-[5px]"
+                  className={`px-4 py-2 ${isLight ? 'bg-[#f4efe6] text-[#5c4d40]' : 'bg-[#1f1612] text-[#c2b4a3]'} border border-opacity-50 rounded-[5px]`}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#dec29b] text-[#140e0b] font-bold rounded-[5px]"
+                  className={`px-4 py-2 ${primaryBtn} font-bold rounded-[5px]`}
                 >
                   Publish Slide
                 </button>
