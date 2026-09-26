@@ -560,6 +560,7 @@ export default function AdminDashboardPage() {
 
   return (
     <div
+      suppressHydrationWarning
       className={`min-h-screen h-screen w-full overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
     >
       {/* MOBILE HEADER BAR */}
