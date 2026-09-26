@@ -23,13 +23,13 @@ const allProducts: Product[] = [];
 const categories = ['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets'] as const;
 
 export default function ShopPage() {
-  const { addToCart, toggleWishlist, isInWishlist } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, products } = useShop();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [sortBy, setSortBy] = useState<string>('featured');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [addedCartMap, setAddedCartMap] = useState<Record<string, boolean>>({});
 
-  const handleWishlistClick = (p: Product, e: React.MouseEvent) => {
+  const handleWishlistClick = (p: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleWishlist({
@@ -37,14 +37,14 @@ export default function ShopPage() {
       name: p.name,
       category: p.category,
       price: p.price,
-      rating: p.rating,
-      reviewCount: p.reviewCount,
+      rating: p.rating || 5,
+      reviewCount: p.reviewCount || 1,
       image: p.image,
-      slug: p.slug,
+      slug: p.slug || p.id,
     });
   };
 
-  const handleAddToCartClick = (p: Product, e: React.MouseEvent) => {
+  const handleAddToCartClick = (p: any, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     addToCart({
@@ -53,7 +53,7 @@ export default function ShopPage() {
       variant: p.category,
       price: p.price,
       image: p.image,
-      slug: p.slug,
+      slug: p.slug || p.id,
     });
     setAddedCartMap((prev) => ({ ...prev, [p.id]: true }));
     setTimeout(() => {
@@ -63,8 +63,8 @@ export default function ShopPage() {
 
   const filteredProducts = useMemo(() => {
     let list = selectedCategory === 'All'
-      ? allProducts
-      : allProducts.filter((p) => p.category === selectedCategory);
+      ? products
+      : products.filter((p) => p.category === selectedCategory);
 
     if (sortBy === 'low') {
       list = [...list].sort((a, b) => a.price - b.price);
@@ -72,7 +72,7 @@ export default function ShopPage() {
       list = [...list].sort((a, b) => b.price - a.price);
     }
     return list;
-  }, [selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy, products]);
 
   return (
     <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pb-0">
@@ -240,7 +240,7 @@ export default function ShopPage() {
                             </svg>
                           ))}
                         </div>
-                        <span className="text-[9.5px] text-[#9a897b]">({p.reviewCount})</span>
+                        <span className="text-[9.5px] text-[#9a897b]">({p.reviewCount || 12})</span>
                       </div>
                     </div>
 

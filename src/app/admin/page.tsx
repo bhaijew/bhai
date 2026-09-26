@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/shared/ScrollReveal';
+import { useShop, ProductItem } from '@/context/ShopContext';
 
 // Initial Hero / Banner Slider Data for Admin Slider Manager
 const INITIAL_SLIDES = [
@@ -36,75 +37,6 @@ const INITIAL_SLIDES = [
     image: '/images/hero-slider-3.jpg',
     status: 'Inactive',
     order: 3,
-  },
-];
-
-// Initial Products Data
-const INITIAL_PRODUCTS = [
-  {
-    id: 'solara-ring',
-    name: 'Solara Diamond Ring',
-    category: 'Rings',
-    price: 1280,
-    originalPrice: 1650,
-    stock: 14,
-    metal: '18k Yellow Gold',
-    status: 'In Stock',
-    isFeatured: true,
-    image: '/images/detail-ring-hero.jpg',
-    sku: 'BJ-RNG-001',
-  },
-  {
-    id: 'lumiere-necklace',
-    name: 'Lumiere Gold Necklace',
-    category: 'Necklaces',
-    price: 980,
-    originalPrice: 1200,
-    stock: 8,
-    metal: '22k Gold',
-    status: 'In Stock',
-    isFeatured: true,
-    image: '/images/shop-prod-2.jpg',
-    sku: 'BJ-NCK-002',
-  },
-  {
-    id: 'valera-earrings',
-    name: 'Valera Diamond Drop Earrings',
-    category: 'Earrings',
-    price: 760,
-    originalPrice: 950,
-    stock: 5,
-    metal: '18k White Gold',
-    status: 'Low Stock',
-    isFeatured: false,
-    image: '/images/shop-prod-3.jpg',
-    sku: 'BJ-ERG-003',
-  },
-  {
-    id: 'royal-bangle',
-    name: 'Royal Heritage Bangle',
-    category: 'Bracelets',
-    price: 1850,
-    originalPrice: 2100,
-    stock: 3,
-    metal: '22k Gold',
-    status: 'Low Stock',
-    isFeatured: true,
-    image: '/images/shop-prod-4.jpg',
-    sku: 'BJ-BRC-004',
-  },
-  {
-    id: 'aurelia-solitaire',
-    name: 'Aurelia Solitaire Pendant',
-    category: 'Necklaces',
-    price: 1420,
-    originalPrice: 1700,
-    stock: 12,
-    metal: '18k Rose Gold',
-    status: 'In Stock',
-    isFeatured: false,
-    image: '/images/shop-prod-5.jpg',
-    sku: 'BJ-NCK-005',
   },
 ];
 
@@ -214,15 +146,17 @@ const INITIAL_CUSTOMERS = [
 ];
 
 export default function AdminDashboardPage() {
+  // Real-time Shop Context
+  const { products, addProduct, deleteProduct: removeStoreProduct } = useShop();
+
   // Theme State: Default is 'light' (White Theme) as requested!
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add-product' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // States for store data
-  const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [orders, setOrders] = useState(INITIAL_ORDERS);
   const [enquiries, setEnquiries] = useState(INITIAL_ENQUIRIES);
   const [slides, setSlides] = useState(INITIAL_SLIDES);
@@ -233,20 +167,144 @@ export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('All');
 
-  // Modal states for Product
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
-  const [newProduct, setNewProduct] = useState({
+  // Full Page Add Product Form State (No Modal Popup!)
+  const [addForm, setAddForm] = useState({
     name: '',
     category: 'Rings',
     price: '',
     originalPrice: '',
-    stock: '',
+    stock: '10',
     metal: '18k Yellow Gold',
     sku: '',
-    image: '/images/detail-ring-hero.jpg',
+    weightGrams: '6.5',
+    description: '',
+    primaryImage: '/images/detail-ring-hero.jpg',
+    additionalImages: [
+      '/images/shop-prod-1.jpg',
+      '/images/category-rings.jpg'
+    ],
+    newImageUrlInput: '',
+    // SEO fields
+    seoTitle: '',
+    seoDescription: '',
+    slug: '',
+    focusKeywordsText: '',
   });
 
-  // Modal states for Slider Banner
+  const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
+  // Auto Generate SKU
+  const generateAutoSku = () => {
+    const catCode = addForm.category.substring(0, 3).toUpperCase();
+    const randNum = Math.floor(1000 + Math.random() * 9000);
+    setAddForm(prev => ({ ...prev, sku: `BJ-${catCode}-${randNum}` }));
+  };
+
+  // Auto Generate SEO Keywords & Meta Info
+  const generateAutoSeo = () => {
+    const title = addForm.name.trim() || 'Luxury Jewelry Piece';
+    const metal = addForm.metal || 'Gold';
+    const cat = addForm.category || 'Jewelry';
+    const slugified = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+
+    const generatedSeoTitle = `${title} | ${metal} ${cat} | Bhai Jeweller`;
+    const generatedMetaDesc = `Shop ${title} handcrafted in ${metal}. Authentic fine ${cat.toLowerCase()} with certified purity and artisan heritage craftsmanship. Free insured shipping.`;
+    const generatedKeywords = [
+      title.toLowerCase(),
+      `${metal.toLowerCase()} ${cat.toLowerCase()}`,
+      `bhai jeweller ${cat.toLowerCase()}`,
+      `fine jewelry ${cat.toLowerCase()}`,
+      `handmade gold ${cat.toLowerCase()}`
+    ].join(', ');
+
+    setAddForm(prev => ({
+      ...prev,
+      slug: slugified || 'luxury-product',
+      seoTitle: generatedSeoTitle,
+      seoDescription: generatedMetaDesc,
+      focusKeywordsText: generatedKeywords,
+    }));
+  };
+
+  // Add Additional Image URL
+  const handleAddImageUrl = () => {
+    if (!addForm.newImageUrlInput.trim()) return;
+    setAddForm(prev => ({
+      ...prev,
+      additionalImages: [...prev.additionalImages, prev.newImageUrlInput.trim()],
+      newImageUrlInput: ''
+    }));
+  };
+
+  // Remove Image from list
+  const handleRemoveImage = (indexToRemove: number) => {
+    setAddForm(prev => ({
+      ...prev,
+      additionalImages: prev.additionalImages.filter((_, idx) => idx !== indexToRemove)
+    }));
+  };
+
+  // Submit Full Page Add Product Form
+  const handleFullProductSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.name || !addForm.price) return;
+
+    const allImagesList = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean);
+    const generatedSlug = addForm.slug || addForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const autoSku = addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const newProductObject: ProductItem = {
+      id: `prod-${Date.now()}`,
+      name: addForm.name,
+      category: addForm.category,
+      price: Number(addForm.price),
+      originalPrice: Number(addForm.originalPrice || addForm.price),
+      stock: Number(addForm.stock || 1),
+      metal: addForm.metal,
+      status: Number(addForm.stock) > 0 ? 'In Stock' : 'Out of Stock',
+      isFeatured: true,
+      image: addForm.primaryImage || '/images/detail-ring-hero.jpg',
+      images: allImagesList.length > 0 ? allImagesList : ['/images/detail-ring-hero.jpg'],
+      sku: autoSku,
+      description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
+      slug: generatedSlug,
+      weightGrams: Number(addForm.weightGrams || 5.0),
+      seoTitle: addForm.seoTitle || `${addForm.name} | Bhai Jeweller`,
+      seoDescription: addForm.seoDescription || `Buy ${addForm.name} online in Pakistan & UK. Handcrafted luxury jewelry.`,
+      focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [addForm.name.toLowerCase()]
+    };
+
+    // Save directly to persistent StoreContext (saves to localStorage & updates site live!)
+    addProduct(newProductObject);
+
+    setSaveSuccessMsg(true);
+    setTimeout(() => {
+      setSaveSuccessMsg(false);
+      setActiveTab('products');
+    }, 1200);
+
+    // Reset Form
+    setAddForm({
+      name: '',
+      category: 'Rings',
+      price: '',
+      originalPrice: '',
+      stock: '10',
+      metal: '18k Yellow Gold',
+      sku: '',
+      weightGrams: '6.5',
+      description: '',
+      primaryImage: '/images/detail-ring-hero.jpg',
+      additionalImages: ['/images/shop-prod-1.jpg'],
+      newImageUrlInput: '',
+      seoTitle: '',
+      seoDescription: '',
+      slug: '',
+      focusKeywordsText: '',
+    });
+  };
+
+  // Slider Banner Modal State
   const [isAddSlideOpen, setIsAddSlideOpen] = useState(false);
   const [newSlide, setNewSlide] = useState({
     title: '',
@@ -263,41 +321,6 @@ export default function AdminDashboardPage() {
   const [gold22kRate, setGold22kRate] = useState('22,450');
   const [shippingThreshold, setShippingThreshold] = useState('500');
   const [noticeBanner, setNoticeBanner] = useState('Complimentary Worldwide Insured Express Shipping on Orders Over $500');
-
-  // Product Handler
-  const handleAddProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newProduct.name || !newProduct.price) return;
-    const added = {
-      id: `prod-${Date.now()}`,
-      name: newProduct.name,
-      category: newProduct.category,
-      price: Number(newProduct.price),
-      originalPrice: Number(newProduct.originalPrice || newProduct.price),
-      stock: Number(newProduct.stock || 1),
-      metal: newProduct.metal,
-      status: Number(newProduct.stock) > 0 ? 'In Stock' : 'Out of Stock',
-      isFeatured: true,
-      image: newProduct.image,
-      sku: newProduct.sku || `BJ-PRD-${Math.floor(100 + Math.random() * 900)}`,
-    };
-    setProducts([added, ...products]);
-    setIsAddProductOpen(false);
-    setNewProduct({
-      name: '',
-      category: 'Rings',
-      price: '',
-      originalPrice: '',
-      stock: '',
-      metal: '18k Yellow Gold',
-      sku: '',
-      image: '/images/detail-ring-hero.jpg',
-    });
-  };
-
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter(p => p.id !== id));
-  };
 
   // Slider Slide Handler
   const handleAddSlide = (e: React.FormEvent) => {
@@ -353,7 +376,7 @@ export default function AdminDashboardPage() {
   // Filtered Products
   const filteredProducts = products.filter(p => {
     const matchCat = productCategory === 'All' || p.category === productCategory;
-    const matchQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchCat && matchQuery;
   });
 
@@ -367,6 +390,7 @@ export default function AdminDashboardPage() {
   const NAV_ITEMS = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', count: null },
     { id: 'products', label: 'Products Catalog', icon: '💎', count: products.length },
+    { id: 'add-product', label: '➕ Add Product Page', icon: '✨', count: null },
     { id: 'slides', label: 'Slider & Banners', icon: '🖼️', count: slides.length },
     { id: 'orders', label: 'Orders & Sales', icon: '📦', count: activeOrdersCount },
     { id: 'enquiries', label: 'Bespoke Enquiries', icon: '🎨', count: pendingEnquiriesCount },
@@ -396,7 +420,7 @@ export default function AdminDashboardPage() {
   return (
     <div
       style={{ zoom: '80%' }}
-      className={`min-h-screen ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
+      className={`h-screen max-h-screen overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
     >
       {/* MOBILE HEADER BAR */}
       <header className={`md:hidden flex items-center justify-between px-4 py-3 ${sidebarBg} border-b sticky top-0 z-40`}>
@@ -510,9 +534,9 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* DESKTOP SIDEBAR SLIDER DRAWER */}
+      {/* DESKTOP SIDEBAR SLIDER DRAWER (STATIONARY / FIXED) */}
       <aside
-        className={`hidden md:flex flex-col ${sidebarBg} border-r transition-all duration-300 relative z-30 ${
+        className={`hidden md:flex flex-col ${sidebarBg} border-r transition-all duration-300 relative z-30 h-full overflow-y-auto flex-shrink-0 sticky top-0 ${
           sidebarOpen ? 'w-64' : 'w-20'
         }`}
       >
@@ -635,14 +659,14 @@ export default function AdminDashboardPage() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT AREA */}
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      {/* MAIN CONTENT AREA (INDEPENDENT VERTICAL SCROLL) */}
+      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
         {/* TOP STATUS BAR */}
         <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b ${cardHeaderBorder} gap-4`}>
           <div>
             <span className={`text-xs uppercase tracking-widest ${accentGold} font-semibold`}>Luxury Management Suite</span>
             <h1 className={`font-serif text-2xl sm:text-3xl ${titleColor} font-semibold tracking-wide capitalize mt-0.5`}>
-              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab}
+              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? 'Add New Product (Full Page)' : activeTab}
             </h1>
           </div>
           <div className="flex items-center space-x-3">
@@ -662,12 +686,14 @@ export default function AdminDashboardPage() {
               <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
               Operational
             </span>
-            <button
-              onClick={() => setIsAddProductOpen(true)}
-              className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center space-x-1`}
-            >
-              <span>+ Add Product</span>
-            </button>
+            {activeTab !== 'add-product' && (
+              <button
+                onClick={() => setActiveTab('add-product')}
+                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center space-x-1`}
+              >
+                <span>+ Add Product Page</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -692,13 +718,13 @@ export default function AdminDashboardPage() {
               <div className={`${cardBg} p-5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Active Orders</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>{activeOrdersCount}</p>
+                    <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live Catalog Items</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>{totalProductsCount}</p>
                   </div>
-                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>📦</span>
+                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>💎</span>
                 </div>
                 <div className={`mt-4 flex items-center text-xs ${subtitleColor}`}>
-                  <span>{orders.length} total orders recorded</span>
+                  <span>Synced in real-time with Storefront</span>
                 </div>
               </div>
 
@@ -771,40 +797,35 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Slider & Quick Banner Control Panel */}
+              {/* Quick Add & Banner Panel */}
               <div className={`${cardBg} rounded-[5px] p-5 flex flex-col justify-between`}>
                 <div>
                   <div className={`flex items-center justify-between mb-3 border-b ${cardHeaderBorder} pb-3`}>
-                    <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Active Banners</h3>
-                    <span className={`text-xs ${badgeBg} px-2 py-0.5 rounded-[5px]`}>
-                      {slides.filter(s => s.status === 'Active').length} Active
-                    </span>
+                    <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Quick Inventory Action</h3>
                   </div>
                   <p className={`text-xs ${subtitleColor} mb-4`}>
-                    Manage storefront hero slider slides, subtitles, and call-to-action buttons.
+                    Create a new product with multiple images and auto-generated SEO metadata.
                   </p>
-                  <div className="space-y-3">
-                    {slides.map(slide => (
+                  <button
+                    onClick={() => setActiveTab('add-product')}
+                    className={`w-full py-3 ${primaryBtn} rounded-[5px] text-xs font-bold uppercase tracking-wider shadow-md transition-all mb-4`}
+                  >
+                    + Open Full Add Product Page
+                  </button>
+                  <div className="space-y-3 pt-2">
+                    {slides.slice(0, 2).map(slide => (
                       <div key={slide.id} className={`p-3 ${isLight ? 'bg-[#f9f6f0] border-[#e8dfd1]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
                         <div className="truncate pr-2">
                           <p className={`text-xs font-semibold ${titleColor} truncate`}>{slide.title}</p>
                           <p className={`text-[10px] ${subtitleColor} uppercase`}>{slide.status}</p>
                         </div>
-                        <button
-                          onClick={() => toggleSlideStatus(slide.id)}
-                          className={`text-[10px] px-2 py-1 rounded-[5px] font-semibold transition-colors ${
-                            slide.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
-                          }`}
-                        >
-                          {slide.status === 'Active' ? 'Hide' : 'Publish'}
-                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
                 <button
                   onClick={() => setActiveTab('slides')}
-                  className={`mt-6 w-full py-2 ${
+                  className={`mt-4 w-full py-2 ${
                     isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#e8e1d3]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
                   } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors`}
                 >
@@ -843,10 +864,10 @@ export default function AdminDashboardPage() {
                   <option value="Bracelets">Bracelets</option>
                 </select>
                 <button
-                  onClick={() => setIsAddProductOpen(true)}
+                  onClick={() => setActiveTab('add-product')}
                   className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all`}
                 >
-                  + Add Product
+                  + Add Product Page
                 </button>
               </div>
             </div>
@@ -863,6 +884,7 @@ export default function AdminDashboardPage() {
                       <th className="p-4">Metal Spec</th>
                       <th className="p-4">Price</th>
                       <th className="p-4">Stock</th>
+                      <th className="p-4">Images</th>
                       <th className="p-4">Actions</th>
                     </tr>
                   </thead>
@@ -871,7 +893,7 @@ export default function AdminDashboardPage() {
                       <tr key={p.id} className="transition-colors">
                         <td className="p-4 flex items-center space-x-3">
                           <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8dfd1] dark:bg-[#211611] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
-                            <Image src={p.image} alt={p.name} fill className="object-cover" />
+                            <Image src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'} alt={p.name} fill className="object-cover" />
                           </div>
                           <div>
                             <p className={`font-semibold ${titleColor}`}>{p.name}</p>
@@ -895,9 +917,12 @@ export default function AdminDashboardPage() {
                             {p.stock} units ({p.status})
                           </span>
                         </td>
+                        <td className="p-4 text-[#8c6b2d]">
+                          <span className="font-semibold">{p.images?.length || 1} imgs</span>
+                        </td>
                         <td className="p-4">
                           <button
-                            onClick={() => handleDeleteProduct(p.id)}
+                            onClick={() => removeStoreProduct(p.id)}
                             className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
                           >
                             Delete
@@ -909,6 +934,433 @@ export default function AdminDashboardPage() {
                 </table>
               </div>
             </div>
+          </ScrollReveal>
+        )}
+
+        {/* TAB: DEDICATED FULL-PAGE ADD PRODUCT WORKSPACE (NO POPUP MODAL!) */}
+        {activeTab === 'add-product' && (
+          <ScrollReveal direction="up" delay={100} className="space-y-6">
+            {saveSuccessMsg && (
+              <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-[5px] text-sm font-semibold flex items-center space-x-2 animate-bounce">
+                <span>✅ Product saved to real-time database! Synced live with Storefront catalog. Redirecting...</span>
+              </div>
+            )}
+
+            <form onSubmit={handleFullProductSubmit} className="space-y-8">
+              {/* Header Action Bar */}
+              <div className={`${cardBg} p-5 rounded-[5px] flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
+                <div>
+                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Full Product Creation Studio</h2>
+                  <p className={`text-xs ${subtitleColor}`}>Fill product specifications, upload multiple photos, and auto-generate SEO metadata.</p>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('products')}
+                    className={`px-4 py-2 border rounded-[5px] text-xs font-medium transition-colors ${
+                      isLight ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
+                    }`}
+                  >
+                    Cancel & Return
+                  </button>
+                  <button
+                    type="submit"
+                    className={`px-6 py-2.5 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-lg transition-all`}
+                  >
+                    🚀 Save & Publish Live to Site
+                  </button>
+                </div>
+              </div>
+
+              {/* Main Grid: Left Form Fields, Right Live Store Preview & SEO */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* LEFT COL: PRODUCT DETAILS & MULTI-IMAGE UPLOADER */}
+                <div className="lg:col-span-2 space-y-6">
+                  {/* Card 1: Core Product Specs */}
+                  <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
+                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2`}>
+                      1. Basic Product Information
+                    </h3>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                          Product Title *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Royal Aurelia Solitaire Diamond Ring"
+                          value={addForm.name}
+                          onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Category *
+                          </label>
+                          <select
+                            value={addForm.category}
+                            onChange={(e) => setAddForm({ ...addForm, category: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          >
+                            <option value="Rings">Rings</option>
+                            <option value="Necklaces">Necklaces</option>
+                            <option value="Earrings">Earrings</option>
+                            <option value="Bracelets">Bracelets</option>
+                            <option value="Pendants">Pendants</option>
+                            <option value="Bangles">Bangles</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Metal Purity & Material *
+                          </label>
+                          <select
+                            value={addForm.metal}
+                            onChange={(e) => setAddForm({ ...addForm, metal: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          >
+                            <option value="18k Yellow Gold">18k Yellow Gold</option>
+                            <option value="22k Pure Gold">22k Pure Gold</option>
+                            <option value="18k Rose Gold">18k Rose Gold</option>
+                            <option value="18k White Gold">18k White Gold</option>
+                            <option value="24k Gold Bullion">24k Gold Bullion</option>
+                            <option value="Platinum 950">Platinum 950</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Price ($ USD) *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            placeholder="1280"
+                            value={addForm.price}
+                            onChange={(e) => setAddForm({ ...addForm, price: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Original / Compare Price ($)
+                          </label>
+                          <input
+                            type="number"
+                            placeholder="1650"
+                            value={addForm.originalPrice}
+                            onChange={(e) => setAddForm({ ...addForm, originalPrice: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Stock Quantity *
+                          </label>
+                          <input
+                            type="number"
+                            required
+                            placeholder="10"
+                            value={addForm.stock}
+                            onChange={(e) => setAddForm({ ...addForm, stock: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <div className="flex justify-between items-center mb-1">
+                            <label className={`text-xs font-semibold ${subtitleColor}`}>
+                              SKU Code
+                            </label>
+                            <button
+                              type="button"
+                              onClick={generateAutoSku}
+                              className={`text-[10px] ${accentGold} hover:underline font-semibold`}
+                            >
+                              ⚡ Auto Generate
+                            </button>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="BJ-RNG-8472"
+                            value={addForm.sku}
+                            onChange={(e) => setAddForm({ ...addForm, sku: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] font-mono focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Metal Weight (Grams)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            placeholder="6.5"
+                            value={addForm.weightGrams}
+                            onChange={(e) => setAddForm({ ...addForm, weightGrams: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                          Detailed Description & Craftsmanship Details
+                        </label>
+                        <textarea
+                          rows={3}
+                          placeholder="Describe diamond cut, clarity, purity certifications, and bespoke design story..."
+                          value={addForm.description}
+                          onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Multiple Product Images Manager */}
+                  <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
+                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-20">
+                      <h3 className={`font-serif text-base font-bold ${accentGold}`}>
+                        2. Multiple Product Images Studio
+                      </h3>
+                      <span className={`text-xs ${subtitleColor}`}>
+                        Total: {1 + addForm.additionalImages.length} Images
+                      </span>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Primary Cover Image Input */}
+                      <div>
+                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                          Primary Cover Image URL *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={addForm.primaryImage}
+                          onChange={(e) => setAddForm({ ...addForm, primaryImage: e.target.value })}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+
+                      {/* Additional Image URLs List */}
+                      <div className="space-y-2">
+                        <label className={`block text-xs font-semibold ${subtitleColor}`}>
+                          Additional Angle Photos & Gallery Images
+                        </label>
+
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="text"
+                            placeholder="Paste image URL (e.g. /images/shop-prod-2.jpg)..."
+                            value={addForm.newImageUrlInput}
+                            onChange={(e) => setAddForm({ ...addForm, newImageUrlInput: e.target.value })}
+                            className={`flex-1 text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleAddImageUrl}
+                            className={`px-4 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px]`}
+                          >
+                            + Add Image
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Interactive Image Gallery Thumbnails Grid */}
+                      <div className="pt-2">
+                        <p className={`text-xs font-semibold ${subtitleColor} mb-2`}>Gallery Thumbnails Preview:</p>
+                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                          {/* Primary */}
+                          <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#b38b40] group bg-[#f4efe6]">
+                            <Image src={addForm.primaryImage || '/images/detail-ring-hero.jpg'} alt="Primary Cover" fill className="object-cover" />
+                            <span className="absolute bottom-0 left-0 right-0 bg-[#b38b40] text-white text-[9px] text-center font-bold uppercase py-0.5">
+                              Cover Photo
+                            </span>
+                          </div>
+
+                          {/* Additional Images */}
+                          {addForm.additionalImages.map((imgUrl, idx) => (
+                            <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#dcd3c5] dark:border-[#3a2c23] group bg-[#f4efe6]">
+                              <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(idx)}
+                                className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
+                                title="Remove photo"
+                              >
+                                ✕
+                              </button>
+                              <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5">
+                                Angle #{idx + 2}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 3: Automated SEO Engine */}
+                  <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
+                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-20">
+                      <div>
+                        <h3 className={`font-serif text-base font-bold ${accentGold}`}>
+                          3. Automated SEO Metadata & Search Keywords
+                        </h3>
+                        <p className={`text-xs ${subtitleColor}`}>Google SEO tags and search keywords automatically generated.</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={generateAutoSeo}
+                        className={`px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-[5px] shadow transition-all`}
+                      >
+                        ⚡ Auto-Generate SEO Keywords
+                      </button>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                          SEO Page Title
+                        </label>
+                        <input
+                          type="text"
+                          value={addForm.seoTitle}
+                          onChange={(e) => setAddForm({ ...addForm, seoTitle: e.target.value })}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                          Meta Description
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={addForm.seoDescription}
+                          onChange={(e) => setAddForm({ ...addForm, seoDescription: e.target.value })}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            URL Permaslug
+                          </label>
+                          <input
+                            type="text"
+                            value={addForm.slug}
+                            onChange={(e) => setAddForm({ ...addForm, slug: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] font-mono focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Focus Keywords (Comma Separated)
+                          </label>
+                          <input
+                            type="text"
+                            value={addForm.focusKeywordsText}
+                            onChange={(e) => setAddForm({ ...addForm, focusKeywordsText: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* RIGHT COL: REAL-TIME STOREFRONT CARD PREVIEW */}
+                <div className="space-y-6">
+                  <div className={`${cardBg} p-6 rounded-[5px] space-y-4 sticky top-6`}>
+                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2`}>
+                      👁️ Real-Time Storefront Preview
+                    </h3>
+
+                    {/* Store Card Preview */}
+                    <div className="bg-[#FAF7F2] border border-[#E5DCD3] rounded-[5px] overflow-hidden shadow-md text-[#1c1510] max-w-sm mx-auto">
+                      <div className="relative w-full h-56 bg-[#f4efe6]">
+                        <Image
+                          src={addForm.primaryImage || '/images/detail-ring-hero.jpg'}
+                          alt={addForm.name || 'Product Preview'}
+                          fill
+                          className="object-cover"
+                        />
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#140e0b] text-[#dec29b] text-[9px] font-semibold uppercase rounded-[5px]">
+                          {addForm.category}
+                        </span>
+                        {addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price) && (
+                          <span className="absolute top-2 right-2 px-2 py-0.5 bg-red-700 text-white text-[9px] font-bold uppercase rounded-[5px]">
+                            SALE
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-4 space-y-2">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <p className="text-[10px] text-[#8c7d6c] uppercase tracking-wider">{addForm.metal}</p>
+                            <h4 className="font-serif font-bold text-sm text-[#1c1510] line-clamp-1">
+                              {addForm.name || 'Royal Jewelry Piece Title'}
+                            </h4>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                          <span className="text-base font-serif font-bold text-[#b38b40]">
+                            ${addForm.price ? Number(addForm.price).toLocaleString() : '1,280'}
+                          </span>
+                          {addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price) && (
+                            <span className="text-xs text-[#8c7d6c] line-through">
+                              ${Number(addForm.originalPrice).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="pt-2 flex items-center justify-between text-[10px] text-[#8c7d6c] border-t border-[#e8dfd1]">
+                          <span>SKU: {addForm.sku || 'BJ-AUTO'}</span>
+                          <span>Images: {1 + addForm.additionalImages.length}</span>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mt-2 w-full py-2 bg-[#1c1510] text-[#faf7f2] text-xs font-semibold rounded-[5px] uppercase tracking-wider"
+                        >
+                          Add To Bag
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Submit Action */}
+                    <div className="pt-4 border-t border-current border-opacity-20">
+                      <button
+                        type="submit"
+                        className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-lg transition-all`}
+                      >
+                        Publish to Storefront Catalog
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
           </ScrollReveal>
         )}
 
@@ -1298,93 +1750,6 @@ export default function AdminDashboardPage() {
           </ScrollReveal>
         )}
       </main>
-
-      {/* MODAL: ADD PRODUCT */}
-      {isAddProductOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className={`${cardBg} rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4`}>
-            <div className={`flex justify-between items-center border-b ${cardHeaderBorder} pb-3`}>
-              <h3 className={`font-serif text-lg ${accentGold} font-bold`}>Add New Luxury Item</h3>
-              <button onClick={() => setIsAddProductOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>✕</button>
-            </div>
-            <form onSubmit={handleAddProduct} className="space-y-3 text-xs">
-              <div>
-                <label className={`block ${subtitleColor} mb-1`}>Product Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Royal Ruby Ring"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className={`block ${subtitleColor} mb-1`}>Category</label>
-                  <select
-                    value={newProduct.category}
-                    onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
-                  >
-                    <option value="Rings">Rings</option>
-                    <option value="Necklaces">Necklaces</option>
-                    <option value="Earrings">Earrings</option>
-                    <option value="Bracelets">Bracelets</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={`block ${subtitleColor} mb-1`}>Metal Purity</label>
-                  <input
-                    type="text"
-                    value={newProduct.metal}
-                    onChange={(e) => setNewProduct({ ...newProduct, metal: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className={`block ${subtitleColor} mb-1`}>Price ($)</label>
-                  <input
-                    type="number"
-                    required
-                    placeholder="1200"
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
-                  />
-                </div>
-                <div>
-                  <label className={`block ${subtitleColor} mb-1`}>Stock Qty</label>
-                  <input
-                    type="number"
-                    placeholder="10"
-                    value={newProduct.stock}
-                    onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
-                  />
-                </div>
-              </div>
-              <div className="pt-2 flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setIsAddProductOpen(false)}
-                  className={`px-4 py-2 ${isLight ? 'bg-[#f4efe6] text-[#5c4d40]' : 'bg-[#1f1612] text-[#c2b4a3]'} border border-opacity-50 rounded-[5px]`}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={`px-4 py-2 ${primaryBtn} font-bold rounded-[5px]`}
-                >
-                  Save Product
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* MODAL: ADD HERO SLIDE */}
       {isAddSlideOpen && (
