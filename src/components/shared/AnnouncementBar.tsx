@@ -65,7 +65,7 @@ export function AnnouncementBar() {
     <div
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
-      className="relative z-50 w-full overflow-hidden bg-gradient-to-r from-[#140e0b] via-[#1c140f] to-[#140e0b] border-b border-[#2e231b] text-[#d6c7ba] text-[11px] sm:text-xs tracking-wider transition-colors duration-300 select-none shadow-xs"
+      className="hidden md:block relative z-50 w-full overflow-hidden bg-gradient-to-r from-[#140e0b] via-[#1c140f] to-[#140e0b] border-b border-[#2e231b] text-[#d6c7ba] text-[11px] sm:text-xs tracking-wider transition-colors duration-300 select-none shadow-xs"
     >
       <div className="max-w-7xl mx-auto px-3 sm:px-8 py-2 flex items-center justify-between gap-3">
 
