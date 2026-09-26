@@ -349,7 +349,7 @@ export default function ProductDetailPage() {
                   {openAccordion === 'shipping' && (
                     <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
                       <p>• Complimentary Insured Delivery across UK & Worldwide</p>
-                      <p>• 30-day hassle-free return and exchange policy</p>
+                      <p>• 7-day hassle-free return and exchange policy</p>
                     </div>
                   )}
                 </div>

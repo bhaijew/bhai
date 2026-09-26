@@ -3,63 +3,95 @@ import type { Metadata } from 'next';
 import PolicyLayout, { PolicySection } from '@/components/shared/PolicyLayout';
 
 export const metadata: Metadata = {
-  title: 'Return Policy | Bhai Jeweller',
-  description: 'Learn how to start a return or exchange with Bhai Jeweller.',
+  title: 'Returns & Refunds Policy | Bhai Jeweller',
+  description: 'Read the official Returns & Refunds Policy for Bhai Jeweller. Returns eligible within 7 days.',
 };
 
 const returnSections: PolicySection[] = [
   {
     number: '1',
-    title: 'Return Window',
+    title: 'Online Orders Only',
     content:
-      'You can return most items within 7 days of receiving your order, provided they are in their original condition and packaging.',
+      'This policy applies to purchases made through our website only. Items purchased in-store must be returned directly to our Bradford store and are handled under our in-store policy.',
   },
   {
     number: '2',
-    title: 'How to Return',
+    title: 'Return Eligibility',
     content:
-      'To start a return, please contact our support team at support@bhaijeweller.com with your order number and reason for return. We will provide you with return instructions and the delivery address.',
+      'You may request a return within 7 days of receiving your order. To be eligible, your item must:',
+    bullets: [
+      'Be unused and unworn',
+      'Be in its original condition',
+      'Include all original packaging, tags, certificates, and accessories',
+      'Be free from scratches, marks, alterations, or damage',
+      'Be accompanied by a completed returns form',
+      'Include proof of purchase',
+    ],
   },
   {
     number: '3',
-    title: 'Condition of Items',
+    title: 'Non-Returnable Items',
     content:
-      'Items must be unworn, undamaged, and in their original packaging with all tags and certificates (if applicable).',
+      'For hygiene, customisation, and product-specific reasons, we cannot accept returns or refunds on:',
+    bullets: [
+      'Earrings',
+      'Custom-made jewellery',
+      'Bespoke orders',
+      'Engraved or personalised items',
+      'Resized items',
+      'Clearance or sale items',
+    ],
   },
   {
     number: '4',
-    title: 'Refunds & Exchanges',
+    title: 'How to Start a Return',
     content:
-      'Once we receive your returned item, we will inspect it and process your refund or exchange within 7-14 business days. If you requested an exchange, we will ship the new item after the return is approved.',
+      'To initiate a return, contact our support team at support@bhaijeweller.com or complete our online returns request. Customers are responsible for all return shipping costs. We recommend using a tracked and insured delivery service, as we cannot be responsible for items lost or damaged during return transit.',
   },
   {
     number: '5',
-    title: 'Non-Returnable Items',
+    title: 'Refund Timeline',
     content:
-      'Custom-made or personalized jewellery, earrings (for hygiene reasons), and sale items cannot be returned.',
+      'Once your returned item has been received and inspected, we will notify you of the outcome. If approved, your refund will be processed to the original payment method used for the purchase. Please allow up to 10 business days after approval, depending on your payment provider.',
+    bullets: [
+      'Original shipping charges are non-refundable',
+      'Express or upgraded shipping charges are non-refundable',
+      'Return shipping costs are the customer’s responsibility and are non-refundable',
+    ],
   },
   {
     number: '6',
-    title: 'Damaged or Incorrect Items',
+    title: 'Exchanges',
     content:
-      'If you receive a damaged or incorrect item, please contact us within 48 hours of delivery. We will arrange a replacement or full refund at no extra cost.',
+      'We offer exchanges in-store only. If you would like to exchange an item, visit our Bradford store with your item and proof of purchase. Online exchanges cannot be processed by post.',
   },
   {
     number: '7',
+    title: 'Faulty or Damaged Items',
+    content:
+      'Contact our support team within 7 days of receiving your order. Please provide:',
+    bullets: [
+      'Your order number',
+      'A clear description of the issue',
+      'Clear photographs showing the fault or damage',
+    ],
+  },
+  {
+    number: '8',
     title: 'Contact Us',
     content:
-      'For any return-related questions, please reach out to us at support@bhaijeweller.com.',
+      'If you have any questions regarding returns, refunds, or damaged items, please contact us via our Contact Us support page or email support@bhaijeweller.com. We are committed to providing a professional, reliable, and customer-focused service.',
   },
 ];
 
 export default function ReturnPolicyPage() {
   return (
     <PolicyLayout
-      title="Return Policy"
-      subtitle="We're here to make your experience smooth and stress-free. Learn how to return your item."
+      title="Returns & Refunds Policy"
+      subtitle="We want you to love every purchase. If something isn't right, we make it straightforward to return or exchange your item within 7 days."
       heroImage="/images/about-banner.jpg"
-      breadcrumbLabel="Return Policy"
-      lastUpdated="September 25, 2026"
+      breadcrumbLabel="Returns & Refunds Policy"
+      lastUpdated="September 26, 2026"
       sections={returnSections}
       activeSlug="return-policy"
     />
