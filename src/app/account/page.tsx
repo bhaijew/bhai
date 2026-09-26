@@ -38,34 +38,11 @@ export default function AccountPage() {
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderFilter, setOrderFilter] = useState<'all' | 'processing' | 'delivered'>('all');
 
-  // Address State Management
-  const [addresses, setAddresses] = useState<any[]>([
-    {
-      id: 'addr-1',
-      title: 'Primary Residence',
-      name: 'Syed Zeeshan Haider',
-      street: '124 Manor Row, Bradford City Centre',
-      city: 'Bradford',
-      postcode: 'BD1 4NT',
-      country: 'United Kingdom',
-      phone: '+44 (0) 1274 722 888',
-      isDefault: true,
-    },
-    {
-      id: 'addr-2',
-      title: 'Office / Business',
-      name: 'Syed Zeeshan Haider',
-      street: 'Suite 402, St. George Hall House',
-      city: 'Leeds',
-      postcode: 'LS1 2AL',
-      country: 'United Kingdom',
-      phone: '+44 (0) 1274 722 888',
-      isDefault: false,
-    },
-  ]);
+  // Real Address State Management (Starts strictly empty: 0 hardcoded fake addresses)
+  const [addresses, setAddresses] = useState<any[]>([]);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    title: 'Secondary Residence',
+    title: 'Primary Residence',
     name: '',
     street: '',
     city: 'Bradford',
@@ -74,27 +51,8 @@ export default function AccountPage() {
     phone: '',
   });
 
-  // Payment Methods State Management
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([
-    {
-      id: 'pm-1',
-      type: 'Mastercard Black',
-      last4: '8842',
-      expiry: '12/28',
-      holder: 'S Z HAIDER',
-      isDefault: true,
-      cardColor: 'from-[#1f1914] via-[#2c221a] to-[#120e0b]',
-    },
-    {
-      id: 'pm-2',
-      type: 'Visa Infinite',
-      last4: '4190',
-      expiry: '08/27',
-      holder: 'S Z HAIDER',
-      isDefault: false,
-      cardColor: 'from-[#141b24] via-[#1f2a38] to-[#0f141a]',
-    },
-  ]);
+  // Real Payment Methods State Management (Starts strictly empty: 0 hardcoded fake cards)
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [newCard, setNewCard] = useState({
     holder: '',
@@ -159,6 +117,29 @@ export default function AccountPage() {
             role: data.user.role || 'client',
           });
 
+          // Set default form field names to match user
+          setNewAddress((prev) => ({
+            ...prev,
+            name: userName,
+            phone: userPhone,
+          }));
+          setNewCard((prev) => ({
+            ...prev,
+            holder: userName.toUpperCase(),
+          }));
+
+          // Load user's real saved addresses from account storage
+          if (typeof window !== 'undefined' && userEmail) {
+            try {
+              const rawAddr = localStorage.getItem(`bhai_addresses_${userEmail}`);
+              if (rawAddr) setAddresses(JSON.parse(rawAddr));
+              const rawCards = localStorage.getItem(`bhai_cards_${userEmail}`);
+              if (rawCards) setPaymentMethods(JSON.parse(rawCards));
+            } catch (err) {
+              console.error('Storage parse error:', err);
+            }
+          }
+
           // Fetch orders for this authenticated user
           fetch('/api/orders')
             .then((res) => res.json())
@@ -219,17 +200,40 @@ export default function AccountPage() {
       phone: newAddress.phone || user.phone,
       isDefault: addresses.length === 0,
     };
-    setAddresses((prev) => [...prev, item]);
+    const updated = [...addresses, item];
+    setAddresses(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_addresses_${user.email}`, JSON.stringify(updated));
+    }
     setShowAddAddressModal(false);
     setNewAddress({
       title: 'Secondary Residence',
-      name: '',
+      name: user.name,
       street: '',
       city: 'Bradford',
       postcode: '',
       country: 'United Kingdom',
-      phone: '',
+      phone: user.phone,
     });
+  };
+
+  const handleDeleteAddress = (id: string) => {
+    const updated = addresses.filter((a) => a.id !== id);
+    setAddresses(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_addresses_${user.email}`, JSON.stringify(updated));
+    }
+  };
+
+  const handleSetDefaultAddress = (id: string) => {
+    const updated = addresses.map((a) => ({
+      ...a,
+      isDefault: a.id === id,
+    }));
+    setAddresses(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_addresses_${user.email}`, JSON.stringify(updated));
+    }
   };
 
   const handleAddPayment = (e: React.FormEvent) => {
@@ -238,20 +242,46 @@ export default function AccountPage() {
     const cleanNum = newCard.cardNumber.replace(/\s+/g, '');
     const last4 = cleanNum.slice(-4) || '1234';
     const isVisa = cleanNum.startsWith('4');
+    const isAmex = cleanNum.startsWith('3');
     const item = {
       id: `pm-${Date.now()}`,
-      type: isVisa ? 'Visa Infinite' : 'Mastercard World Elite',
+      type: isVisa ? 'Visa Infinite' : isAmex ? 'American Express Gold' : 'Mastercard World Elite',
       last4: last4,
       expiry: newCard.expiry,
       holder: newCard.holder.toUpperCase() || user.name.toUpperCase(),
       isDefault: paymentMethods.length === 0,
       cardColor: isVisa
         ? 'from-[#141b24] via-[#1f2a38] to-[#0f141a]'
+        : isAmex
+        ? 'from-[#2b2214] via-[#3d301b] to-[#1c150b]'
         : 'from-[#1f1914] via-[#2c221a] to-[#120e0b]',
     };
-    setPaymentMethods((prev) => [...prev, item]);
+    const updated = [...paymentMethods, item];
+    setPaymentMethods(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_cards_${user.email}`, JSON.stringify(updated));
+    }
     setShowAddPaymentModal(false);
-    setNewCard({ holder: '', cardNumber: '', expiry: '', cvv: '' });
+    setNewCard({ holder: user.name.toUpperCase(), cardNumber: '', expiry: '', cvv: '' });
+  };
+
+  const handleDeletePayment = (id: string) => {
+    const updated = paymentMethods.filter((p) => p.id !== id);
+    setPaymentMethods(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_cards_${user.email}`, JSON.stringify(updated));
+    }
+  };
+
+  const handleSetDefaultPayment = (id: string) => {
+    const updated = paymentMethods.map((p) => ({
+      ...p,
+      isDefault: p.id === id,
+    }));
+    setPaymentMethods(updated);
+    if (typeof window !== 'undefined' && user.email) {
+      localStorage.setItem(`bhai_cards_${user.email}`, JSON.stringify(updated));
+    }
   };
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
@@ -317,6 +347,7 @@ export default function AccountPage() {
     {
       id: 'addresses',
       label: 'Addresses',
+      badge: addresses.length > 0 ? addresses.length : undefined,
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -327,6 +358,7 @@ export default function AccountPage() {
     {
       id: 'payments',
       label: 'Payment Methods',
+      badge: paymentMethods.length > 0 ? paymentMethods.length : undefined,
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
@@ -986,15 +1018,15 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 4: ADDRESS BOOK & SHOWROOM PICKUP
+                PAGE 4: REAL ADDRESS BOOK & SHOWROOM PICKUP
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'addresses' && (
               <ScrollReveal direction="up">
                 <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Address Book</h2>
-                      <p className="text-xs text-[#8a796c] mt-0.5">Manage insured delivery addresses and showroom pickup preferences</p>
+                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">My Delivery Addresses ({addresses.length})</h2>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Manage your real shipping and billing addresses for fast insured checkout</p>
                     </div>
                     <button
                       type="button"
@@ -1005,43 +1037,71 @@ export default function AccountPage() {
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {addresses.map((addr) => (
-                      <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs">
-                        <div className="flex items-center justify-between">
-                          <span className="font-serif text-base font-semibold text-[#1c1510]">{addr.title}</span>
-                          {addr.isDefault && (
-                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-300">
-                              Default
-                            </span>
-                          )}
-                        </div>
-                        <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
-                          <p className="font-semibold text-[#1c1510]">{addr.name}</p>
-                          <p>{addr.street}</p>
-                          <p>{addr.city}, {addr.postcode}</p>
-                          <p>{addr.country}</p>
-                          <p className="text-[11px] text-[#8a796c] pt-1">Tel: {addr.phone}</p>
-                        </div>
+                  {addresses.length === 0 ? (
+                    <div className="py-16 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
+                        <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+                        </svg>
                       </div>
-                    ))}
-
-                    {/* Showroom Pickup Permanent Card */}
-                    <div className="border border-[#dec29b] rounded-2xl p-5 bg-[#faf6ee] space-y-3 relative shadow-2xs">
-                      <div className="flex items-center justify-between">
-                        <span className="font-serif text-base font-semibold text-[#1c1510]">Bradford Showroom (VIP Pickup)</span>
-                        <span className="px-2.5 py-0.5 rounded-full bg-[#dec29b]/30 text-[#6d5028] text-[10px] font-semibold border border-[#dec29b]">
-                          Complimentary
-                        </span>
-                      </div>
-                      <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
-                        <p className="font-semibold text-[#1c1510]">Bhai Jeweller Showroom</p>
-                        <p>124 Manor Row, Bradford City Centre</p>
-                        <p>Bradford, BD1 4NT, United Kingdom</p>
-                        <p className="text-[11px] text-[#8a796c] pt-1">Mon–Sat 10:00 AM – 6:00 PM</p>
-                      </div>
+                      <h3 className="font-serif text-xl font-medium text-[#1c1510]">No Saved Addresses</h3>
+                      <p className="text-xs text-[#8a796c] max-w-sm mx-auto">
+                        You have not added any delivery address yet. Add your residence or business address for fast checkout.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddAddressModal(true)}
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                      >
+                        + Add Your First Address
+                      </button>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {addresses.map((addr) => (
+                        <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-serif text-base font-semibold text-[#1c1510]">{addr.title}</span>
+                              {addr.isDefault && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-300">
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
+                              <p className="font-semibold text-[#1c1510]">{addr.name}</p>
+                              <p>{addr.street}</p>
+                              <p>{addr.city}, {addr.postcode}</p>
+                              <p>{addr.country}</p>
+                              <p className="text-[11px] text-[#8a796c] pt-1">Tel: {addr.phone}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between pt-3 border-t border-[#ede4d8] text-xs">
+                            {!addr.isDefault ? (
+                              <button
+                                type="button"
+                                onClick={() => handleSetDefaultAddress(addr.id)}
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
+                              >
+                                Set as Default
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-emerald-700 font-medium">✓ Primary Address</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAddress(addr.id)}
+                              className="text-[11px] text-red-600 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   {showAddAddressModal && (
                     <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
@@ -1049,7 +1109,7 @@ export default function AccountPage() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <input
                           type="text"
-                          placeholder="Label (e.g. London Home, Studio)"
+                          placeholder="Label (e.g. Home, Office)"
                           value={newAddress.title}
                           onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
                           className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
@@ -1110,15 +1170,15 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 5: PAYMENT METHODS & CARDS
+                PAGE 5: REAL PAYMENT METHODS & CARDS
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'payments' && (
               <ScrollReveal direction="up">
                 <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Payment Methods</h2>
-                      <p className="text-xs text-[#8a796c] mt-0.5">Encrypted payment cards and checkout options</p>
+                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Payment Methods ({paymentMethods.length})</h2>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Encrypted payment cards saved securely for 1-click checkout</p>
                     </div>
                     <button
                       type="button"
@@ -1129,29 +1189,70 @@ export default function AccountPage() {
                     </button>
                   </div>
 
-                  {/* Luxury Digital Cards Display */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {paymentMethods.map((pm) => (
-                      <div
-                        key={pm.id}
-                        className={`relative bg-gradient-to-br ${pm.cardColor} text-[#f5efe8] rounded-2xl p-6 shadow-xl border border-[#dec29b]/40 flex flex-col justify-between min-h-[170px] overflow-hidden`}
+                  {paymentMethods.length === 0 ? (
+                    <div className="py-16 text-center space-y-4">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
+                        <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+                        </svg>
+                      </div>
+                      <h3 className="font-serif text-xl font-medium text-[#1c1510]">No Saved Payment Cards</h3>
+                      <p className="text-xs text-[#8a796c] max-w-sm mx-auto">
+                        Add a credit or debit card for fast, encrypted checkout on your fine jewellery orders.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddPaymentModal(true)}
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
-                        <div className="flex items-center justify-between relative z-10">
-                          <span className="font-serif text-sm tracking-wider text-[#dec29b] font-semibold">{pm.type}</span>
-                          <div className="w-8 h-6 bg-[#dec29b]/20 border border-[#dec29b]/50 rounded flex items-center justify-center text-[9px] text-[#dec29b]">
-                            CHIP
+                        + Add Your First Card
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      {paymentMethods.map((pm) => (
+                        <div key={pm.id} className="space-y-2">
+                          <div
+                            className={`relative bg-gradient-to-br ${pm.cardColor} text-[#f5efe8] rounded-2xl p-6 shadow-xl border border-[#dec29b]/40 flex flex-col justify-between min-h-[170px] overflow-hidden`}
+                          >
+                            <div className="flex items-center justify-between relative z-10">
+                              <span className="font-serif text-sm tracking-wider text-[#dec29b] font-semibold">{pm.type}</span>
+                              <div className="w-8 h-6 bg-[#dec29b]/20 border border-[#dec29b]/50 rounded flex items-center justify-center text-[9px] text-[#dec29b]">
+                                CHIP
+                              </div>
+                            </div>
+                            <p className="font-mono text-lg tracking-[0.28em] text-white my-3 relative z-10">
+                              •••• •••• •••• {pm.last4}
+                            </p>
+                            <div className="flex items-center justify-between text-[11px] text-[#d6c9be] relative z-10">
+                              <span className="tracking-wider uppercase">{pm.holder}</span>
+                              <span>EXP {pm.expiry}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between px-2 text-xs">
+                            {!pm.isDefault ? (
+                              <button
+                                type="button"
+                                onClick={() => handleSetDefaultPayment(pm.id)}
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
+                              >
+                                Set as Default Card
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-emerald-700 font-medium">✓ Default Card</span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePayment(pm.id)}
+                              className="text-[11px] text-red-600 hover:underline"
+                            >
+                              Remove Card
+                            </button>
                           </div>
                         </div>
-                        <p className="font-mono text-lg tracking-[0.28em] text-white my-3 relative z-10">
-                          •••• •••• •••• {pm.last4}
-                        </p>
-                        <div className="flex items-center justify-between text-[11px] text-[#d6c9be] relative z-10">
-                          <span className="tracking-wider uppercase">{pm.holder}</span>
-                          <span>EXP {pm.expiry}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Security Assurance */}
                   <div className="p-4 bg-[#faf6ee] border border-[#ded3c5] rounded-xl flex items-center gap-3 text-xs text-[#6b5c50]">
