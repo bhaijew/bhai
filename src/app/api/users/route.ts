@@ -50,42 +50,6 @@ export async function GET() {
       }
     }
 
-    // Fallback data if DB is not populated yet
-    if (usersList.length === 0) {
-      usersList = [
-        {
-          id: 'USR-1001',
-          name: 'Master Admin',
-          email: 'admin@bhaijeweller.com',
-          phone: '+44 7911 123456',
-          role: 'admin',
-          failedAttempts: 0,
-          isLocked: false,
-          registeredDate: '26/09/2026',
-        },
-        {
-          id: 'USR-1002',
-          name: 'Lady Aurelia Spencer',
-          email: 'aurelia@luxurygroup.co.uk',
-          phone: '+44 7700 900123',
-          role: 'client',
-          failedAttempts: 0,
-          isLocked: false,
-          registeredDate: '25/09/2026',
-        },
-        {
-          id: 'USR-1003',
-          name: 'Zainab Bibi',
-          email: 'zainab.b@gmail.com',
-          phone: '+92 300 5551234',
-          role: 'client',
-          failedAttempts: 2,
-          isLocked: false,
-          registeredDate: '24/09/2026',
-        },
-      ];
-    }
-
     return NextResponse.json({
       success: true,
       users: usersList,
