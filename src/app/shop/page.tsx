@@ -1,33 +1,36 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useShop, WishlistItem } from '@/context/ShopContext';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
 
-interface Product {
-  id: string;
-  name: string;
-  category: 'Rings' | 'Necklaces' | 'Earrings' | 'Bracelets';
-  price: number;
-  originalPrice: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  slug: string;
-}
-
-const allProducts: Product[] = [];
-
 const categories = ['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets'] as const;
 
-export default function ShopPage() {
+function ShopContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const initialSearch = searchParams.get('search') || searchParams.get('q') || '';
+  const initialCategory = searchParams.get('category') || 'All';
+
   const { addToCart, toggleWishlist, isInWishlist, products } = useShop();
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
+  const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [addedCartMap, setAddedCartMap] = useState<Record<string, boolean>>({});
+
+  // Sync state if URL query param changes
+  useEffect(() => {
+    const q = searchParams.get('search') || searchParams.get('q') || '';
+    setSearchQuery(q);
+    const cat = searchParams.get('category');
+    if (cat && categories.includes(cat as any)) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
 
   const handleWishlistClick = (p: any, e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +42,7 @@ export default function ShopPage() {
       price: p.price,
       rating: p.rating || 5,
       reviewCount: p.reviewCount || 1,
-      image: p.image,
+      image: p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg',
       slug: p.slug || p.id,
     });
   };
@@ -50,9 +53,9 @@ export default function ShopPage() {
     addToCart({
       id: p.id,
       name: p.name,
-      variant: p.category,
+      variant: p.metal || p.category,
       price: p.price,
-      image: p.image,
+      image: p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg',
       slug: p.slug || p.id,
     });
     setAddedCartMap((prev) => ({ ...prev, [p.id]: true }));
@@ -61,10 +64,29 @@ export default function ShopPage() {
     }, 2000);
   };
 
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    router.replace('/shop');
+  };
+
   const filteredProducts = useMemo(() => {
     let list = selectedCategory === 'All'
       ? products
-      : products.filter((p) => p.category === selectedCategory);
+      : products.filter((p) => p.category?.toLowerCase() === selectedCategory.toLowerCase());
+
+    // Search query filtering
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter((p) => {
+        const nameMatch = p.name?.toLowerCase().includes(q);
+        const catMatch = p.category?.toLowerCase().includes(q);
+        const metalMatch = p.metal?.toLowerCase().includes(q);
+        const descMatch = p.description?.toLowerCase().includes(q);
+        const skuMatch = p.sku?.toLowerCase().includes(q);
+        const kwMatch = Array.isArray(p.focusKeywords) && p.focusKeywords.some((k) => k.toLowerCase().includes(q));
+        return nameMatch || catMatch || metalMatch || descMatch || skuMatch || kwMatch;
+      });
+    }
 
     if (sortBy === 'low') {
       list = [...list].sort((a, b) => a.price - b.price);
@@ -72,12 +94,12 @@ export default function ShopPage() {
       list = [...list].sort((a, b) => b.price - a.price);
     }
     return list;
-  }, [selectedCategory, sortBy, products]);
+  }, [selectedCategory, searchQuery, sortBy, products]);
 
   return (
     <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pb-0">
 
-      {/* ── Top Hero Banner (matches screen 2 mockup) ── */}
+      {/* ── Top Hero Banner ── */}
       <section className="relative w-full h-[180px] sm:h-[220px] md:h-[260px] bg-[#120e0b] overflow-hidden flex items-center justify-center text-center">
         <Image
           src="/images/shop-banner.jpg"
@@ -91,10 +113,12 @@ export default function ShopPage() {
 
         <div className="relative z-10 px-4 max-w-xl">
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl text-[#f5efe8] font-normal leading-tight">
-            Shop Our Collection
+            {searchQuery ? `Search Results` : `Shop Our Collection`}
           </h1>
           <p className="text-xs sm:text-sm text-[#c8bdb5] font-light mt-2">
-            Timeless designs for every moment. Handcrafted in 21ct & 18k gold.
+            {searchQuery
+              ? `Showing results matching "${searchQuery}"`
+              : `Timeless designs for every moment. Handcrafted in 21ct & 18k gold.`}
           </p>
         </div>
       </section>
@@ -102,75 +126,141 @@ export default function ShopPage() {
       {/* ── Container ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-6">
 
-        {/* Breadcrumb */}
-        <nav className="text-xs text-[#8c7e73] font-light mb-6 flex items-center gap-1.5">
-          <Link href="/" className="hover:text-[#1c1510] transition-colors">Home</Link>
-          <span>/</span>
-          <span className="text-[#1c1510] font-normal">Shop</span>
-        </nav>
+        {/* Breadcrumb & Search Query Status Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <nav className="text-xs text-[#8c7e73] font-light flex items-center gap-1.5">
+            <Link href="/" className="hover:text-[#1c1510] transition-colors">Home</Link>
+            <span>/</span>
+            <Link href="/shop" onClick={handleClearSearch} className="hover:text-[#1c1510] transition-colors">Shop</Link>
+            {searchQuery && (
+              <>
+                <span>/</span>
+                <span className="text-[#1c1510] font-normal truncate">Search: &ldquo;{searchQuery}&rdquo;</span>
+              </>
+            )}
+          </nav>
 
-        {/* Category Pills & Sort Bar (matches screen 2) */}
-        <ScrollReveal direction="up" duration={600}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#e8dfd5]">
-            {/* Category Filter Chips */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => {
-                    setSelectedCategory(cat);
-                    setCurrentPage(1);
-                  }}
-                  className={`px-4 py-1.5 rounded-full text-xs font-light transition-all whitespace-nowrap ${
-                    selectedCategory === cat
-                      ? 'bg-[#1c1510] text-[#f5efe8] shadow-xs'
-                      : 'bg-[#f0e8dc] text-[#6b5c50] hover:bg-[#e4dacf]'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2 text-xs text-[#6b5c50] self-end sm:self-auto">
-              <label htmlFor="sortSelect" className="font-light">Sort by:</label>
-              <select
-                id="sortSelect"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="bg-[#f0e8dc] border border-[#dfd4c5] rounded-lg px-2.5 py-1 text-xs text-[#1c1510] outline-none cursor-pointer"
+          {/* Active Search Badge */}
+          {searchQuery && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#6e5d4f] font-light">
+                Found <strong>{filteredProducts.length}</strong> {filteredProducts.length === 1 ? 'item' : 'items'}
+              </span>
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#ebd7be]/50 hover:bg-[#ebd7be] text-[#5a4329] text-xs font-medium border border-[#dec29b] transition-all shadow-2xs"
               >
-                <option value="featured">Featured</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-              </select>
+                <span>Clear &ldquo;{searchQuery}&rdquo;</span>
+                <span className="text-sm leading-none">✕</span>
+              </button>
             </div>
+          )}
+        </div>
+
+        {/* Search Input Bar + Category Pills + Sort Bar */}
+        <ScrollReveal direction="up" duration={600}>
+          <div className="flex flex-col gap-4 pb-6 border-b border-[#e8dfd5]">
+
+            {/* In-Page Real Search Input */}
+            <div className="relative w-full max-w-xl mx-auto">
+              <svg className="w-4 h-4 text-[#9e7d56] absolute left-3.5 top-1/2 -translate-y-1/2 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by jewellery name, 21ct gold, metal, ring size, SKU..."
+                className="w-full bg-white text-[#1c1510] text-xs sm:text-sm placeholder-[#9a897b] border border-[#ded3c5] focus:border-[#9e7d56] rounded-full pl-10 pr-10 py-2.5 outline-none transition-all shadow-2xs"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8c7e73] hover:text-[#1c1510] text-xs font-semibold p-1"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Category Filter Chips & Sort Dropdown */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+              {/* Category Filter Chips */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setCurrentPage(1);
+                    }}
+                    className={`px-4 py-1.5 rounded-full text-xs font-light transition-all whitespace-nowrap ${
+                      selectedCategory === cat
+                        ? 'bg-[#1c1510] text-[#f5efe8] shadow-xs'
+                        : 'bg-[#f0e8dc] text-[#6b5c50] hover:bg-[#e4dacf]'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sort Dropdown */}
+              <div className="flex items-center gap-2 text-xs text-[#6b5c50] self-end sm:self-auto">
+                <label htmlFor="sortSelect" className="font-light">Sort by:</label>
+                <select
+                  id="sortSelect"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="bg-[#f0e8dc] border border-[#dfd4c5] rounded-lg px-2.5 py-1 text-xs text-[#1c1510] outline-none cursor-pointer"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="low">Price: Low to High</option>
+                  <option value="high">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+
           </div>
         </ScrollReveal>
 
-        {/* ── Product Grid or Clean Empty State (5px square radius) ── */}
+        {/* ── Product Grid or Clean Empty State ── */}
         {filteredProducts.length === 0 ? (
           <ScrollReveal direction="zoom" duration={700}>
             <div className="bg-white rounded-[5px] border border-[#ede5db] p-8 sm:p-12 text-center my-8 shadow-xs">
               <div className="w-14 h-14 mx-auto mb-3.5 rounded-full bg-[#faf6f0] border border-[#ede5db] flex items-center justify-center text-[#9e7d56]">
                 <svg className="w-7 h-7 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                 </svg>
               </div>
-              <h2 className="font-serif text-xl text-[#1c1510]">No products available currently</h2>
+              <h2 className="font-serif text-xl text-[#1c1510]">
+                {searchQuery ? `No products found matching "${searchQuery}"` : `No products available currently`}
+              </h2>
               <p className="text-xs text-[#7d6f63] font-light mt-1.5 max-w-md mx-auto">
-                Our store is being prepared with exclusive luxury pieces. Please check back soon!
+                {searchQuery
+                  ? `Try checking for spelling errors, searching for general terms like "Gold" or "Ring", or reset your search.`
+                  : `Our store is being prepared with exclusive luxury pieces. Please check back soon!`}
               </p>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="mt-4 px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-light hover:bg-[#382b22] transition-all shadow-xs"
+                >
+                  Clear Search & View All
+                </button>
+              )}
             </div>
           </ScrollReveal>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6 pt-6">
             {filteredProducts.map((p, idx) => (
-              <ScrollReveal key={p.id} delay={idx * 80} direction="up">
+              <ScrollReveal key={p.id} delay={idx * 60} direction="up">
                 <Link
-                  href={`/shop/${p.slug}`}
+                  href={`/shop/${p.slug || p.id}`}
                   className="group flex flex-col bg-white rounded-[5px] overflow-hidden border border-[#ede5db] hover:border-[#c9b49a] card-luxury"
                 >
                   {/* Product Image + Heart Wishlist Button */}
@@ -186,7 +276,7 @@ export default function ShopPage() {
 
                     {/* Subtle Luxury Hallmark Badge */}
                     <span className="absolute top-2.5 left-2.5 z-10 text-[8.5px] sm:text-[9.5px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#805f32] border border-[#dec29b]/40 shadow-2xs">
-                      {p.category === 'Rings' ? '21ct Gold' : 'Hallmark'}
+                      {p.category === 'Rings' ? '21ct Gold' : (p.metal || 'Hallmark')}
                     </span>
 
                     {/* Wishlist Heart Icon */}
@@ -214,17 +304,19 @@ export default function ShopPage() {
                       <h3 className="font-serif text-[13px] sm:text-[15px] font-normal text-[#1c1510] leading-snug group-hover:text-[#9e7d56] transition-colors truncate">
                         {p.name}
                       </h3>
-                      <p className="text-[10px] text-[#9a897b] font-light mt-0.5 tracking-wide">{p.category}</p>
+                      <p className="text-[10px] text-[#9a897b] font-light mt-0.5 tracking-wide">{p.category} • {p.metal || 'Gold'}</p>
                     </div>
 
                     <div className="mt-1">
                       <div className="flex items-center gap-1.5">
                         <span className="text-xs sm:text-sm font-semibold text-[#1c1510]">
-                          ${p.price.toLocaleString()}
+                          £{Number(p.price).toLocaleString()}
                         </span>
-                        <span className="text-[10px] text-[#a09080] line-through font-light">
-                          ${p.originalPrice.toLocaleString()}
-                        </span>
+                        {p.originalPrice && p.originalPrice > p.price && (
+                          <span className="text-[10px] text-[#a09080] line-through font-light">
+                            £{Number(p.originalPrice).toLocaleString()}
+                          </span>
+                        )}
                       </div>
 
                       {/* Rating Stars */}
@@ -265,44 +357,45 @@ export default function ShopPage() {
         )}
 
         {/* ── Pagination ── */}
-        <div className="flex items-center justify-center gap-2 pt-10 pb-12">
-          <button
-            type="button"
-            aria-label="Previous page"
-            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-            className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
-          >
-            ‹
-          </button>
-          {[1, 2, 3, 4, 5].map((page) => (
+        {filteredProducts.length > 0 && (
+          <div className="flex items-center justify-center gap-2 pt-10 pb-12">
             <button
-              key={page}
               type="button"
-              onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-[5px] text-xs transition-all duration-300 active:scale-95 ${
-                currentPage === page
-                  ? 'bg-[#1c1510] text-[#f5efe8] font-semibold scale-105 shadow-md border border-[#1c1510]'
-                  : 'text-[#6b5c50] font-light hover:bg-[#ebdcb9]/50 hover:text-[#1c1510] border border-transparent'
-              }`}
+              aria-label="Previous page"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
             >
-              {page}
+              ‹
             </button>
-          ))}
-          <button
-            type="button"
-            aria-label="Next page"
-            onClick={() => setCurrentPage((prev) => Math.min(5, prev + 1))}
-            className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
-          >
-            ›
-          </button>
-        </div>
+            {[1, 2, 3, 4, 5].map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => setCurrentPage(page)}
+                className={`w-8 h-8 rounded-[5px] text-xs transition-all duration-300 active:scale-95 ${
+                  currentPage === page
+                    ? 'bg-[#1c1510] text-[#f5efe8] font-semibold scale-105 shadow-md border border-[#1c1510]'
+                    : 'text-[#6b5c50] font-light hover:bg-[#ebdcb9]/50 hover:text-[#1c1510] border border-transparent'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+            <button
+              type="button"
+              aria-label="Next page"
+              onClick={() => setCurrentPage((prev) => Math.min(5, prev + 1))}
+              className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
+            >
+              ›
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── "Get Exclusive Offers" Full-Width Edge-To-Edge Section ── */}
       <ScrollReveal direction="up" duration={800}>
         <section className="w-full bg-[#140e0b] border-t border-[#261d16] py-12 sm:py-16 px-4 text-center relative overflow-hidden mt-8 mb-0">
-          {/* Subtle center white divider line */}
           <div className="w-20 h-[1.5px] bg-[#f5efe8]/40 mx-auto mb-5 rounded-full" />
 
           <div className="relative z-10 max-w-md mx-auto">
@@ -329,5 +422,13 @@ export default function ShopPage() {
         </section>
       </ScrollReveal>
     </main>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#faf7f2] flex items-center justify-center text-[#9e7d56] font-serif text-lg">Loading collection...</div>}>
+      <ShopContent />
+    </Suspense>
   );
 }

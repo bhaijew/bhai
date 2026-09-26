@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useShop } from '@/context/ShopContext';
+import { useShop, ProductItem } from '@/context/ShopContext';
 
 interface HeaderProps {
   brandName?: string;
@@ -11,6 +12,17 @@ interface HeaderProps {
   solidBg?: boolean;
   isRelative?: boolean;
 }
+
+const QUICK_TAGS = [
+  '21ct Gold',
+  'Diamond Rings',
+  'Necklaces',
+  'Chandelier Earrings',
+  'Gold Bangles',
+  'Bridal',
+  'Solitaire',
+  '18k Gold',
+];
 
 export function Header({
   brandName = 'BHAI JEWELLER',
@@ -21,10 +33,20 @@ export function Header({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { cartCount, wishlistCount } = useShop();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const { cartCount, wishlistCount, products } = useShop();
   const router = useRouter();
 
-  // Handle ESC key press to close search mode or drawer (empty deps array to avoid React HMR size change errors)
+  // Focus input when search opens
+  useEffect(() => {
+    if (isSearchOpen) {
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [isSearchOpen]);
+
+  // Handle ESC key press to close search mode or drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -49,14 +71,35 @@ export function Header({
     };
   }, [drawerOpen]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Real-time live search filter
+  const liveResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const q = searchQuery.toLowerCase().trim();
+    return products.filter((p: ProductItem) => {
+      const nameMatch = p.name?.toLowerCase().includes(q);
+      const catMatch = p.category?.toLowerCase().includes(q);
+      const metalMatch = p.metal?.toLowerCase().includes(q);
+      const descMatch = p.description?.toLowerCase().includes(q);
+      const skuMatch = p.sku?.toLowerCase().includes(q);
+      const kwMatch = Array.isArray(p.focusKeywords) && p.focusKeywords.some((k) => k.toLowerCase().includes(q));
+      return nameMatch || catMatch || metalMatch || descMatch || skuMatch || kwMatch;
+    });
+  }, [searchQuery, products]);
+
+  const handleSearchSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setDrawerOpen(false);
-      setSearchQuery('');
     }
+  };
+
+  const handleTagClick = (tag: string) => {
+    setSearchQuery(tag);
+    router.push(`/shop?search=${encodeURIComponent(tag)}`);
+    setIsSearchOpen(false);
+    setDrawerOpen(false);
   };
 
   const navLinks = [
@@ -85,7 +128,7 @@ export function Header({
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 h-16 sm:h-20 md:h-24 flex items-center justify-between">
 
-          {/* ── SEARCH OPEN MODE (Hides all desktop page links & overlays header) ── */}
+          {/* ── SEARCH OPEN MODE (Full Header Search Bar + Live Dropdown) ── */}
           {isSearchOpen ? (
             <div className="w-full flex items-center justify-between gap-3 animate-fadeIn">
 
@@ -111,11 +154,11 @@ export function Header({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
                   <input
+                    ref={searchInputRef}
                     type="text"
-                    autoFocus
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search rings, necklaces, bracelets, 21ct gold..."
+                    placeholder="Search rings, necklaces, bracelets, 21ct gold, SKU..."
                     className="w-full bg-[#1c1511] text-[#f5efe8] text-xs sm:text-sm placeholder-[#8a796b] border border-[#3d2e24] focus:border-[#d8bb93] rounded-full pl-10 sm:pl-11 pr-10 py-2 sm:py-2.5 outline-none transition-all shadow-inner"
                   />
                   {searchQuery && (
@@ -257,6 +300,99 @@ export function Header({
           )}
 
         </div>
+
+        {/* ── LIVE SEARCH RESULTS DRAWER & QUICK TAGS OVERLAY ── */}
+        {isSearchOpen && (
+          <div className="w-full bg-[#16100d] border-b border-[#2e231b] shadow-2xl animate-fadeIn text-[#f5efe8]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 py-5 sm:py-6">
+
+              {/* Trending Quick Search Tags */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide text-xs">
+                <span className="text-[11px] text-[#9e8d7d] uppercase tracking-wider font-medium mr-1 whitespace-nowrap">
+                  Trending:
+                </span>
+                {QUICK_TAGS.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => handleTagClick(tag)}
+                    className="px-3 py-1 rounded-full bg-[#241a14] hover:bg-[#dec29b] text-[#d4c5b5] hover:text-[#140e0b] border border-[#3b2c21] hover:border-[#dec29b] transition-all text-xs font-light whitespace-nowrap active:scale-95"
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* Live Search Results View */}
+              {searchQuery.trim().length > 0 && (
+                <div className="mt-4 pt-4 border-t border-[#261d16]">
+                  <div className="flex items-center justify-between mb-3.5">
+                    <p className="text-xs text-[#a09080] font-light">
+                      Found <strong className="text-[#f5efe8] font-semibold">{liveResults.length}</strong> {liveResults.length === 1 ? 'item' : 'items'} matching &ldquo;<span className="text-[#dec29b]">{searchQuery}</span>&rdquo;
+                    </p>
+                    {liveResults.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleSearchSubmit()}
+                        className="text-xs text-[#dec29b] hover:underline font-light"
+                      >
+                        View all in Shop →
+                      </button>
+                    )}
+                  </div>
+
+                  {liveResults.length === 0 ? (
+                    <div className="py-6 text-center">
+                      <p className="font-serif text-lg text-[#dec29b]">No products found</p>
+                      <p className="text-xs text-[#9a897b] font-light mt-1">
+                        Try searching for &quot;Gold&quot;, &quot;Ring&quot;, &quot;21ct&quot;, or &quot;Necklace&quot;.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 max-h-[380px] overflow-y-auto pr-1">
+                      {liveResults.map((p) => {
+                        const imgSrc = p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg';
+                        const slug = p.slug || p.id;
+                        return (
+                          <Link
+                            key={p.id}
+                            href={`/shop/${slug}`}
+                            onClick={() => {
+                              setIsSearchOpen(false);
+                              setSearchQuery('');
+                            }}
+                            className="group flex flex-col bg-[#1f1712] border border-[#31231a] hover:border-[#dec29b] rounded-[6px] overflow-hidden p-2 transition-all"
+                          >
+                            <div className="relative aspect-square w-full rounded-[4px] overflow-hidden bg-[#2a2018]">
+                              <Image
+                                src={imgSrc}
+                                alt={p.name}
+                                fill
+                                unoptimized={true}
+                                sizes="140px"
+                                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              />
+                            </div>
+                            <h4 className="font-serif text-xs text-[#f5efe8] group-hover:text-[#dec29b] transition-colors mt-2 font-medium line-clamp-1">
+                              {p.name}
+                            </h4>
+                            <p className="text-[10px] text-[#9e8e80] font-light truncate">
+                              {p.metal || p.category}
+                            </p>
+                            <p className="text-xs font-bold text-[#dec29b] mt-1">
+                              £{Number(p.price).toFixed(2)}
+                            </p>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Backdrop overlay when search is open (hides rest of page under dark overlay) */}
