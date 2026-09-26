@@ -5,13 +5,20 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useShop, ProductItem } from '@/context/ShopContext';
 
-function ProductCard({ product }: { product: ProductItem }) {
+interface DisplayProduct {
+  id: string;
+  name: string;
+  metal: string;
+  purity: string;
+  price: number;
+  image: string;
+  alt: string;
+  href: string;
+}
+
+function ProductCard({ product }: { product: DisplayProduct }) {
   const { addToCart, toggleWishlist, isInWishlist } = useShop();
   const [added, setAdded] = useState(false);
-
-  const imgSrc = product.image || (product.images && product.images[0]) || '/images/detail-ring-hero.jpg';
-  const slug = product.slug || product.id;
-  const purity = product.category === 'Rings' ? '21ct Gold' : (product.metal || '18k Gold');
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -19,12 +26,12 @@ function ProductCard({ product }: { product: ProductItem }) {
     toggleWishlist({
       id: product.id,
       name: product.name,
-      category: product.category || product.metal,
+      category: product.metal,
       price: product.price,
-      rating: product.rating || 5,
-      reviewCount: product.reviewCount || 12,
-      image: imgSrc,
-      slug: slug,
+      rating: 5,
+      reviewCount: 12,
+      image: product.image,
+      slug: product.id,
     });
   };
 
@@ -34,10 +41,9 @@ function ProductCard({ product }: { product: ProductItem }) {
     addToCart({
       id: product.id,
       name: product.name,
-      variant: purity,
+      variant: product.purity,
       price: product.price,
-      image: imgSrc,
-      slug: slug,
+      image: product.image,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -45,12 +51,12 @@ function ProductCard({ product }: { product: ProductItem }) {
 
   return (
     <div className="group flex flex-col text-left transition-all duration-300 w-[150px] sm:w-[190px] md:w-[220px] flex-shrink-0 snap-start select-none">
-      <Link href={`/shop/${slug}`} className="block">
+      <Link href={product.href} className="block">
         {/* Product Image Container */}
         <div className="relative w-full aspect-square rounded-[14px] sm:rounded-2xl overflow-hidden bg-[#e5ebf0] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <Image
-            src={imgSrc}
-            alt={product.name}
+            src={product.image}
+            alt={product.alt}
             fill
             unoptimized={true}
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 220px"
@@ -83,21 +89,14 @@ function ProductCard({ product }: { product: ProductItem }) {
           </h3>
 
           <p className="text-[10px] sm:text-xs text-[#8c7e73] font-light mt-1 flex items-center gap-1.5 tracking-tight truncate">
-            <span>{product.metal || product.category}</span>
+            <span>{product.metal}</span>
             <span className="text-[8px]">•</span>
-            <span>{purity}</span>
+            <span>{product.purity}</span>
           </p>
 
-          <div className="flex items-center gap-2 mt-1.5">
-            <p className="text-[14px] sm:text-[16px] font-bold text-[#111111] tracking-tight">
-              £{Number(product.price).toFixed(2)}
-            </p>
-            {product.originalPrice && product.originalPrice > product.price && (
-              <p className="text-[11px] sm:text-[12px] text-[#9a897b] line-through font-light">
-                £{Number(product.originalPrice).toFixed(2)}
-              </p>
-            )}
-          </div>
+          <p className="text-[14px] sm:text-[16px] font-bold text-[#111111] mt-1.5 tracking-tight">
+            £{product.price.toFixed(2)}
+          </p>
         </div>
       </Link>
 
@@ -117,7 +116,7 @@ function ProductCard({ product }: { product: ProductItem }) {
   );
 }
 
-function ProductRow({ products }: { products: ProductItem[] }) {
+function ProductRow({ products }: { products: DisplayProduct[] }) {
   const rowRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -133,32 +132,28 @@ function ProductRow({ products }: { products: ProductItem[] }) {
   return (
     <div className="relative w-full group/row my-1">
       {/* Left Navigation Arrow */}
-      {products.length > 4 && (
-        <button
-          type="button"
-          onClick={() => handleScroll('left')}
-          aria-label="Scroll left"
-          className="absolute left-0 sm:left-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
-        >
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => handleScroll('left')}
+        aria-label="Scroll left"
+        className="absolute left-0 sm:left-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
+      >
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
 
       {/* Right Navigation Arrow */}
-      {products.length > 4 && (
-        <button
-          type="button"
-          onClick={() => handleScroll('right')}
-          aria-label="Scroll right"
-          className="absolute right-0 sm:right-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
-        >
-          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
+      <button
+        type="button"
+        onClick={() => handleScroll('right')}
+        aria-label="Scroll right"
+        className="absolute right-0 sm:right-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
+      >
+        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
 
       {/* Scrollable Container */}
       <div
@@ -177,17 +172,30 @@ function ProductRow({ products }: { products: ProductItem[] }) {
 export function FeaturedProducts() {
   const { products } = useShop();
 
-  const { row1, row2 } = useMemo(() => {
+  const { row1Products, row2Products } = useMemo(() => {
     if (!products || products.length === 0) {
-      return { row1: [], row2: [] };
+      return { row1Products: [], row2Products: [] };
     }
-    if (products.length <= 6) {
-      return { row1: products, row2: [] };
+
+    const mapped: DisplayProduct[] = products.map((p: ProductItem) => ({
+      id: p.id,
+      name: p.name,
+      metal: p.metal || p.category || 'Gold',
+      purity: p.category === 'Rings' ? '875 (21ct)' : (p.metal || '750 (18k)'),
+      price: Number(p.price),
+      image: p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg',
+      alt: p.name,
+      href: `/shop/${p.slug || p.id}`,
+    }));
+
+    if (mapped.length <= 1) {
+      return { row1Products: mapped, row2Products: mapped };
     }
-    const mid = Math.ceil(products.length / 2);
+
+    const mid = Math.ceil(mapped.length / 2);
     return {
-      row1: products.slice(0, mid),
-      row2: products.slice(mid),
+      row1Products: mapped.slice(0, mid),
+      row2Products: mapped.slice(mid),
     };
   }, [products]);
 
@@ -214,8 +222,8 @@ export function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Products or Clean Empty State */}
-        {products.length === 0 ? (
+        {/* Two Horizontal Scrollable Rows - Preserving Original 2-Row Style */}
+        {row1Products.length === 0 && row2Products.length === 0 ? (
           <div className="bg-[#fdfaf3] rounded-2xl border border-[#e5dabf] p-8 sm:p-12 text-center shadow-2xs">
             <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#f6efdb] border border-[#e5dabf] flex items-center justify-center text-[#9e7d56]">
               <svg className="w-6 h-6 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -229,8 +237,15 @@ export function FeaturedProducts() {
           </div>
         ) : (
           <div className="flex flex-col gap-5 sm:gap-8">
-            {row1.length > 0 && <div><ProductRow products={row1} /></div>}
-            {row2.length > 0 && <div><ProductRow products={row2} /></div>}
+            {/* Row 1: Horizontal Scrollable */}
+            <div>
+              <ProductRow products={row1Products} />
+            </div>
+
+            {/* Row 2: Horizontal Scrollable */}
+            <div>
+              <ProductRow products={row2Products} />
+            </div>
           </div>
         )}
 
