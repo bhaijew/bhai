@@ -1023,22 +1023,89 @@ export default function AccountPage() {
             {activeTab === 'addresses' && (
               <ScrollReveal direction="up">
                 <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
-                  <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
+                  <div className="flex items-center justify-between gap-3 border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">My Delivery Addresses ({addresses.length})</h2>
+                      <h2 className="font-serif text-xl sm:text-2xl text-[#1c1510] font-normal">My Delivery Addresses ({addresses.length})</h2>
                       <p className="text-xs text-[#8a796c] mt-0.5">Manage your real shipping and billing addresses for fast insured checkout</p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setShowAddAddressModal(true)}
-                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
+                      onClick={() => setShowAddAddressModal(!showAddAddressModal)}
+                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      + Add Address
+                      {showAddAddressModal ? '✕ Close' : '+ Add Address'}
                     </button>
                   </div>
 
+                  {/* Add Address Form Placed at the TOP with smooth animation */}
+                  {showAddAddressModal && (
+                    <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-5 sm:p-6 bg-[#faf6ee] space-y-4 animate-fadeIn shadow-sm">
+                      <div className="flex items-center justify-between border-b border-[#ded3c5]/60 pb-2.5">
+                        <h3 className="font-serif text-base sm:text-lg font-semibold text-[#1c1510]">Add New Shipping Address</h3>
+                        <span className="text-[10px] text-[#9e7d56] uppercase tracking-wider font-medium">New Entry</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <input
+                          type="text"
+                          placeholder="Label (e.g. Home, Office)"
+                          value={newAddress.title}
+                          onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Recipient Full Name"
+                          value={newAddress.name}
+                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Street Address"
+                          value={newAddress.street}
+                          onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="City"
+                          value={newAddress.city}
+                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="Postal Code"
+                          value={newAddress.postcode}
+                          onChange={(e) => setNewAddress({ ...newAddress, postcode: e.target.value })}
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddAddressModal(false)}
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                        >
+                          Save Address
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
                   {addresses.length === 0 ? (
-                    <div className="py-16 text-center space-y-4">
+                    <div className="py-14 text-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -1052,15 +1119,15 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddAddressModal(true)}
-                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
                       >
-                        + Add Your First Address
+                        <span>+ Add Your First Address</span>
                       </button>
                     </div>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {addresses.map((addr) => (
-                        <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs flex flex-col justify-between">
+                        <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs flex flex-col justify-between hover:border-[#1c1510] transition-colors">
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span className="font-serif text-base font-semibold text-[#1c1510]">{addr.title}</span>
@@ -1102,69 +1169,6 @@ export default function AccountPage() {
                       ))}
                     </div>
                   )}
-
-                  {showAddAddressModal && (
-                    <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
-                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add New Shipping Address</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                        <input
-                          type="text"
-                          placeholder="Label (e.g. Home, Office)"
-                          value={newAddress.title}
-                          onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="Recipient Full Name"
-                          value={newAddress.name}
-                          onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="Street Address"
-                          value={newAddress.street}
-                          onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="City"
-                          value={newAddress.city}
-                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="Postal Code"
-                          value={newAddress.postcode}
-                          onChange={(e) => setNewAddress({ ...newAddress, postcode: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                      </div>
-                      <div className="flex justify-end gap-2 pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowAddAddressModal(false)}
-                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
-                        >
-                          Save Address
-                        </button>
-                      </div>
-                    </form>
-                  )}
                 </div>
               </ScrollReveal>
             )}
@@ -1175,22 +1179,86 @@ export default function AccountPage() {
             {activeTab === 'payments' && (
               <ScrollReveal direction="up">
                 <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
-                  <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
+                  <div className="flex items-center justify-between gap-3 border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Payment Methods ({paymentMethods.length})</h2>
+                      <h2 className="font-serif text-xl sm:text-2xl text-[#1c1510] font-normal">Payment Methods ({paymentMethods.length})</h2>
                       <p className="text-xs text-[#8a796c] mt-0.5">Encrypted payment cards saved securely for 1-click checkout</p>
                     </div>
                     <button
                       type="button"
-                      onClick={() => setShowAddPaymentModal(true)}
-                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
+                      onClick={() => setShowAddPaymentModal(!showAddPaymentModal)}
+                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs"
                     >
-                      + Add Card
+                      {showAddPaymentModal ? '✕ Close' : '+ Add Card'}
                     </button>
                   </div>
 
+                  {/* Add Payment Form Placed at the TOP with smooth animation */}
+                  {showAddPaymentModal && (
+                    <form onSubmit={handleAddPayment} className="border border-[#ded3c5] rounded-2xl p-5 sm:p-6 bg-[#faf6ee] space-y-4 animate-fadeIn shadow-sm">
+                      <div className="flex items-center justify-between border-b border-[#ded3c5]/60 pb-2.5">
+                        <h3 className="font-serif text-base sm:text-lg font-semibold text-[#1c1510]">Add Payment Card</h3>
+                        <span className="text-[10px] text-[#9e7d56] uppercase tracking-wider font-medium">Encrypted SSL Gateway</span>
+                      </div>
+                      <div className="space-y-3 text-xs">
+                        <input
+                          type="text"
+                          placeholder="Cardholder Name as on Card"
+                          value={newCard.holder}
+                          onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })}
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors"
+                          required
+                        />
+                        <input
+                          type="text"
+                          placeholder="16-Digit Card Number"
+                          maxLength={19}
+                          value={newCard.cardNumber}
+                          onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors font-mono"
+                          required
+                        />
+                        <div className="grid grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="MM/YY"
+                            maxLength={5}
+                            value={newCard.expiry}
+                            onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })}
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors font-mono"
+                            required
+                          />
+                          <input
+                            type="password"
+                            placeholder="Security CVV"
+                            maxLength={4}
+                            value={newCard.cvv}
+                            onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510] transition-colors font-mono"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddPaymentModal(false)}
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                        >
+                          Save Card
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
                   {paymentMethods.length === 0 ? (
-                    <div className="py-16 text-center space-y-4">
+                    <div className="py-14 text-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
@@ -1203,9 +1271,9 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddPaymentModal(true)}
-                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
                       >
-                        + Add Your First Card
+                        <span>+ Add Your First Card</span>
                       </button>
                     </div>
                   ) : (
@@ -1262,66 +1330,6 @@ export default function AccountPage() {
                       <p className="text-[11px] text-[#8a796c]">Your payment details are end-to-end encrypted with AES-256 standards.</p>
                     </div>
                   </div>
-
-                  {showAddPaymentModal && (
-                    <form onSubmit={handleAddPayment} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
-                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add Payment Card</h3>
-                      <div className="space-y-3 text-xs">
-                        <input
-                          type="text"
-                          placeholder="Cardholder Name as on Card"
-                          value={newCard.holder}
-                          onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <input
-                          type="text"
-                          placeholder="16-Digit Card Number"
-                          maxLength={19}
-                          value={newCard.cardNumber}
-                          onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                          required
-                        />
-                        <div className="grid grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            placeholder="MM/YY"
-                            maxLength={5}
-                            value={newCard.expiry}
-                            onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                            required
-                          />
-                          <input
-                            type="password"
-                            placeholder="Security CVV"
-                            maxLength={4}
-                            value={newCard.cvv}
-                            onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                            required
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-end gap-2 pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setShowAddPaymentModal(false)}
-                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="submit"
-                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
-                        >
-                          Save Card
-                        </button>
-                      </div>
-                    </form>
-                  )}
                 </div>
               </ScrollReveal>
             )}
