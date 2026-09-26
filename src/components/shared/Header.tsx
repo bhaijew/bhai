@@ -312,22 +312,23 @@ export function Header({
               </button>
             </div>
 
-            {/* Search Input inside Drawer */}
+            {/* Search Input inside Drawer - Triggers full width search mode */}
             <div className="px-5 pt-4 pb-2 bg-white">
-              <form onSubmit={handleSearchSubmit}>
-                <div className="flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#faf7f2] border border-[#e8ded4] focus-within:border-[#9e7d56] transition-all shadow-2xs">
-                  <svg className="w-4 h-4 text-[#9e7d56] stroke-[1.8] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                  </svg>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search rings, necklaces, 21ct gold..."
-                    className="bg-transparent text-xs text-[#1c1510] placeholder-[#8c7a6b] outline-none w-full font-light"
-                  />
-                </div>
-              </form>
+              <button
+                type="button"
+                onClick={() => {
+                  setDrawerOpen(false);
+                  setIsSearchOpen(true);
+                }}
+                className="w-full text-left flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#faf7f2] border border-[#e8ded4] hover:border-[#9e7d56] active:scale-[0.98] transition-all shadow-2xs group cursor-pointer"
+              >
+                <svg className="w-4 h-4 text-[#9e7d56] stroke-[1.8] flex-shrink-0 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <span className="text-xs text-[#8c7a6b] font-light truncate">
+                  Search rings, necklaces, 21ct gold...
+                </span>
+              </button>
             </div>
 
             {/* Navigation Links */}
