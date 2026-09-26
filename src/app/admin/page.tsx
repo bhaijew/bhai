@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('All');
 
-  // Full Page Add Product Form State (No Modal Popup!)
+  // Full Page Add Product Form State (No pre-filled images by default!)
   const [addForm, setAddForm] = useState({
     name: '',
     category: 'Rings',
@@ -178,11 +178,8 @@ export default function AdminDashboardPage() {
     sku: '',
     weightGrams: '6.5',
     description: '',
-    primaryImage: '/images/detail-ring-hero.jpg',
-    additionalImages: [
-      '/images/shop-prod-1.jpg',
-      '/images/category-rings.jpg'
-    ],
+    primaryImage: '',
+    additionalImages: [] as string[],
     newImageUrlInput: '',
     // SEO fields
     seoTitle: '',
@@ -192,6 +189,28 @@ export default function AdminDashboardPage() {
   });
 
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
+
+  // Handle Upload Image File directly from device (Mobile / PC)
+  const handleDeviceFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const resultUrl = event.target?.result as string;
+        if (!resultUrl) return;
+
+        setAddForm((prev) => {
+          if (!prev.primaryImage) {
+            return { ...prev, primaryImage: resultUrl };
+          }
+          return { ...prev, additionalImages: [...prev.additionalImages, resultUrl] };
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
 
   // Auto Generate SKU
   const generateAutoSku = () => {
@@ -263,7 +282,7 @@ export default function AdminDashboardPage() {
       metal: addForm.metal,
       status: Number(addForm.stock) > 0 ? 'In Stock' : 'Out of Stock',
       isFeatured: true,
-      image: addForm.primaryImage || '/images/detail-ring-hero.jpg',
+      image: addForm.primaryImage || (allImagesList[0] || '/images/detail-ring-hero.jpg'),
       images: allImagesList.length > 0 ? allImagesList : ['/images/detail-ring-hero.jpg'],
       sku: autoSku,
       description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
@@ -274,8 +293,15 @@ export default function AdminDashboardPage() {
       focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [addForm.name.toLowerCase()]
     };
 
-    // Save directly to persistent StoreContext (saves to localStorage & updates site live!)
+    // 1. Save to persistent StoreContext (saves to localStorage & updates site live!)
     addProduct(newProductObject);
+
+    // 2. Save to real-time SQL Database API Endpoint
+    fetch('/api/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newProductObject),
+    }).catch(err => console.error('SQL Database API Sync error:', err));
 
     setSaveSuccessMsg(true);
     setTimeout(() => {
@@ -294,8 +320,8 @@ export default function AdminDashboardPage() {
       sku: '',
       weightGrams: '6.5',
       description: '',
-      primaryImage: '/images/detail-ring-hero.jpg',
-      additionalImages: ['/images/shop-prod-1.jpg'],
+      primaryImage: '',
+      additionalImages: [],
       newImageUrlInput: '',
       seoTitle: '',
       seoDescription: '',
@@ -1142,14 +1168,32 @@ export default function AdminDashboardPage() {
                     </div>
 
                     <div className="space-y-4">
-                      {/* Primary Cover Image Input */}
+                      {/* Device File Upload Box */}
+                      <div className={`p-5 ${isLight ? 'bg-[#fdfbf7] border-[#dcd3c5]' : 'bg-[#1a120e] border-[#3a2c23]'} border-2 border-dashed rounded-[5px] text-center space-y-2`}>
+                        <div className="text-3xl">📁</div>
+                        <h4 className={`text-xs font-bold ${titleColor}`}>Upload Photo Files from Device (PC or Mobile)</h4>
+                        <p className={`text-[10px] ${subtitleColor}`}>Select device image files (JPG, PNG, WEBP)</p>
+                        
+                        <label className={`inline-flex items-center space-x-2 px-5 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px] shadow cursor-pointer transition-all`}>
+                          <span>📷 Choose Photo Files...</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleDeviceFileUpload}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+
+                      {/* Primary Cover Image URL Input */}
                       <div>
                         <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                          Primary Cover Image URL *
+                          Primary Cover Image (Uploaded Device File or Image URL) *
                         </label>
                         <input
                           type="text"
-                          required
+                          placeholder="Upload file above or paste image URL..."
                           value={addForm.primaryImage}
                           onChange={(e) => setAddForm({ ...addForm, primaryImage: e.target.value })}
                           className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
@@ -1175,7 +1219,7 @@ export default function AdminDashboardPage() {
                             onClick={handleAddImageUrl}
                             className={`px-4 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px]`}
                           >
-                            + Add Image
+                            + Add Image URL
                           </button>
                         </div>
                       </div>
@@ -1183,33 +1227,50 @@ export default function AdminDashboardPage() {
                       {/* Interactive Image Gallery Thumbnails Grid */}
                       <div className="pt-2">
                         <p className={`text-xs font-semibold ${subtitleColor} mb-2`}>Gallery Thumbnails Preview:</p>
-                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
-                          {/* Primary */}
-                          <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#b38b40] group bg-[#f4efe6]">
-                            <Image src={addForm.primaryImage || '/images/detail-ring-hero.jpg'} alt="Primary Cover" fill className="object-cover" />
-                            <span className="absolute bottom-0 left-0 right-0 bg-[#b38b40] text-white text-[9px] text-center font-bold uppercase py-0.5">
-                              Cover Photo
-                            </span>
+                        
+                        {!addForm.primaryImage && addForm.additionalImages.length === 0 ? (
+                          <div className={`p-4 text-center rounded-[5px] border border-dashed ${subtitleColor} text-xs italic`}>
+                            No photos added yet. Upload image files above or enter image URL.
                           </div>
+                        ) : (
+                          <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+                            {/* Primary */}
+                            {addForm.primaryImage && (
+                              <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#b38b40] group bg-[#f4efe6]">
+                                <Image src={addForm.primaryImage} alt="Primary Cover" fill className="object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => setAddForm(prev => ({ ...prev, primaryImage: '' }))}
+                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
+                                  title="Remove cover photo"
+                                >
+                                  ✕
+                                </button>
+                                <span className="absolute bottom-0 left-0 right-0 bg-[#b38b40] text-white text-[9px] text-center font-bold uppercase py-0.5">
+                                  COVER PHOTO
+                                </span>
+                              </div>
+                            )}
 
-                          {/* Additional Images */}
-                          {addForm.additionalImages.map((imgUrl, idx) => (
-                            <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#dcd3c5] dark:border-[#3a2c23] group bg-[#f4efe6]">
-                              <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveImage(idx)}
-                                className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
-                                title="Remove photo"
-                              >
-                                ✕
-                              </button>
-                              <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5">
-                                Angle #{idx + 2}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
+                            {/* Additional Images */}
+                            {addForm.additionalImages.map((imgUrl, idx) => (
+                              <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#dcd3c5] dark:border-[#3a2c23] group bg-[#f4efe6]">
+                                <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(idx)}
+                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
+                                  title="Remove photo"
+                                >
+                                  ✕
+                                </button>
+                                <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5">
+                                  Angle #{idx + 2}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -1295,13 +1356,21 @@ export default function AdminDashboardPage() {
 
                     {/* Store Card Preview */}
                     <div className="bg-[#FAF7F2] border border-[#E5DCD3] rounded-[5px] overflow-hidden shadow-md text-[#1c1510] max-w-sm mx-auto">
-                      <div className="relative w-full h-56 bg-[#f4efe6]">
-                        <Image
-                          src={addForm.primaryImage || '/images/detail-ring-hero.jpg'}
-                          alt={addForm.name || 'Product Preview'}
-                          fill
-                          className="object-cover"
-                        />
+                      <div className="relative w-full h-56 bg-[#f4efe6] dark:bg-[#1a120e] flex flex-col items-center justify-center text-center">
+                        {addForm.primaryImage ? (
+                          <Image
+                            src={addForm.primaryImage}
+                            alt={addForm.name || 'Product Preview'}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="p-4 space-y-1">
+                            <span className="text-3xl">📷</span>
+                            <p className="text-xs font-bold text-[#8c6b2d]">No Image Selected Yet</p>
+                            <p className="text-[10px] text-[#8c7d6c]">Upload a photo or enter URL above to preview here</p>
+                          </div>
+                        )}
                         <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#140e0b] text-[#dec29b] text-[9px] font-semibold uppercase rounded-[5px]">
                           {addForm.category}
                         </span>
