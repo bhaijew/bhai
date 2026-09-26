@@ -1,15 +1,31 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const announcements = [
+const defaultAnnouncements = [
   'Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK',
   'Complimentary luxury gift packaging on every order  |  Bespoke service',
   'Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available',
 ];
 
 export function AnnouncementBar() {
+  const [announcements, setAnnouncements] = useState<string[]>(defaultAnnouncements);
+  const [isEnabled, setIsEnabled] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/announcement')
+      .then((res) => res.json())
+      .then((resData) => {
+        if (resData.success && resData.data) {
+          setIsEnabled(resData.data.isEnabled ?? true);
+          if (Array.isArray(resData.data.messages) && resData.data.messages.length > 0) {
+            setAnnouncements(resData.data.messages);
+          }
+        }
+      })
+      .catch((err) => console.error('Failed to fetch announcement bar config:', err));
+  }, []);
 
   const handlePrev = () => {
     setCurrentIndex((prev) => (prev === 0 ? announcements.length - 1 : prev - 1));
@@ -18,6 +34,8 @@ export function AnnouncementBar() {
   const handleNext = () => {
     setCurrentIndex((prev) => (prev === announcements.length - 1 ? 0 : prev + 1));
   };
+
+  if (!isEnabled || announcements.length === 0) return null;
 
   return (
     <div className="hidden md:block relative z-50 w-full overflow-hidden bg-[#16120f] border-b border-[#2a221d] text-[#c9bfb5] text-xs tracking-wider transition-colors duration-300">
@@ -31,49 +49,52 @@ export function AnnouncementBar() {
         </div>
 
         {/* Right chevron controls */}
-        <div className="flex items-center gap-2 text-[#9e9387] pl-2">
-          <button
-            type="button"
-            onClick={handlePrev}
-            aria-label="Previous announcement"
-            className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {announcements.length > 1 && (
+          <div className="flex items-center gap-2 text-[#9e9387] pl-2">
+            <button
+              type="button"
+              onClick={handlePrev}
+              aria-label="Previous announcement"
+              className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.75}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={handleNext}
-            aria-label="Next announcement"
-            className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
-          >
-            <svg
-              className="w-3.5 h-3.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              aria-label="Next announcement"
+              className="p-1 hover:text-[#f3ede6] transition-colors focus:outline-none"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.75}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                className="w-3.5 h-3.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.75}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
+

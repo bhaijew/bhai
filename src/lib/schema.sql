@@ -71,6 +71,31 @@ CREATE TABLE IF NOT EXISTS hero_slides (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 5. HERO SECTION CONFIG TABLE (Real-Time Main Hero)
+CREATE TABLE IF NOT EXISTS hero_section (
+    id VARCHAR(64) PRIMARY KEY DEFAULT 'main_hero',
+    brand_pretitle VARCHAR(255) DEFAULT 'BHAI JEWELLER',
+    headline_line1 VARCHAR(255) DEFAULT 'Jewellery, made',
+    headline_line2 VARCHAR(255) DEFAULT 'unforgettable',
+    headline_line3 VARCHAR(255) DEFAULT '',
+    description TEXT DEFAULT 'Timeless pieces for modern souls. Discover fine jewellery designed to celebrate your most precious moments.',
+    primary_cta_text VARCHAR(100) DEFAULT 'Shop Collection',
+    primary_cta_href VARCHAR(255) DEFAULT '/shop',
+    hero_image TEXT DEFAULT '/images/hero-img.jpg',
+    featured_title VARCHAR(255) DEFAULT 'Diamond Elegance',
+    featured_subtitle TEXT DEFAULT 'Classic pieces, endless beauty.',
+    featured_image TEXT DEFAULT '/images/featured-ring.jpg',
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 6. ANNOUNCEMENT BAR TABLE
+CREATE TABLE IF NOT EXISTS announcement_bar (
+    id VARCHAR(64) PRIMARY KEY DEFAULT 'main_announcement',
+    is_enabled BOOLEAN DEFAULT TRUE,
+    messages JSONB DEFAULT '["Free worldwide shipping on all orders over $150 | Handcrafted with passion in the UK", "Complimentary luxury gift packaging on every order | Bespoke service", "Fine jewellery showroom in Bradford, West Yorkshire | Private viewings available"]'::jsonb,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
@@ -78,9 +103,14 @@ ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bespoke_enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
+ALTER TABLE hero_section ENABLE ROW LEVEL SECURITY;
+ALTER TABLE announcement_bar ENABLE ROW LEVEL SECURITY;
 
 -- Allow public read & write access for API endpoints
 CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true);
 CREATE POLICY "Allow Public Orders Access" ON orders FOR ALL USING (true);
 CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING (true);
 CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true);
+CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true);
+CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true);
+

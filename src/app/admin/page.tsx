@@ -29,6 +29,32 @@ export default function AdminDashboardPage() {
   const [slides, setSlides] = useState(INITIAL_SLIDES);
   const [customers] = useState(INITIAL_CUSTOMERS);
 
+  // Real-Time Hero Section Form State
+  const [heroForm, setHeroForm] = useState({
+    brandPretitle: 'BHAI JEWELLER',
+    headlineLine1: 'Jewellery, made',
+    headlineLine2: 'unforgettable',
+    headlineLine3: '',
+    description: 'Timeless pieces for modern souls. Discover fine jewellery designed to celebrate your most precious moments.',
+    primaryCtaText: 'Shop Collection',
+    primaryCtaHref: '/shop',
+    heroImage: '/images/hero-img.jpg',
+    featuredTitle: 'Diamond Elegance',
+    featuredSubtitle: 'Classic pieces, endless beauty.',
+    featuredHref: '/shop',
+    featuredImage: '/images/featured-ring.jpg',
+  });
+  const [heroSaveMsg, setHeroSaveMsg] = useState(false);
+
+  // Real-Time Announcement Bar Form State
+  const [announcementForm, setAnnouncementForm] = useState({
+    isEnabled: true,
+    message1: 'Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK',
+    message2: 'Complimentary luxury gift packaging on every order  |  Bespoke service',
+    message3: 'Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available',
+  });
+  const [announcementSaveMsg, setAnnouncementSaveMsg] = useState(false);
+
   // Fetch real-time database data from Supabase API endpoints on mount
   useEffect(() => {
     fetch('/api/orders')
@@ -57,6 +83,29 @@ export default function AdminDashboardPage() {
         }
       })
       .catch((err) => console.error('Error loading slides from API:', err));
+
+    fetch('/api/hero')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setHeroForm((prev) => ({ ...prev, ...data.data }));
+        }
+      })
+      .catch((err) => console.error('Error loading hero config from API:', err));
+
+    fetch('/api/announcement')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setAnnouncementForm({
+            isEnabled: data.data.isEnabled ?? true,
+            message1: data.data.messages?.[0] || '',
+            message2: data.data.messages?.[1] || '',
+            message3: data.data.messages?.[2] || '',
+          });
+        }
+      })
+      .catch((err) => console.error('Error loading announcement config from API:', err));
   }, []);
 
   // Filter states
@@ -287,8 +336,62 @@ export default function AdminDashboardPage() {
   };
 
   const handleDeleteSlide = (id: string) => {
-    setSlides(slides.filter(s => s.id !== id));
-    fetch(`/api/slides?id=${id}`, { method: 'DELETE' }).catch(err => console.error('Slide delete API error:', err));
+    setSlides(slides.filter((s) => s.id !== id));
+    fetch(`/api/slides?id=${id}`, { method: 'DELETE' }).catch((err) =>
+      console.error('Slide delete API error:', err)
+    );
+  };
+
+  // Hero Section Save & File Upload Handlers
+  const handleHeroImageUpload = (e: React.ChangeEvent<HTMLInputElement>, targetField: 'heroImage' | 'featuredImage') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const resultUrl = event.target?.result as string;
+      if (resultUrl) {
+        setHeroForm((prev) => ({ ...prev, [targetField]: resultUrl }));
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleHeroSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    fetch('/api/hero', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(heroForm),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setHeroSaveMsg(true);
+          setTimeout(() => setHeroSaveMsg(false), 3000);
+        }
+      })
+      .catch((err) => console.error('Error saving hero section:', err));
+  };
+
+  const handleAnnouncementSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const messages = [announcementForm.message1, announcementForm.message2, announcementForm.message3].filter(Boolean);
+    fetch('/api/announcement', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        isEnabled: announcementForm.isEnabled,
+        messages,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          setAnnouncementSaveMsg(true);
+          setTimeout(() => setAnnouncementSaveMsg(false), 3000);
+        }
+      })
+      .catch((err) => console.error('Error saving announcement bar:', err));
   };
 
   // Order Handler
@@ -330,17 +433,98 @@ export default function AdminDashboardPage() {
     return o.status === orderStatusFilter;
   });
 
-  // Navigation Items list
+  // Navigation Items list with sleek professional vector SVG icons
   const NAV_ITEMS = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', count: null },
-    { id: 'products', label: 'Products Catalog', icon: '💎', count: products.length },
-    { id: 'add-product', label: '➕ Add Product Page', icon: '✨', count: null },
-    { id: 'slides', label: 'Slider & Banners', icon: '🖼️', count: slides.length },
-    { id: 'orders', label: 'Orders & Sales', icon: '📦', count: activeOrdersCount },
-    { id: 'enquiries', label: 'Bespoke Enquiries', icon: '🎨', count: pendingEnquiriesCount },
-    { id: 'customers', label: 'VIP Clients', icon: '👥', count: customers.length },
-    { id: 'goldrates', label: 'Gold Rate Manager', icon: '🪙', count: null },
-    { id: 'settings', label: 'Store Settings', icon: '⚙️', count: null },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+        </svg>
+      ),
+      count: null,
+    },
+    {
+      id: 'products',
+      label: 'Products Catalog',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+        </svg>
+      ),
+      count: products.length,
+    },
+    {
+      id: 'add-product',
+      label: 'Add Product Studio',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        </svg>
+      ),
+      count: null,
+    },
+    {
+      id: 'slides',
+      label: 'Hero & Slider Banners',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+        </svg>
+      ),
+      count: slides.length,
+    },
+    {
+      id: 'orders',
+      label: 'Orders & Sales',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119.993z" />
+        </svg>
+      ),
+      count: activeOrdersCount,
+    },
+    {
+      id: 'enquiries',
+      label: 'Bespoke Enquiries',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l2.846-.813a3.75 3.75 0 00.912-.454l9.708-9.708a2.25 2.25 0 000-3.182l-1.591-1.591a2.25 2.25 0 00-3.182 0l-9.708 9.708a3.75 3.75 0 00-.454.912z" />
+        </svg>
+      ),
+      count: pendingEnquiriesCount,
+    },
+    {
+      id: 'customers',
+      label: 'VIP Clients',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+        </svg>
+      ),
+      count: customers.length,
+    },
+    {
+      id: 'goldrates',
+      label: 'Gold Rate Manager',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-6h6m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      count: null,
+    },
+    {
+      id: 'settings',
+      label: 'Store Settings',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h11.25" />
+        </svg>
+      ),
+      count: null,
+    },
   ];
 
   // Theme-dependent styles helper
@@ -1352,11 +1536,222 @@ export default function AdminDashboardPage() {
 
         {/* TAB 3: ADMIN ENVIRONMENT SLIDER & BANNER MANAGER */}
         {activeTab === 'slides' && (
-          <ScrollReveal direction="up" delay={100} className="space-y-6">
+          <ScrollReveal direction="up" delay={100} className="space-y-8">
+            {/* REAL-TIME HERO SECTION EDITOR */}
+            <div className={`${cardBg} rounded-[5px] p-6 space-y-6`}>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-current border-opacity-15 pb-4">
+                <div>
+                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>⚡ Main Storefront Hero Section Editor</h2>
+                  <p className={`text-xs ${subtitleColor}`}>Edit headline, subtext, button links, background campaign image, and featured card live on the main website homepage.</p>
+                </div>
+                {heroSaveMsg && (
+                  <span className="px-3 py-1.5 rounded-[5px] bg-emerald-600 text-white text-xs font-bold animate-bounce shadow">
+                    ✓ Hero Section Saved & Live!
+                  </span>
+                )}
+              </div>
+
+              <form onSubmit={handleHeroSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Column: Form Inputs */}
+                  <div className="lg:col-span-7 space-y-4 text-xs">
+                    <div>
+                      <label className={`block font-semibold ${subtitleColor} mb-1`}>Brand Pre-Title Tag</label>
+                      <input
+                        type="text"
+                        value={heroForm.brandPretitle}
+                        onChange={(e) => setHeroForm({ ...heroForm, brandPretitle: e.target.value })}
+                        className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        placeholder="e.g. BHAI JEWELLER"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Headline Line 1</label>
+                        <input
+                          type="text"
+                          value={heroForm.headlineLine1}
+                          onChange={(e) => setHeroForm({ ...heroForm, headlineLine1: e.target.value })}
+                          className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          placeholder="e.g. Jewellery, made"
+                        />
+                      </div>
+                      <div>
+                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Headline Line 2 (Italic Gold)</label>
+                        <input
+                          type="text"
+                          value={heroForm.headlineLine2}
+                          onChange={(e) => setHeroForm({ ...heroForm, headlineLine2: e.target.value })}
+                          className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          placeholder="e.g. unforgettable"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={`block font-semibold ${subtitleColor} mb-1`}>Headline Line 3 (Optional)</label>
+                      <input
+                        type="text"
+                        value={heroForm.headlineLine3}
+                        onChange={(e) => setHeroForm({ ...heroForm, headlineLine3: e.target.value })}
+                        className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        placeholder="e.g. Royal Heritage"
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`block font-semibold ${subtitleColor} mb-1`}>Hero Subtitle / Description</label>
+                      <textarea
+                        rows={3}
+                        value={heroForm.description}
+                        onChange={(e) => setHeroForm({ ...heroForm, description: e.target.value })}
+                        className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        placeholder="Timeless pieces for modern souls..."
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Button Text</label>
+                        <input
+                          type="text"
+                          value={heroForm.primaryCtaText}
+                          onChange={(e) => setHeroForm({ ...heroForm, primaryCtaText: e.target.value })}
+                          className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Button Target Link</label>
+                        <input
+                          type="text"
+                          value={heroForm.primaryCtaHref}
+                          onChange={(e) => setHeroForm({ ...heroForm, primaryCtaHref: e.target.value })}
+                          className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Hero Background Image Upload */}
+                    <div className="p-4 border rounded-[5px] border-current border-opacity-20 space-y-2">
+                      <label className={`block font-bold ${accentGold}`}>Main Hero Background Image</label>
+                      <div className="flex flex-col sm:flex-row gap-2 items-center">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleHeroImageUpload(e, 'heroImage')}
+                          className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#b38b40] file:text-white cursor-pointer"
+                        />
+                        <span className={`text-[10px] ${subtitleColor}`}>or URL:</span>
+                        <input
+                          type="text"
+                          value={heroForm.heroImage}
+                          onChange={(e) => setHeroForm({ ...heroForm, heroImage: e.target.value })}
+                          className={`flex-1 px-3 py-1.5 text-xs rounded-[5px] focus:outline-none ${inputBg}`}
+                          placeholder="/images/hero-img.jpg"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Featured Collection Card Image & Info */}
+                    <div className="p-4 border rounded-[5px] border-current border-opacity-20 space-y-3">
+                      <h4 className={`font-bold ${accentGold}`}>Right Floating Featured Card Config</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className={`block ${subtitleColor} mb-1`}>Featured Title</label>
+                          <input
+                            type="text"
+                            value={heroForm.featuredTitle}
+                            onChange={(e) => setHeroForm({ ...heroForm, featuredTitle: e.target.value })}
+                            className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+                        <div>
+                          <label className={`block ${subtitleColor} mb-1`}>Featured Subtitle</label>
+                          <input
+                            type="text"
+                            value={heroForm.featuredSubtitle}
+                            onChange={(e) => setHeroForm({ ...heroForm, featuredSubtitle: e.target.value })}
+                            className={`w-full px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className={`block ${subtitleColor} mb-1`}>Featured Image (Upload from device or URL)</label>
+                        <div className="flex flex-col sm:flex-row gap-2 items-center">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleHeroImageUpload(e, 'featuredImage')}
+                            className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#b38b40] file:text-white cursor-pointer"
+                          />
+                          <input
+                            type="text"
+                            value={heroForm.featuredImage}
+                            onChange={(e) => setHeroForm({ ...heroForm, featuredImage: e.target.value })}
+                            className={`flex-1 px-3 py-1.5 text-xs rounded-[5px] focus:outline-none ${inputBg}`}
+                            placeholder="/images/featured-ring.jpg"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Interactive Real-Time Preview */}
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="sticky top-6 space-y-3">
+                      <span className={`block font-bold text-xs ${accentGold}`}>👁️ Live Real-Time Hero Preview</span>
+                      <div className="relative w-full rounded-[5px] overflow-hidden bg-[#120e0b] border border-[#3a2c23] p-6 text-white min-h-[300px] flex flex-col justify-between shadow-xl">
+                        {heroForm.heroImage && (
+                          <Image src={heroForm.heroImage} alt="Hero Preview" fill className="object-cover opacity-50 z-0" />
+                        )}
+                        <div className="relative z-10 space-y-2">
+                          <p className="text-[10px] tracking-[0.25em] text-[#dec29b] uppercase font-medium">{heroForm.brandPretitle || 'BHAI JEWELLER'}</p>
+                          <h3 className="font-serif text-2xl font-normal leading-tight">
+                            {heroForm.headlineLine1}{' '}
+                            <span className="italic text-[#dec29b] font-light">{heroForm.headlineLine2}</span>
+                            {heroForm.headlineLine3 && <span> {heroForm.headlineLine3}</span>}
+                          </h3>
+                          <p className="text-xs text-[#cfc6bc] line-clamp-3 font-light">{heroForm.description}</p>
+                          <div className="pt-2">
+                            <span className="px-4 py-2 rounded-full bg-[#dec29b] text-[#140e0b] font-bold text-xs inline-block">
+                              {heroForm.primaryCtaText || 'Shop Collection'} →
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Featured Card Preview */}
+                        <div className="relative z-10 mt-4 p-3 bg-white/10 backdrop-blur-md rounded-[5px] border border-white/20 flex items-center gap-3">
+                          <div className="relative w-12 h-12 rounded-[5px] overflow-hidden bg-gray-800 flex-shrink-0">
+                            {heroForm.featuredImage && (
+                              <Image src={heroForm.featuredImage} alt="Featured Preview" fill className="object-cover" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[9px] text-[#dec29b] font-bold uppercase tracking-wider">FEATURED</p>
+                            <p className="text-xs font-serif font-bold text-white truncate">{heroForm.featuredTitle || 'Diamond Elegance'}</p>
+                            <p className="text-[10px] text-gray-300 truncate">{heroForm.featuredSubtitle}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className={`w-full py-3.5 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-xl transition-all hover:scale-[1.01]`}
+                      >
+                        ⚡ Save Real-Time Hero Section Live
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
             <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-5 rounded-[5px]`}>
               <div>
-                <h2 className={`font-serif text-lg font-semibold ${accentGold}`}>Homepage Banner & Hero Slider Controls</h2>
-                <p className={`text-xs ${subtitleColor}`}>Add, edit, toggle visibility, and reorder full-width banner slides for the storefront.</p>
+                <h2 className={`font-serif text-lg font-semibold ${accentGold}`}>Additional Homepage Banner Slides</h2>
+                <p className={`text-xs ${subtitleColor}`}>Add, edit, toggle visibility, and reorder extra banner slides for the storefront slider.</p>
               </div>
               <button
                 onClick={() => setIsAddSlideOpen(true)}
@@ -1697,30 +2092,95 @@ export default function AdminDashboardPage() {
         {/* TAB 8: STORE SETTINGS */}
         {activeTab === 'settings' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className={`${cardBg} rounded-[5px] p-6 max-w-2xl mx-auto space-y-6`}>
+            {/* ANNOUNCEMENT BAR MANAGER */}
+            <div className={`${cardBg} rounded-[5px] p-6 max-w-3xl mx-auto space-y-6`}>
+              <div className="flex items-center justify-between border-b border-current border-opacity-15 pb-3">
+                <div>
+                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>📢 Real-Time Top Announcement Bar Manager</h2>
+                  <p className={`text-xs ${subtitleColor}`}>Edit promotional top-bar text slides & toggle visibility on main site live.</p>
+                </div>
+                {announcementSaveMsg && (
+                  <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-[5px] animate-bounce shadow">
+                    ✓ Announcement Live!
+                  </span>
+                )}
+              </div>
+
+              <form onSubmit={handleAnnouncementSubmit} className="space-y-4 text-xs">
+                {/* Enable/Disable Toggle */}
+                <div className="flex items-center justify-between p-3 rounded-[5px] border border-current border-opacity-20">
+                  <div>
+                    <span className={`font-bold ${titleColor}`}>Enable Announcement Top Bar</span>
+                    <p className={`text-[10px] ${subtitleColor}`}>Shows rotating notification bar at top of desktop site.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAnnouncementForm(prev => ({ ...prev, isEnabled: !prev.isEnabled }))}
+                    className={`px-4 py-1.5 rounded-full font-bold text-xs transition-all ${
+                      announcementForm.isEnabled
+                        ? 'bg-emerald-600 text-white shadow'
+                        : 'bg-gray-400 text-gray-900'
+                    }`}
+                  >
+                    {announcementForm.isEnabled ? 'ON (Visible)' : 'OFF (Hidden)'}
+                  </button>
+                </div>
+
+                <div>
+                  <label className={`block font-semibold ${subtitleColor} mb-1`}>Announcement Message 1</label>
+                  <input
+                    type="text"
+                    value={announcementForm.message1}
+                    onChange={(e) => setAnnouncementForm({ ...announcementForm, message1: e.target.value })}
+                    className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                    placeholder="Free worldwide shipping on all orders over $150..."
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold ${subtitleColor} mb-1`}>Announcement Message 2</label>
+                  <input
+                    type="text"
+                    value={announcementForm.message2}
+                    onChange={(e) => setAnnouncementForm({ ...announcementForm, message2: e.target.value })}
+                    className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                    placeholder="Complimentary luxury gift packaging on every order..."
+                  />
+                </div>
+
+                <div>
+                  <label className={`block font-semibold ${subtitleColor} mb-1`}>Announcement Message 3</label>
+                  <input
+                    type="text"
+                    value={announcementForm.message3}
+                    onChange={(e) => setAnnouncementForm({ ...announcementForm, message3: e.target.value })}
+                    className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                    placeholder="Fine jewellery showroom in Bradford, West Yorkshire..."
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md`}
+                >
+                  📢 Save & Push Announcement Bar Live
+                </button>
+              </form>
+            </div>
+
+            {/* STORE CONFIGURATION */}
+            <div className={`${cardBg} rounded-[5px] p-6 max-w-3xl mx-auto space-y-6`}>
               <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Storewide Configuration</h2>
 
-              <div className="space-y-4">
+              <div className="space-y-4 text-xs">
                 <div>
-                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
+                  <label className={`block uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
                     Free Shipping Threshold ($)
                   </label>
                   <input
                     type="text"
                     value={shippingThreshold}
                     onChange={(e) => setShippingThreshold(e.target.value)}
-                    className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-xs uppercase tracking-wider ${subtitleColor} mb-1 font-semibold`}>
-                    Announcement Top Banner Text
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={noticeBanner}
-                    onChange={(e) => setNoticeBanner(e.target.value)}
                     className={`w-full text-sm px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                   />
                 </div>
