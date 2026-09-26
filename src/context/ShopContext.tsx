@@ -82,6 +82,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   // Load from localStorage and sync live API products on mount
   useEffect(() => {
+    let localProds: ProductItem[] = [];
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
       const savedWishlist = localStorage.getItem(WISHLIST_STORAGE_KEY);
@@ -90,7 +91,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
       if (savedProducts) {
         const parsed = JSON.parse(savedProducts);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          localProds = parsed;
           setProducts(parsed);
         }
       }
@@ -103,7 +105,21 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {
-          setProducts(data.data);
+          if (data.data.length > 0) {
+            setProducts(data.data);
+            try {
+              localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(data.data));
+            } catch (e) {}
+          } else if (localProds.length > 0) {
+            // Server DB is empty, sync local products back to server
+            localProds.forEach((prod) => {
+              fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(prod),
+              }).catch(() => {});
+            });
+          }
         }
       })
       .catch((err) => console.error('Failed to fetch live products from API:', err));
@@ -127,8 +143,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   // Sync products to localStorage
   useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+    if (isLoaded && products.length > 0) {
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(products));
+      } catch (e) {}
     }
   }, [products, isLoaded]);
 
@@ -190,11 +208,24 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const clearWishlist = () => setWishlist([]);
 
   const addProduct = (newProd: ProductItem) => {
-    setProducts((prev) => [newProd, ...prev]);
+    setProducts((prev) => {
+      const updated = [newProd, ...prev.filter((p) => p.id !== newProd.id)];
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
   };
 
   const deleteProduct = (id: string) => {
-    setProducts((prev) => prev.filter((p) => p.id !== id));
+    setProducts((prev) => {
+      const updated = prev.filter((p) => p.id !== id);
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    fetch(`/api/products?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);

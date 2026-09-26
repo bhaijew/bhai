@@ -1,27 +1,17 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useShop } from '@/context/ShopContext';
+import { useShop, ProductItem } from '@/context/ShopContext';
 
-interface Product {
-  id: string;
-  name: string;
-  metal: string;
-  purity: string;
-  price: number;
-  image: string;
-  alt: string;
-  href: string;
-}
-
-const row1Products: Product[] = [];
-const row2Products: Product[] = [];
-
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product }: { product: ProductItem }) {
   const { addToCart, toggleWishlist, isInWishlist } = useShop();
   const [added, setAdded] = useState(false);
+
+  const imgSrc = product.image || (product.images && product.images[0]) || '/images/detail-ring-hero.jpg';
+  const slug = product.slug || product.id;
+  const purity = product.category === 'Rings' ? '21ct Gold' : (product.metal || '18k Gold');
 
   const handleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -29,12 +19,12 @@ function ProductCard({ product }: { product: Product }) {
     toggleWishlist({
       id: product.id,
       name: product.name,
-      category: product.metal,
+      category: product.category || product.metal,
       price: product.price,
-      rating: 5,
-      reviewCount: 12,
-      image: product.image,
-      slug: 'solara-diamond-ring',
+      rating: product.rating || 5,
+      reviewCount: product.reviewCount || 12,
+      image: imgSrc,
+      slug: slug,
     });
   };
 
@@ -44,9 +34,10 @@ function ProductCard({ product }: { product: Product }) {
     addToCart({
       id: product.id,
       name: product.name,
-      variant: product.purity,
+      variant: purity,
       price: product.price,
-      image: product.image,
+      image: imgSrc,
+      slug: slug,
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -54,13 +45,14 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <div className="group flex flex-col text-left transition-all duration-300 w-[150px] sm:w-[190px] md:w-[220px] flex-shrink-0 snap-start select-none">
-      <Link href={product.href} className="block">
+      <Link href={`/shop/${slug}`} className="block">
         {/* Product Image Container */}
         <div className="relative w-full aspect-square rounded-[14px] sm:rounded-2xl overflow-hidden bg-[#e5ebf0] shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <Image
-            src={product.image}
-            alt={product.alt}
+            src={imgSrc}
+            alt={product.name}
             fill
+            unoptimized={true}
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 220px"
             className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
           />
@@ -91,14 +83,21 @@ function ProductCard({ product }: { product: Product }) {
           </h3>
 
           <p className="text-[10px] sm:text-xs text-[#8c7e73] font-light mt-1 flex items-center gap-1.5 tracking-tight truncate">
-            <span>{product.metal}</span>
+            <span>{product.metal || product.category}</span>
             <span className="text-[8px]">•</span>
-            <span>{product.purity}</span>
+            <span>{purity}</span>
           </p>
 
-          <p className="text-[14px] sm:text-[16px] font-bold text-[#111111] mt-1.5 tracking-tight">
-            £{product.price.toFixed(2)}
-          </p>
+          <div className="flex items-center gap-2 mt-1.5">
+            <p className="text-[14px] sm:text-[16px] font-bold text-[#111111] tracking-tight">
+              £{Number(product.price).toFixed(2)}
+            </p>
+            {product.originalPrice && product.originalPrice > product.price && (
+              <p className="text-[11px] sm:text-[12px] text-[#9a897b] line-through font-light">
+                £{Number(product.originalPrice).toFixed(2)}
+              </p>
+            )}
+          </div>
         </div>
       </Link>
 
@@ -118,7 +117,7 @@ function ProductCard({ product }: { product: Product }) {
   );
 }
 
-function ProductRow({ products }: { products: Product[] }) {
+function ProductRow({ products }: { products: ProductItem[] }) {
   const rowRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (direction: 'left' | 'right') => {
@@ -134,28 +133,32 @@ function ProductRow({ products }: { products: Product[] }) {
   return (
     <div className="relative w-full group/row my-1">
       {/* Left Navigation Arrow */}
-      <button
-        type="button"
-        onClick={() => handleScroll('left')}
-        aria-label="Scroll left"
-        className="absolute left-0 sm:left-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
-      >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
+      {products.length > 4 && (
+        <button
+          type="button"
+          onClick={() => handleScroll('left')}
+          aria-label="Scroll left"
+          className="absolute left-0 sm:left-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
+        >
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+      )}
 
       {/* Right Navigation Arrow */}
-      <button
-        type="button"
-        onClick={() => handleScroll('right')}
-        aria-label="Scroll right"
-        className="absolute right-0 sm:right-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
-      >
-        <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      {products.length > 4 && (
+        <button
+          type="button"
+          onClick={() => handleScroll('right')}
+          aria-label="Scroll right"
+          className="absolute right-0 sm:right-1 top-[38%] -translate-y-1/2 z-30 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-[#111111] hover:bg-[#9e7d56] active:scale-95 text-white shadow-xl flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none border-2 border-white/90"
+        >
+          <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      )}
 
       {/* Scrollable Container */}
       <div
@@ -172,6 +175,22 @@ function ProductRow({ products }: { products: Product[] }) {
 }
 
 export function FeaturedProducts() {
+  const { products } = useShop();
+
+  const { row1, row2 } = useMemo(() => {
+    if (!products || products.length === 0) {
+      return { row1: [], row2: [] };
+    }
+    if (products.length <= 6) {
+      return { row1: products, row2: [] };
+    }
+    const mid = Math.ceil(products.length / 2);
+    return {
+      row1: products.slice(0, mid),
+      row2: products.slice(mid),
+    };
+  }, [products]);
+
   return (
     <section className="w-full bg-[#f6efdb] py-7 sm:py-12 lg:py-16">
       <div className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8">
@@ -196,7 +215,7 @@ export function FeaturedProducts() {
         </div>
 
         {/* Products or Clean Empty State */}
-        {row1Products.length === 0 && row2Products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="bg-[#fdfaf3] rounded-2xl border border-[#e5dabf] p-8 sm:p-12 text-center shadow-2xs">
             <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#f6efdb] border border-[#e5dabf] flex items-center justify-center text-[#9e7d56]">
               <svg className="w-6 h-6 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,8 +229,8 @@ export function FeaturedProducts() {
           </div>
         ) : (
           <div className="flex flex-col gap-5 sm:gap-8">
-            {row1Products.length > 0 && <div><ProductRow products={row1Products} /></div>}
-            {row2Products.length > 0 && <div><ProductRow products={row2Products} /></div>}
+            {row1.length > 0 && <div><ProductRow products={row1} /></div>}
+            {row2.length > 0 && <div><ProductRow products={row2} /></div>}
           </div>
         )}
 

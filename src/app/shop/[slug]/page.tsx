@@ -1,48 +1,90 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 
-interface ProductDetailPageProps {
-  params: Promise<{ slug: string }>;
-}
-
-const productGallery = [
-  '/images/detail-ring-hero.jpg',
-  '/images/detail-thumb-1.jpg',
-  '/images/detail-thumb-2.jpg',
-  '/images/detail-thumb-3.jpg',
-  '/images/detail-thumb-4.jpg',
-];
-
 export default function ProductDetailPage() {
-  const { addToCart, toggleWishlist, isInWishlist } = useShop();
+  const params = useParams();
+  const rawSlug = params?.slug as string | undefined;
+  const { addToCart, toggleWishlist, isInWishlist, products } = useShop();
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('7');
   const [openAccordion, setOpenAccordion] = useState<string | null>('details');
   const [addedToCart, setAddedToCart] = useState(false);
 
-  const productData = {
-    id: 'solara-ring',
-    name: 'Solara Diamond Ring',
-    category: 'Rings',
-    price: 1280,
-    rating: 5,
-    reviewCount: 12,
-    image: '/images/detail-ring-hero.jpg',
-    slug: 'solara-diamond-ring',
-  };
+  // Find dynamic product from store
+  const currentProduct = useMemo(() => {
+    if (!rawSlug) return null;
+    return products.find(
+      (p) => p.slug === rawSlug || p.id === rawSlug || p.slug === decodeURIComponent(rawSlug)
+    ) || null;
+  }, [rawSlug, products]);
+
+  // Fallback product details if matching
+  const productData = useMemo(() => {
+    if (currentProduct) {
+      const allImgs = [
+        currentProduct.image,
+        ...(currentProduct.images || []),
+      ].filter(Boolean);
+
+      return {
+        id: currentProduct.id,
+        name: currentProduct.name,
+        category: currentProduct.category || 'Fine Jewellery',
+        price: currentProduct.price,
+        originalPrice: currentProduct.originalPrice || currentProduct.price,
+        metal: currentProduct.metal || '18k Gold',
+        weight: currentProduct.weightGrams ? `${currentProduct.weightGrams}g` : '4.5g',
+        description: currentProduct.description || `Exquisite handcrafted ${currentProduct.metal || '18k gold'} ${currentProduct.name} designed by master artisans with hallmark certification.`,
+        rating: currentProduct.rating || 5,
+        reviewCount: currentProduct.reviewCount || 12,
+        images: allImgs.length > 0 ? allImgs : ['/images/detail-ring-hero.jpg'],
+        slug: currentProduct.slug || currentProduct.id,
+        sku: currentProduct.sku || `BJ-${currentProduct.id.slice(-4)}`,
+        stock: currentProduct.stock ?? 10,
+      };
+    }
+
+    // Default luxury fallback
+    return {
+      id: rawSlug || 'solara-ring',
+      name: rawSlug ? rawSlug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Solara Diamond Ring',
+      category: 'Rings',
+      price: 1280,
+      originalPrice: 1650,
+      metal: '18k Solid Gold',
+      weight: '4.2g',
+      description: 'A timeless solitaire ring crafted in 18k solid gold with a brilliant-cut diamond. Elegant, classic and made to last forever.',
+      rating: 5,
+      reviewCount: 12,
+      images: [
+        '/images/detail-ring-hero.jpg',
+        '/images/detail-thumb-1.jpg',
+        '/images/detail-thumb-2.jpg',
+        '/images/detail-thumb-3.jpg',
+        '/images/detail-thumb-4.jpg',
+      ],
+      slug: rawSlug || 'solara-diamond-ring',
+      sku: 'BJ-SLR-1001',
+      stock: 10,
+    };
+  }, [currentProduct, rawSlug]);
+
+  const productGallery = productData.images;
 
   const handleAddToCart = () => {
     addToCart({
       id: productData.id,
       name: productData.name,
-      variant: `Ring Size: ${selectedSize}`,
+      variant: `Size: ${selectedSize}`,
       price: productData.price,
-      image: productData.image,
+      image: productGallery[0] || '/images/detail-ring-hero.jpg',
       slug: productData.slug,
     });
     setAddedToCart(true);
@@ -50,7 +92,16 @@ export default function ProductDetailPage() {
   };
 
   const handleToggleWishlist = () => {
-    toggleWishlist(productData);
+    toggleWishlist({
+      id: productData.id,
+      name: productData.name,
+      category: productData.category,
+      price: productData.price,
+      rating: productData.rating,
+      reviewCount: productData.reviewCount,
+      image: productGallery[0] || '/images/detail-ring-hero.jpg',
+      slug: productData.slug,
+    });
   };
 
   const toggleAccordion = (id: string) => {
@@ -70,7 +121,7 @@ export default function ProductDetailPage() {
             <span>/</span>
             <Link href="/shop" className="hover:text-[#1c1510] transition-colors">Shop</Link>
             <span>/</span>
-            <span className="text-[#1c1510] font-normal truncate">Solara Diamond Ring</span>
+            <span className="text-[#1c1510] font-normal truncate">{productData.name}</span>
           </nav>
         </ScrollReveal>
 
@@ -83,10 +134,11 @@ export default function ProductDetailPage() {
               {/* Main Image Container */}
               <div className="relative w-full aspect-[4/3] sm:aspect-[4/3] rounded-[5px] overflow-hidden bg-[#e8ded4] shadow-xs">
                 <Image
-                  src={productGallery[activeImageIndex]}
-                  alt="Solara Diamond Ring"
+                  src={productGallery[activeImageIndex] || productGallery[0] || '/images/detail-ring-hero.jpg'}
+                  alt={productData.name}
                   fill
                   priority
+                  unoptimized={true}
                   sizes="(max-width: 1024px) 100vw, 600px"
                   className="object-cover transition-all duration-500"
                 />
@@ -115,39 +167,45 @@ export default function ProductDetailPage() {
                 </span>
 
                 {/* Arrow navigation on image */}
-                <button
-                  type="button"
-                  onClick={() => setActiveImageIndex((i) => (i === 0 ? productGallery.length - 1 : i - 1))}
-                  aria-label="Previous image"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center text-xs shadow-xs hover:bg-white"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveImageIndex((i) => (i === productGallery.length - 1 ? 0 : i + 1))}
-                  aria-label="Next image"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center text-xs shadow-xs hover:bg-white"
-                >
-                  ›
-                </button>
+                {productGallery.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex((i) => (i === 0 ? productGallery.length - 1 : i - 1))}
+                      aria-label="Previous image"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center text-xs shadow-xs hover:bg-white"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveImageIndex((i) => (i === productGallery.length - 1 ? 0 : i + 1))}
+                      aria-label="Next image"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white/80 backdrop-blur-xs flex items-center justify-center text-xs shadow-xs hover:bg-white"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
               </div>
 
               {/* Thumbnails Row */}
-              <div className="grid grid-cols-5 gap-2 mt-3">
-                {productGallery.map((img, idx) => (
-                  <button
-                    key={img}
-                    type="button"
-                    onClick={() => setActiveImageIndex(idx)}
-                    className={`relative aspect-square rounded-[5px] overflow-hidden bg-[#e8ded4] border-2 transition-all ${
-                      activeImageIndex === idx ? 'border-[#1c1510] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
-                    }`}
-                  >
-                    <Image src={img} alt="Thumbnail" fill sizes="100px" className="object-cover" />
-                  </button>
-                ))}
-              </div>
+              {productGallery.length > 1 && (
+                <div className="grid grid-cols-5 gap-2 mt-3">
+                  {productGallery.map((img, idx) => (
+                    <button
+                      key={`${img}-${idx}`}
+                      type="button"
+                      onClick={() => setActiveImageIndex(idx)}
+                      className={`relative aspect-square rounded-[5px] overflow-hidden bg-[#e8ded4] border-2 transition-all ${
+                        activeImageIndex === idx ? 'border-[#1c1510] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <Image src={img} alt="Thumbnail" fill unoptimized={true} sizes="100px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </ScrollReveal>
           </div>
 
@@ -156,7 +214,7 @@ export default function ProductDetailPage() {
             <ScrollReveal delay={100}>
               {/* Title */}
               <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#1c1510] font-normal leading-tight">
-                Solara Diamond Ring
+                {productData.name}
               </h1>
 
               {/* Rating Stars & Reviews */}
@@ -168,25 +226,30 @@ export default function ProductDetailPage() {
                     </svg>
                   ))}
                 </div>
-                <span className="text-xs text-[#8a796c] font-light">(12 reviews)</span>
+                <span className="text-xs text-[#8a796c] font-light">({productData.reviewCount} reviews)</span>
+                <span className="text-xs text-[#8a796c] font-light">• SKU: {productData.sku}</span>
               </div>
 
               {/* Price & Discount Badge */}
               <div className="flex items-center gap-3 mt-3">
                 <span className="font-serif text-2xl sm:text-3xl font-medium text-[#1c1510]">
-                  $1,280
+                  £{Number(productData.price).toLocaleString()}
                 </span>
-                <span className="text-sm text-[#9a897b] line-through font-light">
-                  $1,650
-                </span>
-                <span className="px-2.5 py-0.5 rounded-[5px] bg-[#dec29b]/25 border border-[#dec29b]/40 text-[#5a4329] text-[10.5px] font-semibold">
-                  22% OFF
-                </span>
+                {productData.originalPrice > productData.price && (
+                  <>
+                    <span className="text-sm text-[#9a897b] line-through font-light">
+                      £{Number(productData.originalPrice).toLocaleString()}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-[5px] bg-[#dec29b]/25 border border-[#dec29b]/40 text-[#5a4329] text-[10.5px] font-semibold">
+                      {Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100)}% OFF
+                    </span>
+                  </>
+                )}
               </div>
 
               {/* Short Description */}
               <p className="text-xs sm:text-sm text-[#6b5c50] font-light leading-relaxed mt-3">
-                A timeless solitaire ring crafted in 18k gold with a brilliant-cut diamond. Elegant, classic and made to last forever.
+                {productData.description}
               </p>
 
               {/* Trust Assurance Badges */}
@@ -196,7 +259,7 @@ export default function ProductDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h12l4 6-10 12L2 9l4-6z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M2 9h20M7 3l5 18 5-18" />
                   </svg>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">18k Gold</span>
+                  <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">{productData.metal}</span>
                   <span className="text-[9px] text-[#8a796c] font-light">Hallmarked</span>
                 </div>
                 <div className="flex flex-col items-center">
@@ -204,21 +267,21 @@ export default function ProductDetailPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
                   </svg>
                   <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">Certified</span>
-                  <span className="text-[9px] text-[#8a796c] font-light">Diamond</span>
+                  <span className="text-[9px] text-[#8a796c] font-light">Purity Guaranteed</span>
                 </div>
                 <div className="flex flex-col items-center">
                   <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                   </svg>
                   <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">Free</span>
-                  <span className="text-[9px] text-[#8a796c] font-light">Shipping</span>
+                  <span className="text-[9px] text-[#8a796c] font-light">Insured Shipping</span>
                 </div>
               </div>
 
-              {/* Ring Size Selector */}
+              {/* Size Selector if relevant */}
               <div className="mt-1">
                 <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="font-medium text-[#1c1510]">Ring Size</span>
+                  <span className="font-medium text-[#1c1510]">Size</span>
                   <button type="button" onClick={() => toggleAccordion('sizeGuide')} className="text-[#9e7d56] hover:underline font-light text-[11px]">
                     Size Guide
                   </button>
@@ -254,12 +317,13 @@ export default function ProductDetailPage() {
                   <span>{addedToCart ? 'Added to Cart!' : 'Add to Cart'}</span>
                 </button>
 
-                <button
-                  type="button"
-                  className="w-full py-3 rounded-[5px] bg-[#f0e8dc] text-[#1c1510] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#e6dccf] active:scale-[0.99] transition-all"
+                <Link
+                  href="/checkout"
+                  onClick={handleAddToCart}
+                  className="w-full py-3 rounded-[5px] bg-[#f0e8dc] text-[#1c1510] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#e6dccf] active:scale-[0.99] transition-all text-center"
                 >
                   Buy Now
-                </button>
+                </Link>
               </div>
 
               {/* ── Product Accordions ── */}
@@ -276,7 +340,7 @@ export default function ProductDetailPage() {
                   </button>
                   {openAccordion === 'details' && (
                     <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn">
-                      Crafted in fine 18k solid gold, this solitaire ring features a handset lab-certified brilliant-cut diamond with a polished cathedral band.
+                      {productData.description}
                     </div>
                   )}
                 </div>
@@ -288,50 +352,15 @@ export default function ProductDetailPage() {
                     onClick={() => toggleAccordion('material')}
                     className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
                   >
-                    <span>Material</span>
+                    <span>Material & Specifications</span>
                     <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'material' ? '−' : '+'}</span>
                   </button>
                   {openAccordion === 'material' && (
                     <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
-                      <p>• Metal: 18k Solid Yellow Gold (Hallmarked 750)</p>
-                      <p>• Weight: Approx 4.2 grams</p>
-                      <p>• Finish: High Mirror Polish</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Diamond Details */}
-                <div className="py-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion('diamond')}
-                    className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
-                  >
-                    <span>Diamond Details</span>
-                    <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'diamond' ? '−' : '+'}</span>
-                  </button>
-                  {openAccordion === 'diamond' && (
-                    <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
-                      <p>• Carat: 0.75 ct Center Stone</p>
-                      <p>• Clarity: VS1 / Colour: F-G</p>
-                      <p>• Cut: Round Brilliant Ideal Cut</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Ring Size Guide */}
-                <div className="py-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion('sizeGuide')}
-                    className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
-                  >
-                    <span>Ring Size Guide</span>
-                    <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'sizeGuide' ? '−' : '+'}</span>
-                  </button>
-                  {openAccordion === 'sizeGuide' && (
-                    <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
-                      <p>Standard UK/US sizing. Need a complimentary ring sizer? Contact our customer care.</p>
+                      <p>• Metal: {productData.metal}</p>
+                      <p>• Weight: {productData.weight}</p>
+                      <p>• Category: {productData.category}</p>
+                      <p>• Certification: Authentic UK & International Hallmark Certified</p>
                     </div>
                   )}
                 </div>
@@ -367,22 +396,26 @@ export default function ProductDetailPage() {
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-              {[
-                { name: 'Lumiere Necklace', price: '$980', image: '/images/shop-prod-2.jpg' },
-                { name: 'Valera Earrings', price: '$760', image: '/images/shop-prod-3.jpg' },
-              ].map((item) => (
+              {products.filter(p => p.id !== productData.id).slice(0, 4).map((item) => (
                 <Link
-                  key={item.name}
-                  href="/shop"
+                  key={item.id}
+                  href={`/shop/${item.slug || item.id}`}
                   className="group flex flex-col bg-white rounded-[5px] overflow-hidden border border-[#ede5db] p-2.5 hover:shadow-md transition-all"
                 >
                   <div className="relative aspect-square rounded-[5px] overflow-hidden bg-[#f5efe7]">
-                    <Image src={item.image} alt={item.name} fill sizes="200px" className="object-cover group-hover:scale-105 transition-transform" />
+                    <Image
+                      src={item.image || (item.images && item.images[0]) || '/images/shop-prod-2.jpg'}
+                      alt={item.name}
+                      fill
+                      unoptimized={true}
+                      sizes="200px"
+                      className="object-cover group-hover:scale-105 transition-transform"
+                    />
                   </div>
                   <h3 className="font-serif text-xs sm:text-sm font-medium text-[#1c1510] mt-2 group-hover:text-[#9e7d56] transition-colors truncate">
                     {item.name}
                   </h3>
-                  <p className="text-xs font-semibold text-[#1c1510] mt-0.5">{item.price}</p>
+                  <p className="text-xs font-semibold text-[#1c1510] mt-0.5">£{Number(item.price).toFixed(2)}</p>
                 </Link>
               ))}
             </div>
@@ -402,7 +435,7 @@ export default function ProductDetailPage() {
                 type="button"
                 className="mt-2.5 px-3 py-1.5 rounded-[5px] border border-[#1c1510] text-[11px] font-medium text-[#1c1510] hover:bg-[#1c1510] hover:text-white transition-colors"
               >
-                Add Gift Box + $25
+                Complimentary Gift Box Included
               </button>
             </div>
           </div>

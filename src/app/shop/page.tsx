@@ -176,9 +176,10 @@ export default function ShopPage() {
                   {/* Product Image + Heart Wishlist Button */}
                   <div className="relative w-full aspect-square bg-[#f5efe7] overflow-hidden">
                     <Image
-                      src={p.image}
+                      src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'}
                       alt={p.name}
                       fill
+                      unoptimized={true}
                       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
                       className="object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
                     />
