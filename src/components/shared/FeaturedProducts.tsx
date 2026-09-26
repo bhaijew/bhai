@@ -16,151 +16,8 @@ interface Product {
   href: string;
 }
 
-const row1Products: Product[] = [
-  {
-    id: 'ring-textured-star',
-    name: '21ct Gold Textured Star Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 244.22,
-    image: '/images/ring-star.jpg',
-    alt: '21ct Gold Textured Star Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-double-chain',
-    name: '21ct Gold Double Chain Sparkle Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 332.56,
-    image: '/images/ring-double-chain.jpg',
-    alt: '21ct Gold Double Chain Sparkle Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-triple-band',
-    name: '21ct Gold Triple Band Sparkle Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 349.00,
-    image: '/images/category-rings.jpg',
-    alt: '21ct Gold Triple Band Sparkle Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-beaded-cut',
-    name: '21ct Gold Beaded Diamond Cut Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 289.50,
-    image: '/images/featured-ring.jpg',
-    alt: '21ct Gold Beaded Diamond Cut Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-crown-solitaire',
-    name: '21ct Gold Crown Solitaire Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 315.00,
-    image: '/images/ring-star.jpg',
-    alt: '21ct Gold Crown Solitaire Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-luxe-chain',
-    name: '21ct Gold Luxe Chain Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 343.21,
-    image: '/images/shop-prod-1.jpg',
-    alt: '21ct Gold Luxe Chain Ring',
-    href: '/shop',
-  },
-  {
-    id: 'ring-crossover-sparkle',
-    name: '21ct Gold Elegant Crossover Ring',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 340.61,
-    image: '/images/shop-prod-2.jpg',
-    alt: '21ct Gold Elegant Crossover Ring',
-    href: '/shop',
-  },
-];
-
-const row2Products: Product[] = [
-  {
-    id: 'necklace-lumiere',
-    name: '21ct Gold Lumière Teardrop Pendant',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 420.00,
-    image: '/images/category-necklaces.jpg',
-    alt: '21ct Gold Lumière Teardrop Pendant',
-    href: '/shop',
-  },
-  {
-    id: 'bracelet-eclat',
-    name: '21ct Gold Éclat Diamond Cut Bracelet',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 390.00,
-    image: '/images/category-bracelets.jpg',
-    alt: '21ct Gold Éclat Diamond Cut Bracelet',
-    href: '/shop',
-  },
-  {
-    id: 'earrings-velora',
-    name: '21ct Gold Velora Drop Earrings',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 360.00,
-    image: '/images/category-earrings.jpg',
-    alt: '21ct Gold Velora Drop Earrings',
-    href: '/shop',
-  },
-  {
-    id: 'necklace-heritage',
-    name: '21ct Gold Heritage Rope Chain',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 580.00,
-    image: '/images/category-necklaces.jpg',
-    alt: '21ct Gold Heritage Rope Chain',
-    href: '/shop',
-  },
-  {
-    id: 'bracelet-filigree',
-    name: '21ct Gold Filigree Floral Bangle',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 610.00,
-    image: '/images/category-bracelets.jpg',
-    alt: '21ct Gold Filigree Floral Bangle',
-    href: '/shop',
-  },
-  {
-    id: 'necklace-royal-drop',
-    name: '21ct Gold Royal Diamond Drop Necklace',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 495.00,
-    image: '/images/shop-prod-3.jpg',
-    alt: '21ct Gold Royal Diamond Drop Necklace',
-    href: '/shop',
-  },
-  {
-    id: 'earrings-starlight',
-    name: '21ct Gold Starlight Chandelier Earrings',
-    metal: 'Yellow Gold',
-    purity: '875 (21ct)',
-    price: 525.00,
-    image: '/images/shop-prod-4.jpg',
-    alt: '21ct Gold Starlight Chandelier Earrings',
-    href: '/shop',
-  },
-];
+const row1Products: Product[] = [];
+const row2Products: Product[] = [];
 
 function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleWishlist, isInWishlist } = useShop();
@@ -338,18 +195,25 @@ export function FeaturedProducts() {
           </Link>
         </div>
 
-        {/* Two Horizontal Scrollable Rows */}
-        <div className="flex flex-col gap-5 sm:gap-8">
-          {/* Row 1: Horizontal Scrollable */}
-          <div>
-            <ProductRow products={row1Products} />
+        {/* Products or Clean Empty State */}
+        {row1Products.length === 0 && row2Products.length === 0 ? (
+          <div className="bg-[#fdfaf3] rounded-2xl border border-[#e5dabf] p-8 sm:p-12 text-center shadow-2xs">
+            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#f6efdb] border border-[#e5dabf] flex items-center justify-center text-[#9e7d56]">
+              <svg className="w-6 h-6 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            <h3 className="font-serif text-lg sm:text-xl text-[#111111] font-normal">No products available currently</h3>
+            <p className="text-xs text-[#8c7e73] font-light mt-1 max-w-sm mx-auto">
+              Our new luxury collection is launching soon. Stay tuned!
+            </p>
           </div>
-
-          {/* Row 2: Horizontal Scrollable */}
-          <div>
-            <ProductRow products={row2Products} />
+        ) : (
+          <div className="flex flex-col gap-5 sm:gap-8">
+            {row1Products.length > 0 && <div><ProductRow products={row1Products} /></div>}
+            {row2Products.length > 0 && <div><ProductRow products={row2Products} /></div>}
           </div>
-        </div>
+        )}
 
       </div>
     </section>

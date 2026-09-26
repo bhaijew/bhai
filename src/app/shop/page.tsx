@@ -17,74 +17,7 @@ interface Product {
   slug: string;
 }
 
-const allProducts: Product[] = [
-  {
-    id: 'solara-ring',
-    name: 'Solara Diamond Ring',
-    category: 'Rings',
-    price: 1280,
-    originalPrice: 1650,
-    rating: 5,
-    reviewCount: 12,
-    image: '/images/shop-prod-1.jpg',
-    slug: 'solara-diamond-ring',
-  },
-  {
-    id: 'lumiere-necklace',
-    name: 'Lumiere Necklace',
-    category: 'Necklaces',
-    price: 980,
-    originalPrice: 1250,
-    rating: 5,
-    reviewCount: 8,
-    image: '/images/shop-prod-2.jpg',
-    slug: 'lumiere-necklace',
-  },
-  {
-    id: 'valera-earrings',
-    name: 'Valera Earrings',
-    category: 'Earrings',
-    price: 760,
-    originalPrice: 980,
-    rating: 5,
-    reviewCount: 10,
-    image: '/images/shop-prod-3.jpg',
-    slug: 'valera-earrings',
-  },
-  {
-    id: 'aurora-necklace',
-    name: 'Aurora Necklace',
-    category: 'Necklaces',
-    price: 890,
-    originalPrice: 1120,
-    rating: 5,
-    reviewCount: 9,
-    image: '/images/shop-prod-4.jpg',
-    slug: 'aurora-diamond-necklace',
-  },
-  {
-    id: 'seraphine-earrings',
-    name: 'Seraphine Earrings',
-    category: 'Earrings',
-    price: 540,
-    originalPrice: 690,
-    rating: 5,
-    reviewCount: 7,
-    image: '/images/shop-prod-5.jpg',
-    slug: 'seraphine-earrings',
-  },
-  {
-    id: 'delphine-bracelet',
-    name: 'Delphine Bracelet',
-    category: 'Bracelets',
-    price: 580,
-    originalPrice: 750,
-    rating: 5,
-    reviewCount: 11,
-    image: '/images/shop-prod-6.jpg',
-    slug: 'delphine-bracelet',
-  },
-];
+const allProducts: Product[] = [];
 
 const categories = ['All', 'Rings', 'Necklaces', 'Earrings', 'Bracelets'] as const;
 
@@ -141,7 +74,7 @@ export default function ShopPage() {
   }, [selectedCategory, sortBy]);
 
   return (
-    <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pb-16 md:pb-24">
+    <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pb-0">
 
       {/* ── Top Hero Banner (matches screen 2 mockup) ── */}
       <section className="relative w-full h-[180px] sm:h-[220px] md:h-[260px] bg-[#120e0b] overflow-hidden flex items-center justify-center text-center">
@@ -214,108 +147,123 @@ export default function ShopPage() {
           </div>
         </div>
 
-        {/* ── Product Grid: 2 cols on mobile, 4 on desktop (matches screen 2 mockup) ── */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6 pt-6">
-          {filteredProducts.map((p) => (
-            <Link
-              key={p.id}
-              href={`/shop/${p.slug}`}
-              className="group flex flex-col bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-[#ede5db] hover:border-[#c9b49a] card-luxury"
-            >
-              {/* Product Image + Heart Wishlist Button */}
-              <div className="relative w-full aspect-square bg-[#f5efe7] overflow-hidden">
-                <Image
-                  src={p.image}
-                  alt={p.name}
-                  fill
-                  sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
-                  className="object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
-                />
+        {/* ── Product Grid or Clean Empty State ── */}
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-[#ede5db] p-8 sm:p-12 text-center my-8 shadow-xs">
+            <div className="w-14 h-14 mx-auto mb-3.5 rounded-full bg-[#faf6f0] border border-[#ede5db] flex items-center justify-center text-[#9e7d56]">
+              <svg className="w-7 h-7 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+              </svg>
+            </div>
+            <h2 className="font-serif text-xl text-[#1c1510]">No products available currently</h2>
+            <p className="text-xs text-[#7d6f63] font-light mt-1.5 max-w-md mx-auto">
+              Our store is being prepared with exclusive luxury pieces. Please check back soon!
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6 pt-6">
+            {filteredProducts.map((p) => (
+              <Link
+                key={p.id}
+                href={`/shop/${p.slug}`}
+                className="group flex flex-col bg-white rounded-xl sm:rounded-2xl overflow-hidden border border-[#ede5db] hover:border-[#c9b49a] card-luxury"
+              >
+                {/* Product Image + Heart Wishlist Button */}
+                <div className="relative w-full aspect-square bg-[#f5efe7] overflow-hidden">
+                  <Image
+                    src={p.image}
+                    alt={p.name}
+                    fill
+                    sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
+                    className="object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
+                  />
 
-                {/* Subtle Luxury Hallmark Badge */}
-                <span className="absolute top-2.5 left-2.5 z-10 text-[8.5px] sm:text-[9.5px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#805f32] border border-[#dec29b]/40 shadow-2xs">
-                  {p.category === 'Rings' ? '21ct Gold' : 'Hallmark'}
-                </span>
+                  {/* Subtle Luxury Hallmark Badge */}
+                  <span className="absolute top-2.5 left-2.5 z-10 text-[8.5px] sm:text-[9.5px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#805f32] border border-[#dec29b]/40 shadow-2xs">
+                    {p.category === 'Rings' ? '21ct Gold' : 'Hallmark'}
+                  </span>
 
-                {/* Wishlist Heart Icon */}
-                <button
-                  type="button"
-                  aria-label="Save to wishlist"
-                  onClick={(e) => handleWishlistClick(p, e)}
-                  className="absolute top-2.5 right-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-xs border border-[#eae0d5] hover:scale-110 active:scale-95 transition-all"
-                >
-                  <svg
-                    className={`w-3.5 h-3.5 ${isInWishlist(p.id) ? 'text-[#c9a87c] fill-current' : 'text-[#8a796c]'}`}
-                    fill={isInWishlist(p.id) ? 'currentColor' : 'none'}
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    viewBox="0 0 24 24"
+                  {/* Wishlist Heart Icon */}
+                  <button
+                    type="button"
+                    aria-label="Save to wishlist"
+                    onClick={(e) => handleWishlistClick(p, e)}
+                    className="absolute top-2.5 right-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center shadow-xs border border-[#eae0d5] hover:scale-110 active:scale-95 transition-all"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Product Info */}
-              <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-2.5">
-                <div>
-                  <h3 className="font-serif text-[13px] sm:text-[15px] font-normal text-[#1c1510] leading-snug group-hover:text-[#9e7d56] transition-colors truncate">
-                    {p.name}
-                  </h3>
-                  <p className="text-[10px] text-[#9a897b] font-light mt-0.5 tracking-wide">{p.category}</p>
+                    <svg
+                      className={`w-3.5 h-3.5 ${isInWishlist(p.id) ? 'text-[#c9a87c] fill-current' : 'text-[#8a796c]'}`}
+                      fill={isInWishlist(p.id) ? 'currentColor' : 'none'}
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  </button>
                 </div>
 
-                <div className="mt-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs sm:text-sm font-semibold text-[#1c1510]">
-                      ${p.price.toLocaleString()}
-                    </span>
-                    <span className="text-[10px] text-[#a09080] line-through font-light">
-                      ${p.originalPrice.toLocaleString()}
-                    </span>
+                {/* Product Info */}
+                <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between gap-2.5">
+                  <div>
+                    <h3 className="font-serif text-[13px] sm:text-[15px] font-normal text-[#1c1510] leading-snug group-hover:text-[#9e7d56] transition-colors truncate">
+                      {p.name}
+                    </h3>
+                    <p className="text-[10px] text-[#9a897b] font-light mt-0.5 tracking-wide">{p.category}</p>
                   </div>
 
-                  {/* Rating Stars */}
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="flex gap-[2px]">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <svg
-                          key={s}
-                          className="w-2.5 h-2.5 text-[#dec29b]"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
+                  <div className="mt-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs sm:text-sm font-semibold text-[#1c1510]">
+                        ${p.price.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-[#a09080] line-through font-light">
+                        ${p.originalPrice.toLocaleString()}
+                      </span>
                     </div>
-                    <span className="text-[9.5px] text-[#9a897b]">({p.reviewCount})</span>
+
+                    {/* Rating Stars */}
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className="flex gap-[2px]">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <svg
+                            key={s}
+                            className="w-2.5 h-2.5 text-[#dec29b]"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="text-[9.5px] text-[#9a897b]">({p.reviewCount})</span>
+                    </div>
                   </div>
+
+                  {/* Add to Cart Button */}
+                  <button
+                    type="button"
+                    onClick={(e) => handleAddToCartClick(p, e)}
+                    className={`w-full py-1.5 sm:py-2 rounded-full text-[11px] font-light tracking-wide transition-all border ${
+                      addedCartMap[p.id]
+                        ? 'bg-[#2d7a48] text-white border-[#2d7a48]'
+                        : 'border-[#1c1510] text-[#1c1510] hover:bg-[#1c1510] hover:text-[#f5efe8] active:scale-[0.98]'
+                    }`}
+                  >
+                    {addedCartMap[p.id] ? '✓ Added to Cart' : 'Add to Cart'}
+                  </button>
                 </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
-                {/* Add to Cart Button */}
-                <button
-                  type="button"
-                  onClick={(e) => handleAddToCartClick(p, e)}
-                  className={`w-full py-1.5 sm:py-2 rounded-full text-[11px] font-light tracking-wide transition-all border ${
-                    addedCartMap[p.id]
-                      ? 'bg-[#2d7a48] text-white border-[#2d7a48]'
-                      : 'border-[#1c1510] text-[#1c1510] hover:bg-[#1c1510] hover:text-[#f5efe8] active:scale-[0.98]'
-                  }`}
-                >
-                  {addedCartMap[p.id] ? '✓ Added to Cart' : 'Add to Cart'}
-                </button>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── Pagination (matches screen 2 mockup) ── */}
+        {/* ── Pagination ── */}
         <div className="flex items-center justify-center gap-2 pt-10 pb-12">
           <button
             type="button"
             aria-label="Previous page"
-            className="w-8 h-8 rounded-full border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] transition-colors"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
           >
             ‹
           </button>
@@ -324,10 +272,10 @@ export default function ShopPage() {
               key={page}
               type="button"
               onClick={() => setCurrentPage(page)}
-              className={`w-8 h-8 rounded-full text-xs font-light transition-all ${
+              className={`w-8 h-8 rounded-[5px] text-xs transition-all duration-300 active:scale-95 ${
                 currentPage === page
-                  ? 'bg-[#1c1510] text-[#f5efe8] font-medium'
-                  : 'text-[#6b5c50] hover:bg-[#ebdcb9]/40'
+                  ? 'bg-[#1c1510] text-[#f5efe8] font-semibold scale-105 shadow-md border border-[#1c1510]'
+                  : 'text-[#6b5c50] font-light hover:bg-[#ebdcb9]/50 hover:text-[#1c1510] border border-transparent'
               }`}
             >
               {page}
@@ -336,38 +284,41 @@ export default function ShopPage() {
           <button
             type="button"
             aria-label="Next page"
-            className="w-8 h-8 rounded-full border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] transition-colors"
+            onClick={() => setCurrentPage((prev) => Math.min(5, prev + 1))}
+            className="w-8 h-8 rounded-[5px] border border-[#ded3c5] flex items-center justify-center text-xs text-[#8a796c] hover:border-[#1c1510] hover:text-[#1c1510] hover:bg-white active:scale-95 transition-all duration-300 shadow-2xs"
           >
             ›
           </button>
         </div>
+      </div>
 
-        {/* ── "Get Exclusive Offers" Section (matches bottom of screen 2) ── */}
-        <div className="rounded-2xl bg-[#140e0b] border border-[#261d16] p-6 sm:p-10 text-center relative overflow-hidden mb-12">
-          <div className="relative z-10 max-w-md mx-auto">
-            <h2 className="font-serif text-2xl sm:text-3xl text-[#f5efe8] font-normal">
-              Get Exclusive Offers
-            </h2>
-            <p className="text-xs text-[#a89b8d] font-light mt-1.5">
-              Be the first to know about new collections, exclusive previews and special releases.
-            </p>
-            <div className="flex items-stretch rounded-full border border-[#2e231c] bg-[#1a1410] overflow-hidden mt-5 max-w-sm mx-auto">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="flex-1 bg-transparent px-4 py-2.5 text-xs text-[#f5efe8] placeholder-[#736355] outline-none font-light min-w-0"
-              />
-              <button
-                type="button"
-                className="flex-shrink-0 w-9 h-9 my-0.5 mr-0.5 rounded-full bg-gradient-to-r from-[#dec29b] to-[#cba37b] flex items-center justify-center text-[#1c1510]"
-              >
-                →
-              </button>
-            </div>
+      {/* ── "Get Exclusive Offers" Full-Width Edge-To-Edge Section ── */}
+      <section className="w-full bg-[#140e0b] border-t border-[#261d16] py-12 sm:py-16 px-4 text-center relative overflow-hidden mt-8 mb-0">
+        {/* Subtle center white divider line */}
+        <div className="w-20 h-[1.5px] bg-[#f5efe8]/40 mx-auto mb-5 rounded-full" />
+
+        <div className="relative z-10 max-w-md mx-auto">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#f5efe8] font-normal">
+            Get Exclusive Offers
+          </h2>
+          <p className="text-xs sm:text-sm text-[#a89b8d] font-light mt-2">
+            Be the first to know about new collections, exclusive previews and special releases.
+          </p>
+          <div className="flex items-stretch rounded-full border border-[#2e231c] bg-[#1a1410] overflow-hidden mt-6 max-w-sm mx-auto shadow-sm">
+            <input
+              type="email"
+              placeholder="Your email address"
+              className="flex-1 bg-transparent px-4 py-2.5 sm:py-3 text-xs text-[#f5efe8] placeholder-[#736355] outline-none font-light min-w-0"
+            />
+            <button
+              type="button"
+              className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 my-0.5 mr-0.5 rounded-full bg-gradient-to-r from-[#dec29b] to-[#cba37b] flex items-center justify-center text-[#1c1510] hover:scale-105 transition-transform"
+            >
+              →
+            </button>
           </div>
         </div>
-
-      </div>
+      </section>
     </main>
   );
 }

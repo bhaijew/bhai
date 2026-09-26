@@ -4,40 +4,11 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-const checkoutItems = [
-  {
-    id: 'solara-ring',
-    name: 'Solara Diamond Ring',
-    qty: 1,
-    price: 1280,
-    image: '/images/shop-prod-1.jpg',
-  },
-  {
-    id: 'lumiere-necklace',
-    name: 'Lumiere Necklace',
-    qty: 1,
-    price: 980,
-    image: '/images/shop-prod-2.jpg',
-  },
-  {
-    id: 'valera-earrings',
-    name: 'Valera Earrings',
-    qty: 1,
-    price: 760,
-    image: '/images/shop-prod-3.jpg',
-  },
-  {
-    id: 'eclat-bracelet',
-    name: 'Eclat Bracelet',
-    qty: 1,
-    price: 620,
-    image: '/images/shop-prod-6.jpg',
-  },
-];
+import { useShop } from '@/context/ShopContext';
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { cart } = useShop();
   const [formData, setFormData] = useState({
     fullName: '',
     address: '',
@@ -51,7 +22,7 @@ export default function CheckoutPage() {
     router.push('/checkout/payment');
   };
 
-  const subtotal = checkoutItems.reduce((acc, item) => acc + item.price * item.qty, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const tax = Math.round(subtotal * 0.1);
   const total = subtotal + tax;
 
@@ -234,24 +205,28 @@ export default function CheckoutPage() {
 
               {/* Mini Item List */}
               <div className="divide-y divide-[#f0e8dc] py-2">
-                {checkoutItems.map((item) => (
-                  <div key={item.id} className="py-2.5 flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#f5efe7] border border-[#e8ded4] flex-shrink-0">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                {cart.length === 0 ? (
+                  <p className="text-xs text-[#8a796c] font-light py-2 italic text-center">Your cart is empty</p>
+                ) : (
+                  cart.map((item) => (
+                    <div key={item.id} className="py-2.5 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-[#f5efe7] border border-[#e8ded4] flex-shrink-0">
+                          <Image src={item.image} alt={item.name} fill className="object-cover" />
+                        </div>
+                        <div>
+                          <h4 className="font-serif text-xs font-medium text-[#1c1510] truncate max-w-[170px] sm:max-w-[200px]">
+                            {item.name}
+                          </h4>
+                          <p className="text-[10.5px] text-[#8a796c] font-light mt-0.5">Qty: {item.quantity}</p>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-serif text-xs font-medium text-[#1c1510] truncate max-w-[170px] sm:max-w-[200px]">
-                          {item.name}
-                        </h4>
-                        <p className="text-[10.5px] text-[#8a796c] font-light mt-0.5">Qty: {item.qty}</p>
-                      </div>
+                      <span className="text-xs font-semibold text-[#1c1510]">
+                        ${(item.price * item.quantity).toLocaleString()}
+                      </span>
                     </div>
-                    <span className="text-xs font-semibold text-[#1c1510]">
-                      ${(item.price * item.qty).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
 
               {/* Price Breakdown */}
