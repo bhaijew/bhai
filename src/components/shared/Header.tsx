@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
 
 interface HeaderProps {
@@ -18,7 +19,22 @@ export function Header({
   isRelative = false,
 }: HeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { cartCount, wishlistCount } = useShop();
+  const router = useRouter();
+
+  // Handle ESC key press to close search mode
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isSearchOpen) {
+        setIsSearchOpen(false);
+        setSearchQuery('');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchOpen]);
 
   // Prevent background scroll when mobile drawer is open
   useEffect(() => {
@@ -31,6 +47,15 @@ export function Header({
       document.body.style.overflow = '';
     };
   }, [drawerOpen]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -49,120 +74,198 @@ export function Header({
         className={`${
           isRelative ? 'relative' : 'absolute top-0 md:top-[37px]'
         } left-0 w-full max-w-full z-40 transition-all duration-300 ${
-          solidBg
+          solidBg || isSearchOpen
             ? 'bg-[#140f0c] shadow-lg border-b border-[#2a2018]'
             : 'bg-gradient-to-b from-[#140f0c]/90 via-[#140f0c]/50 to-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 h-16 sm:h-20 md:h-24 flex items-center justify-between">
 
-          {/* ── Left: Mobile Hamburger Button (3 lines) ── */}
-          <div className="flex items-center md:hidden">
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(true)}
-              aria-label="Open navigation menu"
-              className="text-[#f5efe8] hover:text-[#d8bb93] p-1.5 -ml-1 transition-colors"
-            >
-              <svg className="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
-              </svg>
-            </button>
-          </div>
+          {/* ── SEARCH OPEN MODE (Hides all desktop page links & overlays header) ── */}
+          {isSearchOpen ? (
+            <div className="w-full flex items-center justify-between gap-3 animate-fadeIn">
 
-          {/* ── Center (Mobile) / Left (Desktop): Brand Logo ── */}
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group mx-auto md:mx-0">
-            {/* Stylized Monogram Icon */}
-            <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-[#d8bb93]/60 rounded-full bg-[#1e1713]/80 backdrop-blur-sm group-hover:border-[#d8bb93] shadow-sm transition-colors">
-              <span className="font-serif text-base sm:text-lg text-[#dec29b] italic font-semibold leading-none select-none">
-                B
-              </span>
-            </div>
-
-            {/* Wordmark */}
-            <div className="flex flex-col text-center md:text-left">
-              <span className="font-serif text-base sm:text-lg lg:text-xl tracking-[0.24em] text-[#f5efe8] font-normal leading-tight group-hover:text-[#dec29b] transition-colors">
-                {brandName}
-              </span>
-              <span className="text-[8px] sm:text-[9px] tracking-[0.38em] text-[#c0b0a0] font-light uppercase">
-                — {brandSubline} —
-              </span>
-            </div>
-          </Link>
-
-          {/* ── Desktop Navigation Links ── */}
-          <nav className="hidden md:flex items-center gap-7 lg:gap-9">
-            {navLinks.slice(0, 6).map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-[#e2dad1] hover:text-[#d8bb93] text-sm tracking-wide font-normal transition-colors duration-200 relative group py-1"
-              >
-                {link.name}
-                <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#d8bb93] transition-all duration-300 group-hover:w-full" />
+              {/* Logo (Desktop only when search is open) */}
+              <Link href="/" onClick={() => setIsSearchOpen(false)} className="hidden md:flex items-center gap-2.5 flex-shrink-0 group">
+                <div className="w-8 h-8 rounded-full border border-[#d8bb93]/60 bg-[#1e1713] flex items-center justify-center">
+                  <span className="font-serif text-base text-[#dec29b] italic font-semibold">B</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-serif text-sm tracking-[0.2em] text-[#f5efe8]">
+                    {brandName}
+                  </span>
+                  <span className="text-[7.5px] tracking-[0.3em] text-[#c0b0a0] uppercase">
+                    — {brandSubline} —
+                  </span>
+                </div>
               </Link>
-            ))}
-          </nav>
 
-          {/* ── Right Utility Icons: Search, Wishlist, Cart ── */}
-          <div className="flex items-center gap-3.5 sm:gap-5 text-[#f5efe8]">
-            {/* Search Icon */}
-            <button
-              type="button"
-              aria-label="Search jewellery"
-              className="hover:text-[#d8bb93] transition-colors p-1"
-            >
-              <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-            </button>
+              {/* Expanded Search Bar Form */}
+              <form onSubmit={handleSearchSubmit} className="flex-1 max-w-3xl relative flex items-center mx-1 sm:mx-4">
+                <div className="relative w-full flex items-center">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-[#d8bb93] absolute left-3.5 stroke-[1.8] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                  <input
+                    type="text"
+                    autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search rings, necklaces, bracelets, 21ct gold..."
+                    className="w-full bg-[#1c1511] text-[#f5efe8] text-xs sm:text-sm placeholder-[#8a796b] border border-[#3d2e24] focus:border-[#d8bb93] rounded-full pl-10 sm:pl-11 pr-10 py-2 sm:py-2.5 outline-none transition-all shadow-inner"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3.5 text-[#9a897b] hover:text-[#f5efe8] text-xs font-semibold p-1"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              </form>
 
-            {/* Wishlist (Heart) Icon — Desktop Only (in bottom nav on mobile) */}
-            <Link
-              href="/wishlist"
-              aria-label="Wishlist"
-              className="hidden md:block relative hover:text-[#d8bb93] transition-colors p-1"
-            >
-              <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-              </svg>
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dec29b] text-[#1c1510] font-bold text-[9px] rounded-full flex items-center justify-center shadow-md">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSearchOpen(false);
+                  setSearchQuery('');
+                }}
+                aria-label="Close search"
+                className="flex-shrink-0 px-3 py-1.5 rounded-full border border-[#3d2e24] text-[#d8bb93] hover:text-white hover:bg-[#2a2018] transition-all flex items-center gap-1.5 text-xs font-light"
+              >
+                <span>Close</span>
+                <svg className="w-3.5 h-3.5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
-            {/* Shopping Bag Icon with Badge — Desktop Only (in bottom nav on mobile) */}
-            <Link
-              href="/cart"
-              aria-label="Shopping bag"
-              className="hidden md:block relative hover:text-[#d8bb93] transition-colors p-1"
-            >
-              <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dec29b] text-[#1c1510] font-bold text-[9px] rounded-full flex items-center justify-center shadow-md">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
+            </div>
+          ) : (
+            /* ── NORMAL HEADER MODE ── */
+            <>
+              {/* Left: Mobile Hamburger Button */}
+              <div className="flex items-center md:hidden">
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  aria-label="Open navigation menu"
+                  className="text-[#f5efe8] hover:text-[#d8bb93] p-1.5 -ml-1 transition-colors"
+                >
+                  <svg className="w-6 h-6 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5M3.75 17.25h16.5" />
+                  </svg>
+                </button>
+              </div>
 
-            {/* Account / User Icon — Desktop Only */}
-            <Link
-              href="/login"
-              aria-label="Account Login"
-              className="hidden md:block hover:text-[#d8bb93] transition-colors p-1"
-            >
-              <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-              </svg>
-            </Link>
-          </div>
+              {/* Center (Mobile) / Left (Desktop): Brand Logo */}
+              <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group mx-auto md:mx-0">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center border border-[#d8bb93]/60 rounded-full bg-[#1e1713]/80 backdrop-blur-sm group-hover:border-[#d8bb93] shadow-sm transition-colors">
+                  <span className="font-serif text-base sm:text-lg text-[#dec29b] italic font-semibold leading-none select-none">
+                    B
+                  </span>
+                </div>
+
+                <div className="flex flex-col text-center md:text-left">
+                  <span className="font-serif text-base sm:text-lg lg:text-xl tracking-[0.24em] text-[#f5efe8] font-normal leading-tight group-hover:text-[#dec29b] transition-colors">
+                    {brandName}
+                  </span>
+                  <span className="text-[8px] sm:text-[9px] tracking-[0.38em] text-[#c0b0a0] font-light uppercase">
+                    — {brandSubline} —
+                  </span>
+                </div>
+              </Link>
+
+              {/* Desktop Navigation Links */}
+              <nav className="hidden md:flex items-center gap-7 lg:gap-9">
+                {navLinks.slice(0, 6).map((link) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-[#e2dad1] hover:text-[#d8bb93] text-sm tracking-wide font-normal transition-colors duration-200 relative group py-1"
+                  >
+                    {link.name}
+                    <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#d8bb93] transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Right Utility Icons */}
+              <div className="flex items-center gap-3.5 sm:gap-5 text-[#f5efe8]">
+                {/* Search Icon */}
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(true)}
+                  aria-label="Search jewellery"
+                  className="hover:text-[#d8bb93] transition-colors p-1"
+                >
+                  <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                </button>
+
+                {/* Wishlist Icon */}
+                <Link
+                  href="/wishlist"
+                  aria-label="Wishlist"
+                  className="hidden md:block relative hover:text-[#d8bb93] transition-colors p-1"
+                >
+                  <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                  </svg>
+                  {wishlistCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dec29b] text-[#1c1510] font-bold text-[9px] rounded-full flex items-center justify-center shadow-md">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Shopping Bag Icon */}
+                <Link
+                  href="/cart"
+                  aria-label="Shopping bag"
+                  className="hidden md:block relative hover:text-[#d8bb93] transition-colors p-1"
+                >
+                  <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                  </svg>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dec29b] text-[#1c1510] font-bold text-[9px] rounded-full flex items-center justify-center shadow-md">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
+
+                {/* Account Icon */}
+                <Link
+                  href="/login"
+                  aria-label="Account Login"
+                  className="hidden md:block hover:text-[#d8bb93] transition-colors p-1"
+                >
+                  <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                </Link>
+              </div>
+            </>
+          )}
 
         </div>
       </header>
+
+      {/* Backdrop overlay when search is open (hides rest of page under dark overlay) */}
+      {isSearchOpen && (
+        <div
+          className="fixed inset-0 bg-black/75 backdrop-blur-md z-30 animate-fadeIn"
+          onClick={() => {
+            setIsSearchOpen(false);
+            setSearchQuery('');
+          }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* ── Mobile Side Navigation Drawer (Slides from LEFT) ── */}
       {drawerOpen && (
@@ -207,16 +310,20 @@ export function Header({
 
             {/* Search Input inside Drawer */}
             <div className="px-5 pt-4 pb-2">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1c1612] border border-[#2d221a]">
-                <svg className="w-4 h-4 text-[#8a7a6c] stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search rings, necklaces..."
-                  className="bg-transparent text-xs text-[#f5efe8] placeholder-[#786b5e] outline-none w-full font-light"
-                />
-              </div>
+              <form onSubmit={handleSearchSubmit}>
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#1c1612] border border-[#2d221a]">
+                  <svg className="w-4 h-4 text-[#8a7a6c] stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search rings, necklaces..."
+                    className="bg-transparent text-xs text-[#f5efe8] placeholder-[#786b5e] outline-none w-full font-light"
+                  />
+                </div>
+              </form>
             </div>
 
             {/* Navigation Links */}
