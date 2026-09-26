@@ -1080,80 +1080,84 @@ export default function AdminDashboardPage() {
         {/* TAB 5: BESPOKE ENQUIRIES */}
         {activeTab === 'enquiries' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {enquiries.map((enq) => (
-                <div key={enq.id} className={`${cardBg} rounded-[5px] p-5 space-y-4`}>
-                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between border-b ${cardHeaderBorder} pb-3 gap-2`}>
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`font-mono text-xs ${accentGold} font-bold`}>{enq.id}</span>
-                        <span className={`text-xs ${subtitleColor}`}>• {enq.date}</span>
-                        <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
-                          enq.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
-                          enq.status === 'In Design' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' :
-                          'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
-                        }`}>
-                          {enq.status}
-                        </span>
-                      </div>
-                      <h3 className={`font-serif font-semibold text-lg ${titleColor} mt-1`}>{enq.name}</h3>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <p className={`text-xs ${subtitleColor}`}>Estimated Budget</p>
-                      <p className={`text-sm font-semibold ${accentGold}`}>{enq.budget}</p>
-                    </div>
+                <div key={enq.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-[#b38b40]`}>
+                  {/* Enquiry Header */}
+                  <div className="flex items-center justify-between border-b pb-2 border-opacity-30 border-current">
+                    <span className={`font-mono text-xs font-bold ${accentGold}`}>{enq.id}</span>
+                    <span className={`px-2 py-0.5 rounded-[5px] text-[9px] font-semibold uppercase ${
+                      enq.status === 'Completed' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
+                      enq.status === 'In Design' ? 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300' :
+                      'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300'
+                    }`}>
+                      {enq.status}
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div>
-                      <p className={subtitleColor}>Service Requested:</p>
-                      <p className={`font-medium ${titleColor}`}>{enq.service}</p>
-                    </div>
-                    <div>
-                      <p className={subtitleColor}>Contact Info:</p>
-                      <p className={`font-medium ${titleColor}`}>{enq.email}</p>
-                      <p className={`font-medium ${accentGold}`}>{enq.phone}</p>
-                    </div>
-                    <div>
-                      <p className={subtitleColor}>Design Notes:</p>
-                      <p className={`italic ${subtitleColor}`}>"{enq.message}"</p>
-                    </div>
+                  {/* Client Info */}
+                  <div className="space-y-1 text-xs">
+                    <p className={`font-semibold ${titleColor} truncate`} title={enq.name}>{enq.name}</p>
+                    <p className={`text-[10px] ${subtitleColor} truncate`} title={enq.email}>{enq.email}</p>
+                    <p className={`text-[10px] font-mono ${accentGold}`}>{enq.phone}</p>
                   </div>
 
-                  <div className={`flex flex-wrap items-center justify-between pt-3 border-t ${cardHeaderBorder} gap-2`}>
-                    <div className="flex items-center space-x-2">
+                  {/* Service & Budget */}
+                  <div className="space-y-1 text-[10px]">
+                    <p className={`${subtitleColor} truncate`} title={enq.service}>
+                      <span className="font-semibold text-opacity-80">Service:</span> {enq.service}
+                    </p>
+                    <p className={`${accentGold} font-semibold`}>
+                      Budget: {enq.budget}
+                    </p>
+                    <p className={`italic ${subtitleColor} line-clamp-2 text-[9px]`} title={enq.message}>
+                      "{enq.message}"
+                    </p>
+                  </div>
+
+                  {/* Date & Contact Actions */}
+                  <div className="pt-2 border-t border-opacity-20 border-current space-y-2">
+                    <div className="flex items-center justify-between text-[9px] text-opacity-75">
+                      <span className={subtitleColor}>{enq.date}</span>
+                    </div>
+
+                    <div className="flex items-center space-x-1">
                       <a
                         href={`https://wa.me/${enq.phone.replace(/[^0-9]/g, '')}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-xs transition-colors flex items-center space-x-1"
+                        className="flex-1 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[9px] font-semibold text-center transition-colors truncate"
                       >
-                        <span>WhatsApp Client</span>
+                        WhatsApp
                       </a>
                       <a
                         href={`mailto:${enq.email}`}
-                        className={`px-3 py-1 border rounded-[5px] text-xs transition-colors ${
+                        className={`flex-1 py-1 border rounded-[5px] text-[9px] font-semibold text-center transition-colors truncate ${
                           isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
                         }`}
                       >
-                        Send Email
+                        Email
                       </a>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <span className={`text-[10px] ${subtitleColor}`}>Status:</span>
-                      <button
-                        onClick={() => handleUpdateEnquiryStatus(enq.id, 'In Design')}
-                        className="px-2.5 py-1 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-[5px] text-[10px] transition-colors"
-                      >
-                        In Design
-                      </button>
-                      <button
-                        onClick={() => handleUpdateEnquiryStatus(enq.id, 'Completed')}
-                        className="px-2.5 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[10px] transition-colors"
-                      >
-                        Completed
-                      </button>
+                    {/* Status Update Buttons */}
+                    <div className="flex items-center space-x-1 pt-1">
+                      {enq.status !== 'In Design' && (
+                        <button
+                          onClick={() => handleUpdateEnquiryStatus(enq.id, 'In Design')}
+                          className="flex-1 py-0.5 bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200 border border-purple-300 dark:border-purple-800 rounded-[5px] text-[8px] font-semibold text-center transition-colors"
+                        >
+                          In Design
+                        </button>
+                      )}
+                      {enq.status !== 'Completed' && (
+                        <button
+                          onClick={() => handleUpdateEnquiryStatus(enq.id, 'Completed')}
+                          className="flex-1 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 rounded-[5px] text-[8px] font-semibold text-center transition-colors"
+                        >
+                          Completed
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
