@@ -364,6 +364,11 @@ export default function AdminDashboardPage() {
     };
     setSlides([...slides, addedSlide]);
     setIsAddSlideOpen(false);
+    fetch('/api/slides', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(addedSlide),
+    }).catch(err => console.error('Slide API Sync error:', err));
     setNewSlide({
       title: '',
       subtitle: '',
@@ -377,20 +382,36 @@ export default function AdminDashboardPage() {
 
   const toggleSlideStatus = (id: string) => {
     setSlides(slides.map(s => s.id === id ? { ...s, status: s.status === 'Active' ? 'Inactive' : 'Active' } : s));
+    fetch('/api/slides', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    }).catch(err => console.error('Slide status toggle API error:', err));
   };
 
   const handleDeleteSlide = (id: string) => {
     setSlides(slides.filter(s => s.id !== id));
+    fetch(`/api/slides?id=${id}`, { method: 'DELETE' }).catch(err => console.error('Slide delete API error:', err));
   };
 
   // Order Handler
   const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
     setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: orderId, status: newStatus }),
+    }).catch(err => console.error('Order status API update error:', err));
   };
 
   // Enquiry Handler
   const handleUpdateEnquiryStatus = (enqId: string, newStatus: string) => {
     setEnquiries(enquiries.map(e => e.id === enqId ? { ...e, status: newStatus } : e));
+    fetch('/api/enquiries', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: enqId, status: newStatus }),
+    }).catch(err => console.error('Enquiry status API update error:', err));
   };
 
   // Metrics calculation
