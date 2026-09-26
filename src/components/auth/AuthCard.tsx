@@ -27,6 +27,14 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [registered, setRegistered] = useState(false);
 
+  // Security & Auth States
+  const [authLoading, setAuthLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const [signupError, setSignupError] = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [lockCountdown, setLockCountdown] = useState(0);
+
   // Sync with browser back/forward and URL change
   useEffect(() => {
     const handlePopState = () => {
@@ -41,25 +49,123 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Lockout Countdown Timer
+  useEffect(() => {
+    if (!isBlocked || lockCountdown <= 0) return;
+    const interval = setInterval(() => {
+      setLockCountdown((prev) => {
+        if (prev <= 1) {
+          setIsBlocked(false);
+          setLoginError('');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isBlocked, lockCountdown]);
+
   const switchMode = (newMode: 'login' | 'signup') => {
     if (newMode === mode) return;
     setMode(newMode);
+    setLoginError('');
+    setSignupError('');
     const targetPath = newMode === 'signup' ? '/signup' : '/login';
     window.history.pushState(null, '', targetPath);
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loginIdentifier && loginPassword) {
-      setLoggedIn(true);
+    if (!loginIdentifier || !loginPassword || isBlocked || authLoading) return;
+    setAuthLoading(true);
+    setLoginError('');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          identifier: loginIdentifier,
+          password: loginPassword,
+        }),
+      });
+
+      const data = await res.json();
+      setAuthLoading(false);
+
+      if (data.success) {
+        setLoggedIn(true);
+        if (data.user?.role === 'admin' || loginIdentifier === 'admin@bhaijeweller.com') {
+          setTimeout(() => {
+            window.location.href = '/admin';
+          }, 800);
+        }
+      } else {
+        setLoginError(data.error || 'Login failed.');
+        if (data.isBlocked) {
+          setIsBlocked(true);
+          setLockCountdown(data.remainingSeconds || 900);
+        } else if (typeof data.attemptsLeft === 'number') {
+          setAttemptsLeft(data.attemptsLeft);
+        }
+      }
+    } catch (err) {
+      setAuthLoading(false);
+      setLoginError('Server connection error. Please try again.');
     }
   };
 
-  const handleSignupSubmit = (e: React.FormEvent) => {
+  const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (signupFullName && signupEmail && signupPassword) {
-      setRegistered(true);
+    if (!signupFullName || !signupEmail || !signupPassword || authLoading) return;
+
+    if (signupPassword.length < 8) {
+      setSignupError('Password must be at least 8 characters long.');
+      return;
     }
+
+    setAuthLoading(true);
+    setSignupError('');
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: signupFullName,
+          email: signupEmail,
+          phone: signupPhone,
+          password: signupPassword,
+        }),
+      });
+
+      const data = await res.json();
+      setAuthLoading(false);
+
+      if (data.success) {
+        setRegistered(true);
+      } else {
+        setSignupError(data.error || 'Failed to create account.');
+      }
+    } catch (err) {
+      setAuthLoading(false);
+      setSignupError('Server connection error. Please try again.');
+    }
+  };
+
+  // Password Strength Evaluation
+  const getPasswordStrength = (pass: string) => {
+    if (!pass) return { score: 0, label: '', color: '' };
+    if (pass.length < 8) return { score: 1, label: 'Weak (min 8 chars)', color: 'bg-red-500' };
+    const hasUpper = /[A-Z]/.test(pass);
+    const hasLower = /[a-z]/.test(pass);
+    const hasNum = /[0-9]/.test(pass);
+    const hasSpec = /[^A-Za-z0-9]/.test(pass);
+    const matches = [hasUpper, hasLower, hasNum, hasSpec].filter(Boolean).length;
+
+    if (matches >= 3 && pass.length >= 10) return { score: 3, label: 'Strong Security ✓', color: 'bg-emerald-600' };
+    if (matches >= 2) return { score: 2, label: 'Medium', color: 'bg-amber-500' };
+    return { score: 1, label: 'Weak', color: 'bg-red-500' };
   };
 
   const isLogin = mode === 'login';
@@ -160,6 +266,15 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                 </div>
               ) : (
                 <form onSubmit={handleSignupSubmit} className="space-y-3">
+                  {signupError && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-light flex items-center gap-2 animate-fadeIn">
+                      <svg className="w-4 h-4 text-red-600 shrink-0 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                      </svg>
+                      <span>{signupError}</span>
+                    </div>
+                  )}
+
                   {/* Full Name */}
                   <div>
                     <label className="block text-xs font-medium text-[#1c1510] mb-1">
@@ -239,8 +354,8 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                       <input
                         type={showSignupPassword ? 'text' : 'password'}
                         required
-                        minLength={6}
-                        placeholder="Create a strong password"
+                        minLength={8}
+                        placeholder="Create a strong password (min 8 chars)"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
                         className="w-full pl-10 pr-10 py-2 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] transition-colors font-mono"
@@ -263,15 +378,33 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                         )}
                       </button>
                     </div>
+
+                    {/* Password Strength Indicator */}
+                    {signupPassword && (
+                      <div className="mt-1.5 space-y-1">
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-[#8a796c] font-light">Password Strength:</span>
+                          <span className={`font-medium ${getPasswordStrength(signupPassword).score === 3 ? 'text-emerald-700' : getPasswordStrength(signupPassword).score === 2 ? 'text-amber-700' : 'text-red-600'}`}>
+                            {getPasswordStrength(signupPassword).label}
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full bg-[#ede5db] rounded-full overflow-hidden flex gap-1 p-0.5">
+                          <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 1 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                          <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 2 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                          <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 3 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Submit Button */}
                   <div className="pt-1">
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      disabled={authLoading}
+                      className="w-full py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                     >
-                      <span>Create Account</span>
+                      <span>{authLoading ? 'Creating Account...' : 'Create Account'}</span>
                       <span>→</span>
                     </button>
                   </div>
@@ -406,6 +539,41 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                 </div>
               ) : (
                 <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  {/* Security Lockout / Error Banner */}
+                  {isBlocked ? (
+                    <div className="p-3.5 rounded-xl bg-red-950/10 border border-red-800/30 text-red-900 text-xs font-light space-y-1 animate-shake">
+                      <div className="flex items-center gap-2 font-medium text-red-950">
+                        <svg className="w-4 h-4 text-red-700 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                        <span>Security Lockout Activated</span>
+                      </div>
+                      <p className="text-[11px] text-red-800 leading-snug">
+                        Too many failed login attempts (5/5). Your IP address is temporarily blocked for 15 minutes.
+                      </p>
+                      <div className="pt-1.5 flex items-center justify-between">
+                        <span className="text-[10px] text-red-700">Try again in:</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-red-900 text-white font-mono text-[11px] font-semibold tracking-wider">
+                          {Math.floor(lockCountdown / 60)}:{(lockCountdown % 60).toString().padStart(2, '0')}
+                        </span>
+                      </div>
+                    </div>
+                  ) : loginError ? (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-light flex items-center justify-between gap-2 animate-fadeIn">
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-red-600 shrink-0 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                        </svg>
+                        <span>{loginError}</span>
+                      </div>
+                      {attemptsLeft !== null && (
+                        <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-900 font-semibold text-[10px] shrink-0">
+                          {attemptsLeft} left
+                        </span>
+                      )}
+                    </div>
+                  ) : null}
+
                   {/* Email or Phone */}
                   <div>
                     <label className="block text-xs font-medium text-[#1c1510] mb-1.5">
@@ -420,10 +588,11 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                       <input
                         type="text"
                         required
+                        disabled={isBlocked}
                         placeholder="you@example.com or +44 7000 123456"
                         value={loginIdentifier}
                         onChange={(e) => setLoginIdentifier(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] transition-colors"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] transition-colors disabled:opacity-50"
                       />
                     </div>
                   </div>
@@ -442,10 +611,11 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                       <input
                         type={showLoginPassword ? 'text' : 'password'}
                         required
+                        disabled={isBlocked}
                         placeholder="Enter your password"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
-                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] transition-colors font-mono"
+                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] transition-colors font-mono disabled:opacity-50"
                       />
                       <button
                         type="button"
@@ -487,9 +657,10 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   {/* Submit Button */}
                   <button
                     type="submit"
-                    className="w-full py-3 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm"
+                    disabled={isBlocked || authLoading}
+                    className="w-full py-3 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                   >
-                    <span>Log In</span>
+                    <span>{authLoading ? 'Logging In...' : 'Log In'}</span>
                     <span>→</span>
                   </button>
 
@@ -748,6 +919,36 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   </div>
                 ) : (
                   <form onSubmit={handleLoginSubmit} className="space-y-3.5">
+                    {/* Security Lockout / Error Banner */}
+                    {isBlocked ? (
+                      <div className="p-3 rounded-xl bg-red-950/10 border border-red-800/30 text-red-900 text-xs font-light space-y-1">
+                        <div className="flex items-center gap-1.5 font-medium text-red-950">
+                          <svg className="w-4 h-4 text-red-700 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                          <span>Security Lockout</span>
+                        </div>
+                        <p className="text-[10.5px] text-red-800">
+                          5 failed attempts reached. Blocked for 15 minutes.
+                        </p>
+                        <div className="pt-1 flex items-center justify-between">
+                          <span className="text-[10px] text-red-700">Timer:</span>
+                          <span className="px-2 py-0.5 rounded-full bg-red-900 text-white font-mono text-[10px] font-semibold">
+                            {Math.floor(lockCountdown / 60)}:{(lockCountdown % 60).toString().padStart(2, '0')}
+                          </span>
+                        </div>
+                      </div>
+                    ) : loginError ? (
+                      <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-light flex items-center justify-between gap-2">
+                        <span className="text-[11px]">{loginError}</span>
+                        {attemptsLeft !== null && (
+                          <span className="px-1.5 py-0.5 rounded bg-red-100 text-red-900 font-semibold text-[9.5px]">
+                            {attemptsLeft} left
+                          </span>
+                        )}
+                      </div>
+                    ) : null}
+
                     <div>
                       <label className="block text-xs font-medium text-[#1c1510] mb-1">
                         Email or Phone
@@ -761,10 +962,11 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                         <input
                           type="text"
                           required
+                          disabled={isBlocked}
                           placeholder="you@example.com or phone"
                           value={loginIdentifier}
                           onChange={(e) => setLoginIdentifier(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510]"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] disabled:opacity-50"
                         />
                       </div>
                     </div>
@@ -782,10 +984,11 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                         <input
                           type={showLoginPassword ? 'text' : 'password'}
                           required
+                          disabled={isBlocked}
                           placeholder="Enter your password"
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
-                          className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] font-mono"
+                          className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] font-mono disabled:opacity-50"
                         />
                         <button
                           type="button"
@@ -821,9 +1024,10 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
 
                     <button
                       type="submit"
-                      className="w-full py-3 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      disabled={isBlocked || authLoading}
+                      className="w-full py-3 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                     >
-                      <span>Log In</span>
+                      <span>{authLoading ? 'Logging In...' : 'Log In'}</span>
                       <span>→</span>
                     </button>
                   </form>
@@ -859,6 +1063,12 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   </div>
                 ) : (
                   <form onSubmit={handleSignupSubmit} className="space-y-3">
+                    {signupError && (
+                      <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-light flex items-center gap-2">
+                        <span className="text-[11px]">{signupError}</span>
+                      </div>
+                    )}
+
                     <div>
                       <label className="block text-xs font-medium text-[#1c1510] mb-1">
                         Full Name *
@@ -908,8 +1118,8 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                         <input
                           type={showSignupPassword ? 'text' : 'password'}
                           required
-                          minLength={6}
-                          placeholder="Password (min 6 chars)"
+                          minLength={8}
+                          placeholder="Password (min 8 chars)"
                           value={signupPassword}
                           onChange={(e) => setSignupPassword(e.target.value)}
                           className="w-full pl-3.5 pr-10 py-2 rounded-lg border border-[#ded3c5] bg-[#fdfbf7] text-xs text-[#1c1510] placeholder-[#9a897b] outline-none focus:border-[#1c1510] font-mono"
@@ -931,13 +1141,31 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                           )}
                         </button>
                       </div>
+
+                      {/* Password Strength Indicator */}
+                      {signupPassword && (
+                        <div className="mt-1.5 space-y-1">
+                          <div className="flex items-center justify-between text-[9.5px]">
+                            <span className="text-[#8a796c] font-light">Strength:</span>
+                            <span className={`font-medium ${getPasswordStrength(signupPassword).score === 3 ? 'text-emerald-700' : getPasswordStrength(signupPassword).score === 2 ? 'text-amber-700' : 'text-red-600'}`}>
+                              {getPasswordStrength(signupPassword).label}
+                            </span>
+                          </div>
+                          <div className="h-1 w-full bg-[#ede5db] rounded-full overflow-hidden flex gap-1 p-0.5">
+                            <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 1 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                            <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 2 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                            <div className={`h-full rounded-full transition-all duration-300 flex-1 ${getPasswordStrength(signupPassword).score >= 3 ? getPasswordStrength(signupPassword).color : 'bg-transparent'}`} />
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] transition-all flex items-center justify-center gap-2 shadow-sm"
+                      disabled={authLoading}
+                      className="w-full py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] font-medium text-xs tracking-wide hover:bg-[#33261d] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50"
                     >
-                      <span>Create Account</span>
+                      <span>{authLoading ? 'Creating...' : 'Create Account'}</span>
                       <span>→</span>
                     </button>
                   </form>

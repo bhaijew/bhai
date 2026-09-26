@@ -96,6 +96,34 @@ CREATE TABLE IF NOT EXISTS announcement_bar (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 7. USERS SECURITY TABLE
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(64) PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone VARCHAR(50),
+    password_hash TEXT NOT NULL,
+    role VARCHAR(50) DEFAULT 'client',
+    failed_attempts INT DEFAULT 0,
+    lock_until TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 8. LOGIN SECURITY ATTEMPTS & IP BLOCKING TABLE
+CREATE TABLE IF NOT EXISTS login_attempts (
+    id VARCHAR(64) PRIMARY KEY,
+    ip_address VARCHAR(100) NOT NULL,
+    email_attempted VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    failure_reason TEXT,
+    attempted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
+CREATE INDEX IF NOT EXISTS idx_login_email ON login_attempts(email_attempted);
+
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
@@ -105,6 +133,8 @@ ALTER TABLE bespoke_enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hero_section ENABLE ROW LEVEL SECURITY;
 ALTER TABLE announcement_bar ENABLE ROW LEVEL SECURITY;
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if re-running to prevent "policy already exists" error
 DROP POLICY IF EXISTS "Allow Public Products Access" ON products;
@@ -113,6 +143,8 @@ DROP POLICY IF EXISTS "Allow Public Enquiries Access" ON bespoke_enquiries;
 DROP POLICY IF EXISTS "Allow Public Slides Access" ON hero_slides;
 DROP POLICY IF EXISTS "Allow Public Hero Access" ON hero_section;
 DROP POLICY IF EXISTS "Allow Public Announcement Access" ON announcement_bar;
+DROP POLICY IF EXISTS "Allow Public Users Access" ON users;
+DROP POLICY IF EXISTS "Allow Public Login Attempts Access" ON login_attempts;
 
 -- Allow public read & write access for API endpoints
 CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true) WITH CHECK (true);
@@ -121,6 +153,8 @@ CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING
 CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Users Access" ON users FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Login Attempts Access" ON login_attempts FOR ALL USING (true) WITH CHECK (true);
 
 -- Insert initial default config rows if they don't exist yet
 INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, headline_line3, description, primary_cta_text, primary_cta_href, hero_image, featured_title, featured_subtitle, featured_image)
@@ -130,5 +164,6 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO announcement_bar (id, is_enabled, messages)
 VALUES ('main_announcement', true, '["Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK", "Complimentary luxury gift packaging on every order  |  Bespoke service", "Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available"]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
+
 
 
