@@ -9,7 +9,7 @@ import { useShop, WishlistItem } from '@/context/ShopContext';
 
 export default function AccountPage() {
   const router = useRouter();
-  const { wishlist, removeFromWishlist, addToCart } = useShop();
+  const { wishlist, removeFromWishlist, addToCart, clearWishlist } = useShop();
 
   // Active Tab State
   const [activeTab, setActiveTab] = useState<
@@ -35,12 +35,14 @@ export default function AccountPage() {
 
   const [realOrders, setRealOrders] = useState<any[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [orderSearchQuery, setOrderSearchQuery] = useState('');
+  const [orderFilter, setOrderFilter] = useState<'all' | 'processing' | 'delivered'>('all');
 
   // Address State Management
   const [addresses, setAddresses] = useState<any[]>([
     {
       id: 'addr-1',
-      title: 'Primary Residence (Default)',
+      title: 'Primary Residence',
       name: 'Syed Zeeshan Haider',
       street: '124 Manor Row, Bradford City Centre',
       city: 'Bradford',
@@ -49,10 +51,21 @@ export default function AccountPage() {
       phone: '+44 (0) 1274 722 888',
       isDefault: true,
     },
+    {
+      id: 'addr-2',
+      title: 'Office / Business',
+      name: 'Syed Zeeshan Haider',
+      street: 'Suite 402, St. George Hall House',
+      city: 'Leeds',
+      postcode: 'LS1 2AL',
+      country: 'United Kingdom',
+      phone: '+44 (0) 1274 722 888',
+      isDefault: false,
+    },
   ]);
   const [showAddAddressModal, setShowAddAddressModal] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    title: 'Work / Secondary',
+    title: 'Secondary Residence',
     name: '',
     street: '',
     city: 'Bradford',
@@ -65,19 +78,21 @@ export default function AccountPage() {
   const [paymentMethods, setPaymentMethods] = useState<any[]>([
     {
       id: 'pm-1',
-      type: 'Mastercard',
+      type: 'Mastercard Black',
       last4: '8842',
       expiry: '12/28',
       holder: 'S Z HAIDER',
       isDefault: true,
+      cardColor: 'from-[#1f1914] via-[#2c221a] to-[#120e0b]',
     },
     {
       id: 'pm-2',
-      type: 'Visa',
+      type: 'Visa Infinite',
       last4: '4190',
       expiry: '08/27',
       holder: 'S Z HAIDER',
       isDefault: false,
+      cardColor: 'from-[#141b24] via-[#1f2a38] to-[#0f141a]',
     },
   ]);
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
@@ -95,6 +110,14 @@ export default function AccountPage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [emailNotifs, setEmailNotifs] = useState(true);
+  const [smsNotifs, setSmsNotifs] = useState(true);
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
+
+  // Return Request Form State
+  const [selectedReturnOrder, setSelectedReturnOrder] = useState('');
+  const [returnReason, setReturnReason] = useState('Ring Sizing / Exchange');
+  const [returnSubmitted, setReturnSubmitted] = useState(false);
 
   // Added to cart feedback map
   const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
@@ -199,7 +222,7 @@ export default function AccountPage() {
     setAddresses((prev) => [...prev, item]);
     setShowAddAddressModal(false);
     setNewAddress({
-      title: 'Secondary Address',
+      title: 'Secondary Residence',
       name: '',
       street: '',
       city: 'Bradford',
@@ -214,13 +237,17 @@ export default function AccountPage() {
     if (!newCard.cardNumber || !newCard.expiry) return;
     const cleanNum = newCard.cardNumber.replace(/\s+/g, '');
     const last4 = cleanNum.slice(-4) || '1234';
+    const isVisa = cleanNum.startsWith('4');
     const item = {
       id: `pm-${Date.now()}`,
-      type: cleanNum.startsWith('4') ? 'Visa' : 'Mastercard',
+      type: isVisa ? 'Visa Infinite' : 'Mastercard World Elite',
       last4: last4,
       expiry: newCard.expiry,
       holder: newCard.holder.toUpperCase() || user.name.toUpperCase(),
       isDefault: paymentMethods.length === 0,
+      cardColor: isVisa
+        ? 'from-[#141b24] via-[#1f2a38] to-[#0f141a]'
+        : 'from-[#1f1914] via-[#2c221a] to-[#120e0b]',
     };
     setPaymentMethods((prev) => [...prev, item]);
     setShowAddPaymentModal(false);
@@ -413,7 +440,7 @@ export default function AccountPage() {
         </div>
 
         {/* Profile Details Overlay Card */}
-        <div className="bg-[#faf7f2] border-b border-[#e8decf] rounded-t-3xl -mt-6 relative z-10 px-4 sm:px-8 pb-6 shadow-xs">
+        <div className="bg-[#faf7f2] border-b border-[#e8decf] rounded-t-3xl -mt-6 relative z-10 px-4 sm:px-8 pb-4 shadow-xs">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             
             {/* Left: Avatar Circle + Name & Contacts */}
@@ -483,17 +510,52 @@ export default function AccountPage() {
 
           </div>
         </div>
+
+        {/* ── SMOOTH HORIZONTAL SCROLLABLE TABS BAR (RESTORED AS REQUESTED) ── */}
+        <div className="w-full bg-[#fdfbf7] border-b border-[#ded3c5]/80 sticky top-16 md:top-20 z-30 shadow-2xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
+            <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar scroll-smooth">
+              {sideNavItems.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id as any)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-2 ${
+                      isActive
+                        ? 'bg-[#1c1510] text-[#f5efe8] shadow-sm'
+                        : 'bg-[#ede4d8]/60 text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] border border-[#ded3c5]/70'
+                    }`}
+                  >
+                    <span className={isActive ? 'text-[#dec29b]' : 'text-[#8a796c]'}>{item.icon}</span>
+                    <span>{item.label}</span>
+                    {item.badge !== undefined && (
+                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                        isActive ? 'bg-[#dec29b] text-[#1c1510]' : 'bg-[#1c1510] text-[#f5efe8]'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
 
 
       {/* ─────────────────────────────────────────────────────────────
-          MAIN GRID LAYOUT (Side Nav + Content + Widgets)
+          MAIN CONTENT AREA (DIFFERENT UNIQUE VIEWS PER TAB)
           ───────────────────────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* ── LEFT SIDEBAR NAVIGATION ── */}
-          <aside className="lg:col-span-3 bg-[#faf7f2] border border-[#ded3c5] rounded-2xl p-3 shadow-xs sticky top-24">
+          {/* ── LEFT DESKTOP SIDEBAR NAVIGATION ── */}
+          <aside className="hidden lg:block lg:col-span-3 bg-[#faf7f2] border border-[#ded3c5] rounded-2xl p-3 shadow-xs sticky top-36">
+            <div className="px-3 py-2 mb-2 border-b border-[#ede4d8]">
+              <span className="text-[10px] font-semibold tracking-widest text-[#9e7d56] uppercase">PORTAL MENU</span>
+            </div>
             <nav className="space-y-1">
               {sideNavItems.map((item) => {
                 const isActive = activeTab === item.id;
@@ -536,45 +598,83 @@ export default function AccountPage() {
           </aside>
 
 
-          {/* ── CENTER CONTENT AREA (Dynamic Tab Views) ── */}
-          <div className="lg:col-span-6 space-y-8">
+          {/* ── CENTER / MAIN CONTENT (INDIVIDUALLY CRAFTED DISTINCT TAB PAGES) ── */}
+          <div className="lg:col-span-9 space-y-8">
             
             {/* ═══════════════════════════════════════════════════════════
-                TAB 1: MY ACCOUNT (Overview)
+                PAGE 1: MY ACCOUNT OVERVIEW & VIP PRIVILEGES
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'account' && (
-              <>
-                {/* STATS OVERVIEW CARDS */}
+              <div className="space-y-6">
+                
+                {/* VIP Patron Header Card */}
+                <ScrollReveal direction="up">
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1c140f] via-[#2c2018] to-[#120e0b] text-[#f5efe8] p-6 sm:p-8 border border-[#dec29b]/50 shadow-xl">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#dec29b]/10 rounded-full blur-3xl pointer-events-none" />
+                    <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                      <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dec29b]/15 border border-[#dec29b]/40 text-[#dec29b] text-[10px] tracking-widest uppercase font-semibold">
+                          ✦ VIP Private Client Status
+                        </div>
+                        <h2 className="font-serif text-2xl sm:text-3xl text-white font-normal">
+                          Welcome back, {user.name}
+                        </h2>
+                        <p className="text-xs text-[#d6c9be] max-w-lg font-light leading-relaxed">
+                          Your bespoke account provides priority Bradford showroom appointments, lifetime polishing warranty, and complimentary insured worldwide delivery.
+                        </p>
+                      </div>
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Link
+                          href="/shop"
+                          className="px-5 py-2.5 rounded-full bg-[#dec29b] text-[#1c1510] text-xs font-semibold hover:bg-[#e8d2b5] transition-all shadow-md text-center"
+                        >
+                          Explore Collection
+                        </Link>
+                        <Link
+                          href="/contact"
+                          className="px-5 py-2.5 rounded-full border border-[#dec29b]/60 text-[#f5efe8] text-xs font-light hover:bg-[#dec29b]/10 transition-all text-center"
+                        >
+                          Book Showroom VIP
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                </ScrollReveal>
+
+                {/* 4-Card Stats Grid */}
                 <ScrollReveal direction="up" delay={50}>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-                    
-                    {/* Stat 1: Total Real Orders */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    {/* Stat 1: Total Orders */}
                     <div 
                       onClick={() => setActiveTab('orders')}
-                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-colors text-center sm:text-left"
+                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
                     >
-                      <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
-                        </svg>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
+                          </svg>
+                        </div>
+                        <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Total Orders</span>
-                        <span className="font-serif text-2xl text-[#1c1510] font-normal">
-                          {ordersLoading ? '...' : realOrders.length}
-                        </span>
+                        <span className="font-serif text-2xl text-[#1c1510] font-normal">{ordersLoading ? '...' : realOrders.length}</span>
                       </div>
                     </div>
 
-                    {/* Stat 2: Real Wishlist Items */}
+                    {/* Stat 2: Wishlist */}
                     <div 
                       onClick={() => setActiveTab('wishlist')}
-                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-colors text-center sm:text-left"
+                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
                     >
-                      <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                          </svg>
+                        </div>
+                        <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Wishlist</span>
@@ -582,171 +682,225 @@ export default function AccountPage() {
                       </div>
                     </div>
 
-                    {/* Stat 3: Calculated Loyalty Points */}
-                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                      <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.412.868-.839.605l-4.71-2.92a.562.562 0 00-.59 0l-4.71 2.92c-.427.263-.955-.119-.839-.605l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                        </svg>
+                    {/* Stat 3: Loyalty Points */}
+                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.412.868-.839.605l-4.71-2.92a.562.562 0 00-.59 0l-4.71 2.92c-.427.263-.955-.119-.839-.605l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                          </svg>
+                        </div>
+                        <span className="text-[10px] bg-[#faf6ee] text-[#9e7d56] px-2 py-0.5 rounded-full border border-[#ded3c5]">1 pt / $10</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Points</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Reward Points</span>
                         <span className="font-serif text-2xl text-[#1c1510] font-normal">{rewardPoints}</span>
                       </div>
                     </div>
 
                     {/* Stat 4: Member Status */}
-                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                      <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-                        </svg>
+                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+                          </svg>
+                        </div>
+                        <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Active</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Membership</span>
-                        <span className="font-serif text-sm text-[#1c1510] font-medium truncate block mt-1">
-                          {user.memberSince}
-                        </span>
+                        <span className="font-serif text-sm text-[#1c1510] font-medium truncate block mt-1">{user.memberSince}</span>
                       </div>
                     </div>
-
                   </div>
                 </ScrollReveal>
 
-                {/* RECENT ORDERS SUMMARY */}
-                <ScrollReveal direction="up" delay={90}>
-                  <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs">
-                    <div className="flex items-center justify-between mb-4 border-b border-[#ede4d8] pb-3">
-                      <h2 className="font-serif text-xl text-[#1c1510] font-normal">
-                        Recent Orders ({ordersLoading ? '...' : realOrders.length})
-                      </h2>
-                      <button 
-                        onClick={() => setActiveTab('orders')}
-                        className="text-xs text-[#9e7d56] font-medium hover:text-[#1c1510] transition-colors flex items-center gap-1"
-                      >
-                        <span>View All Orders</span>
-                        <span>→</span>
+                {/* 2-Column Overview Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Recent Activity */}
+                  <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-[#ede4d8] pb-3">
+                      <h3 className="font-serif text-lg text-[#1c1510] font-normal">Recent Purchases</h3>
+                      <button onClick={() => setActiveTab('orders')} className="text-xs text-[#9e7d56] hover:underline">
+                        View all
                       </button>
                     </div>
-
-                    {ordersLoading ? (
-                      <div className="py-10 flex flex-col items-center justify-center text-center">
-                        <div className="w-8 h-8 border-2 border-[#dec29b] border-t-transparent rounded-full animate-spin mb-3" />
-                        <p className="text-xs text-[#8a796c]">Loading orders from database...</p>
-                      </div>
-                    ) : realOrders.length === 0 ? (
-                      <div className="py-10 px-4 flex flex-col items-center justify-center text-center">
-                        <div className="w-14 h-14 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mb-3 shadow-xs">
-                          <svg className="w-6 h-6 stroke-[1.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
-                          </svg>
-                        </div>
-                        <h3 className="font-serif text-lg font-medium text-[#1c1510] mb-1">No Orders Placed Yet</h3>
-                        <p className="text-xs text-[#8a796c] max-w-sm mb-4">
-                          Browse our jewellery catalogue to view your purchases and delivery updates here.
-                        </p>
-                        <Link
-                          href="/shop"
-                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d] text-xs font-medium transition-all shadow-sm"
-                        >
-                          Shop Collection
-                        </Link>
+                    {realOrders.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-[#8a796c]">
+                        No orders recorded yet. Explore the shop to make your first purchase.
                       </div>
                     ) : (
-                      <div className="divide-y divide-[#ede4d8]/60">
-                        {realOrders.slice(0, 3).map((ord: any) => (
-                          <div key={ord.id} className="flex items-center justify-between py-3.5">
-                            <div className="flex items-center gap-3">
-                              <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-white border border-[#ded3c5]">
-                                <Image src="/images/detail-ring-hero.jpg" alt={ord.id} fill className="object-cover" />
-                              </div>
-                              <div>
-                                <span className="font-mono text-xs font-medium text-[#1c1510] block">{ord.id}</span>
-                                <span className="text-[10px] text-[#8a796c]">{ord.date} • {ord.items}</span>
-                              </div>
+                      <div className="divide-y divide-[#ede4d8]/70">
+                        {realOrders.slice(0, 3).map((ord) => (
+                          <div key={ord.id} className="py-3 flex items-center justify-between">
+                            <div>
+                              <p className="font-mono text-xs font-semibold text-[#1c1510]">{ord.id}</p>
+                              <p className="text-[10px] text-[#8a796c]">{ord.date} • {ord.items}</p>
                             </div>
-                            <div className="text-right">
-                              <span className="font-serif text-sm font-medium text-[#1c1510] block">$ {Number(ord.amount || 0).toFixed(2)}</span>
-                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300/60 font-medium">
-                                {ord.status || 'Processing'}
-                              </span>
-                            </div>
+                            <span className="font-serif text-sm font-semibold text-[#1c1510]">$ {Number(ord.amount || 0).toFixed(2)}</span>
                           </div>
                         ))}
                       </div>
                     )}
                   </div>
-                </ScrollReveal>
-              </>
+
+                  {/* Showroom & Client Services */}
+                  <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-4">
+                    <div className="border-b border-[#ede4d8] pb-3">
+                      <h3 className="font-serif text-lg text-[#1c1510] font-normal">Bradford Showroom Care</h3>
+                    </div>
+                    <div className="space-y-3 text-xs text-[#5a4b40] leading-relaxed">
+                      <p className="flex items-center gap-2">
+                        <span className="text-[#9e7d56]">📍</span>
+                        <span>124 Manor Row, Bradford City Centre, BD1 4NT</span>
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="text-[#9e7d56]">🕒</span>
+                        <span>Monday – Saturday: 10:00 AM – 6:00 PM</span>
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <span className="text-[#9e7d56]">📞</span>
+                        <span>+44 (0) 1274 722 888 (Direct Line)</span>
+                      </p>
+                    </div>
+                    <div className="pt-2">
+                      <Link
+                        href="/contact"
+                        className="w-full py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-medium hover:bg-[#ded3c5] transition-all flex items-center justify-center gap-2"
+                      >
+                        <span>Schedule Bespoke Appointment</span>
+                        <span>→</span>
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 2: ORDERS & TRACKING
+                PAGE 2: ORDERS & LIVE TRACKING HUB
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'orders' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
-                  <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
+                  
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Order History</h2>
-                      <p className="text-xs text-[#8a796c] font-light mt-0.5">Track and view all your past fine jewellery purchases</p>
+                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">My Jewellery Orders</h2>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Real-time order statuses, insured parcel delivery, and invoices</p>
                     </div>
                     <Link
                       href="/shop"
-                      className="px-4 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all self-start sm:self-auto font-medium"
                     >
-                      Shop More
+                      + New Purchase
                     </Link>
+                  </div>
+
+                  {/* Filter & Search Bar */}
+                  <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                      {(['all', 'processing', 'delivered'] as const).map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setOrderFilter(filter)}
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium capitalize transition-all ${
+                            orderFilter === filter
+                              ? 'bg-[#1c1510] text-[#f5efe8]'
+                              : 'bg-white border border-[#ded3c5] text-[#6b5c50] hover:bg-[#faf6ee]'
+                          }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Search order ID or items..."
+                      value={orderSearchQuery}
+                      onChange={(e) => setOrderSearchQuery(e.target.value)}
+                      className="w-full sm:w-64 p-2.5 text-xs bg-white border border-[#ded3c5] rounded-full px-4 focus:outline-none focus:border-[#1c1510]"
+                    />
                   </div>
 
                   {ordersLoading ? (
                     <div className="py-16 text-center">
                       <div className="w-10 h-10 border-3 border-[#dec29b] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                      <p className="text-xs text-[#8a796c]">Loading your database orders...</p>
+                      <p className="text-xs text-[#8a796c]">Loading database orders...</p>
                     </div>
                   ) : realOrders.length === 0 ? (
-                    <div className="py-16 text-center space-y-3">
+                    <div className="py-16 text-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                         </svg>
                       </div>
-                      <h3 className="font-serif text-xl font-medium text-[#1c1510]">No Orders Found</h3>
+                      <h3 className="font-serif text-xl font-medium text-[#1c1510]">No Orders In Your History</h3>
                       <p className="text-xs text-[#8a796c] max-w-sm mx-auto">
-                        Your completed purchases and bespoke jewellery orders will be recorded here in real time.
+                        Once you place an order online or at our showroom, you can track production, hallmarking, and live courier delivery right here.
                       </p>
                       <Link
                         href="/shop"
-                        className="inline-block mt-2 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         Explore Catalogue
                       </Link>
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {realOrders.map((ord: any) => (
-                        <div key={ord.id} className="border border-[#ded3c5] rounded-xl p-4 bg-white/70 space-y-3">
-                          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ede4d8] pb-3">
-                            <div>
-                              <span className="font-mono text-sm font-semibold text-[#1c1510]">{ord.id}</span>
-                              <span className="text-xs text-[#8a796c] ml-3">Placed on {ord.date}</span>
+                      {realOrders
+                        .filter((ord) => {
+                          if (orderFilter === 'processing' && ord.status !== 'Processing') return false;
+                          if (orderFilter === 'delivered' && ord.status === 'Processing') return false;
+                          if (orderSearchQuery) {
+                            const q = orderSearchQuery.toLowerCase();
+                            return ord.id?.toLowerCase().includes(q) || ord.items?.toLowerCase().includes(q);
+                          }
+                          return true;
+                        })
+                        .map((ord: any) => (
+                          <div key={ord.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-4 shadow-2xs hover:border-[#1c1510] transition-colors">
+                            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ede4d8] pb-3">
+                              <div className="flex items-center gap-3">
+                                <span className="font-mono text-sm font-bold text-[#1c1510]">{ord.id}</span>
+                                <span className="text-xs text-[#8a796c]">Order Date: {ord.date}</span>
+                              </div>
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                ord.status === 'Processing'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                              }`}>
+                                ● {ord.status || 'Delivered'}
+                              </span>
                             </div>
-                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 border border-emerald-300/60">
-                              ✓ {ord.status || 'Delivered'}
-                            </span>
+
+                            {/* Tracking Timeline Bar */}
+                            <div className="py-2">
+                              <div className="grid grid-cols-4 text-center text-[10px] text-[#7a6a5c] mb-1 font-medium">
+                                <span className="text-emerald-800">1. Order Placed</span>
+                                <span className="text-emerald-800">2. Hallmarking</span>
+                                <span className="text-emerald-800">3. Dispatched</span>
+                                <span className={ord.status === 'Processing' ? 'text-[#8a796c]' : 'text-emerald-800 font-bold'}>4. Delivered</span>
+                              </div>
+                              <div className="w-full bg-[#ede4d8] h-2 rounded-full overflow-hidden flex">
+                                <div className="bg-emerald-600 h-full w-3/4 rounded-full" />
+                              </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pt-2">
+                              <div>
+                                <p className="font-medium text-[#1c1510]">{ord.items}</p>
+                                <p className="text-[11px] text-[#8a796c] mt-0.5">Shipping Address: {ord.address || 'Showroom Collection, Bradford'}</p>
+                              </div>
+                              <div className="text-left sm:text-right">
+                                <span className="font-serif text-lg font-bold text-[#1c1510] block">$ {Number(ord.amount || 0).toFixed(2)}</span>
+                                <span className="text-[10px] text-[#8a796c]">{ord.paymentMethod || 'Credit Card Payment'}</span>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between text-xs text-[#4a3b30]">
-                            <div>
-                              <p className="font-medium text-[#1c1510]">{ord.items}</p>
-                              <p className="text-[11px] text-[#8a796c] mt-0.5">Shipping to: {ord.address || 'Standard Showroom Delivery'}</p>
-                            </div>
-                            <div className="text-right">
-                              <span className="font-serif text-base font-semibold text-[#1c1510] block">$ {Number(ord.amount || 0).toFixed(2)}</span>
-                              <span className="text-[10px] text-[#8a796c]">{ord.paymentMethod || 'Card Payment'}</span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                 </div>
@@ -754,26 +908,29 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 3: WISHLIST
+                PAGE 3: WISHLIST HUB
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'wishlist' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">My Wishlist ({wishlist.length})</h2>
-                      <p className="text-xs text-[#8a796c] font-light mt-0.5">Save and manage your favorite handcrafted jewellery pieces</p>
+                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Saved Wishlist ({wishlist.length})</h2>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Your curated collection of bespoke jewellery and rings</p>
                     </div>
-                    <Link
-                      href="/shop"
-                      className="px-4 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
-                    >
-                      Browse More
-                    </Link>
+                    {wishlist.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearWishlist}
+                        className="text-xs text-red-700 hover:underline font-medium"
+                      >
+                        Clear All
+                      </button>
+                    )}
                   </div>
 
                   {wishlist.length === 0 ? (
-                    <div className="py-16 text-center space-y-3">
+                    <div className="py-16 text-center space-y-4">
                       <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -781,49 +938,45 @@ export default function AccountPage() {
                       </div>
                       <h3 className="font-serif text-xl font-medium text-[#1c1510]">Your Wishlist is Empty</h3>
                       <p className="text-xs text-[#8a796c] max-w-sm mx-auto">
-                        Explore our timeless rings, necklaces, earrings, and bracelets to add your favorite items here.
+                        Click the heart icon on any fine jewellery piece in our shop to save it to your private portfolio.
                       </p>
                       <Link
                         href="/shop"
-                        className="inline-block mt-2 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         Explore Catalogue
                       </Link>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {wishlist.map((item) => (
-                        <div key={item.id} className="border border-[#ded3c5] rounded-xl p-4 bg-white/80 flex gap-3 items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-[#faf6ee] border border-[#ded3c5] flex-shrink-0">
+                        <div key={item.id} className="border border-[#ded3c5] rounded-2xl p-4 bg-white space-y-3 shadow-2xs hover:border-[#1c1510] transition-colors flex flex-col justify-between">
+                          <div>
+                            <div className="relative w-full h-44 rounded-xl overflow-hidden bg-[#faf6ee] mb-3">
                               <Image src={item.image} alt={item.name} fill className="object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => removeFromWishlist(item.id)}
+                                className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-red-600 hover:bg-white text-xs shadow-xs"
+                              >
+                                ✕
+                              </button>
                             </div>
-                            <div>
-                              <span className="text-[10px] text-[#9e7d56] uppercase tracking-wider block">{item.category}</span>
-                              <h4 className="font-serif text-sm font-semibold text-[#1c1510] line-clamp-1">{item.name}</h4>
-                              <span className="font-serif text-sm text-[#1c1510] font-medium block mt-1">$ {item.price.toFixed(2)}</span>
-                            </div>
+                            <span className="text-[10px] tracking-widest text-[#9e7d56] uppercase font-semibold">{item.category}</span>
+                            <h4 className="font-serif text-base font-medium text-[#1c1510] line-clamp-1 mt-0.5">{item.name}</h4>
+                            <p className="font-serif text-lg font-semibold text-[#1c1510] mt-1">$ {item.price.toFixed(2)}</p>
                           </div>
-                          <div className="flex flex-col gap-2 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={() => handleAddToCart(item)}
-                              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                                addedMap[item.id]
-                                  ? 'bg-emerald-700 text-white'
-                                  : 'bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d]'
-                              }`}
-                            >
-                              {addedMap[item.id] ? '✓ Added' : 'Add to Cart'}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeFromWishlist(item.id)}
-                              className="text-[10px] text-[#8a796c] hover:text-red-700 transition-colors text-center"
-                            >
-                              Remove
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleAddToCart(item)}
+                            className={`w-full py-2.5 rounded-full text-xs font-medium transition-all ${
+                              addedMap[item.id]
+                                ? 'bg-emerald-800 text-white'
+                                : 'bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d]'
+                            }`}
+                          >
+                            {addedMap[item.id] ? '✓ Added to Bag' : 'Add to Shopping Bag'}
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -833,56 +986,73 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 4: ADDRESSES
+                PAGE 4: ADDRESS BOOK & SHOWROOM PICKUP
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'addresses' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Shipping Addresses</h2>
-                      <p className="text-xs text-[#8a796c] font-light mt-0.5">Manage your delivery and billing locations</p>
+                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Address Book</h2>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Manage insured delivery addresses and showroom pickup preferences</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowAddAddressModal(true)}
-                      className="px-4 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium flex items-center gap-1.5"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
                     >
-                      <span>+ Add Address</span>
+                      + Add Address
                     </button>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {addresses.map((addr) => (
-                      <div key={addr.id} className="border border-[#ded3c5] rounded-xl p-4 bg-white/80 relative space-y-2">
+                      <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs">
                         <div className="flex items-center justify-between">
-                          <span className="font-serif text-sm font-semibold text-[#1c1510]">{addr.title}</span>
+                          <span className="font-serif text-base font-semibold text-[#1c1510]">{addr.title}</span>
                           {addr.isDefault && (
-                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-medium border border-emerald-300">
-                              Default Address
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-300">
+                              Default
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-[#4a3b30] font-medium">{addr.name}</p>
-                        <p className="text-xs text-[#7a6a5c] leading-relaxed">
-                          {addr.street}, {addr.city}, {addr.postcode}, {addr.country}
-                        </p>
-                        <p className="text-xs text-[#7a6a5c]">Phone: {addr.phone}</p>
+                        <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
+                          <p className="font-semibold text-[#1c1510]">{addr.name}</p>
+                          <p>{addr.street}</p>
+                          <p>{addr.city}, {addr.postcode}</p>
+                          <p>{addr.country}</p>
+                          <p className="text-[11px] text-[#8a796c] pt-1">Tel: {addr.phone}</p>
+                        </div>
                       </div>
                     ))}
+
+                    {/* Showroom Pickup Permanent Card */}
+                    <div className="border border-[#dec29b] rounded-2xl p-5 bg-[#faf6ee] space-y-3 relative shadow-2xs">
+                      <div className="flex items-center justify-between">
+                        <span className="font-serif text-base font-semibold text-[#1c1510]">Bradford Showroom (VIP Pickup)</span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#dec29b]/30 text-[#6d5028] text-[10px] font-semibold border border-[#dec29b]">
+                          Complimentary
+                        </span>
+                      </div>
+                      <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
+                        <p className="font-semibold text-[#1c1510]">Bhai Jeweller Showroom</p>
+                        <p>124 Manor Row, Bradford City Centre</p>
+                        <p>Bradford, BD1 4NT, United Kingdom</p>
+                        <p className="text-[11px] text-[#8a796c] pt-1">Mon–Sat 10:00 AM – 6:00 PM</p>
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Add Address Modal */}
                   {showAddAddressModal && (
-                    <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-5 bg-[#faf6ee] space-y-4">
-                      <h3 className="font-serif text-base font-semibold text-[#1c1510]">Add New Shipping Address</h3>
+                    <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add New Shipping Address</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <input
                           type="text"
-                          placeholder="Address Title (e.g. Home, Office)"
+                          placeholder="Label (e.g. London Home, Studio)"
                           value={newAddress.title}
                           onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -890,7 +1060,7 @@ export default function AccountPage() {
                           placeholder="Recipient Full Name"
                           value={newAddress.name}
                           onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -898,7 +1068,7 @@ export default function AccountPage() {
                           placeholder="Street Address"
                           value={newAddress.street}
                           onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -906,29 +1076,29 @@ export default function AccountPage() {
                           placeholder="City"
                           value={newAddress.city}
                           onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
                           type="text"
-                          placeholder="Postcode"
+                          placeholder="Postal Code"
                           value={newAddress.postcode}
                           onChange={(e) => setNewAddress({ ...newAddress, postcode: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                       </div>
-                      <div className="flex gap-2 justify-end pt-2">
+                      <div className="flex justify-end gap-2 pt-2">
                         <button
                           type="button"
                           onClick={() => setShowAddAddressModal(false)}
-                          className="px-4 py-2 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d]"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
                         >
                           Save Address
                         </button>
@@ -940,65 +1110,77 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 5: PAYMENT METHODS
+                PAGE 5: PAYMENT METHODS & CARDS
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'payments' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
                       <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Payment Methods</h2>
-                      <p className="text-xs text-[#8a796c] font-light mt-0.5">Secure payment options and cards</p>
+                      <p className="text-xs text-[#8a796c] mt-0.5">Encrypted payment cards and checkout options</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowAddPaymentModal(true)}
-                      className="px-4 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium flex items-center gap-1.5"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
                     >
-                      <span>+ Add Card</span>
+                      + Add Card
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Luxury Digital Cards Display */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {paymentMethods.map((pm) => (
-                      <div key={pm.id} className="relative bg-gradient-to-br from-[#1c1510] to-[#2d221a] text-[#f5efe8] rounded-2xl p-5 shadow-lg border border-[#dec29b]/40 flex flex-col justify-between min-h-[140px]">
-                        <div className="flex items-center justify-between">
+                      <div
+                        key={pm.id}
+                        className={`relative bg-gradient-to-br ${pm.cardColor} text-[#f5efe8] rounded-2xl p-6 shadow-xl border border-[#dec29b]/40 flex flex-col justify-between min-h-[170px] overflow-hidden`}
+                      >
+                        <div className="flex items-center justify-between relative z-10">
                           <span className="font-serif text-sm tracking-wider text-[#dec29b] font-semibold">{pm.type}</span>
-                          {pm.isDefault && (
-                            <span className="text-[9px] bg-[#dec29b]/20 text-[#dec29b] px-2 py-0.5 rounded-full border border-[#dec29b]/40">
-                              Default Card
-                            </span>
-                          )}
+                          <div className="w-8 h-6 bg-[#dec29b]/20 border border-[#dec29b]/50 rounded flex items-center justify-center text-[9px] text-[#dec29b]">
+                            CHIP
+                          </div>
                         </div>
-                        <p className="font-mono text-base tracking-[0.25em] text-[#ffffff] my-2">•••• •••• •••• {pm.last4}</p>
-                        <div className="flex items-center justify-between text-[10px] text-[#c7b8aa]">
-                          <span>{pm.holder}</span>
-                          <span>EXP: {pm.expiry}</span>
+                        <p className="font-mono text-lg tracking-[0.28em] text-white my-3 relative z-10">
+                          •••• •••• •••• {pm.last4}
+                        </p>
+                        <div className="flex items-center justify-between text-[11px] text-[#d6c9be] relative z-10">
+                          <span className="tracking-wider uppercase">{pm.holder}</span>
+                          <span>EXP {pm.expiry}</span>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Add Payment Modal */}
+                  {/* Security Assurance */}
+                  <div className="p-4 bg-[#faf6ee] border border-[#ded3c5] rounded-xl flex items-center gap-3 text-xs text-[#6b5c50]">
+                    <span className="text-xl">🔒</span>
+                    <div>
+                      <p className="font-semibold text-[#1c1510]">PCI-DSS Level 1 Banking Security</p>
+                      <p className="text-[11px] text-[#8a796c]">Your payment details are end-to-end encrypted with AES-256 standards.</p>
+                    </div>
+                  </div>
+
                   {showAddPaymentModal && (
-                    <form onSubmit={handleAddPayment} className="border border-[#ded3c5] rounded-2xl p-5 bg-[#faf6ee] space-y-4">
-                      <h3 className="font-serif text-base font-semibold text-[#1c1510]">Add Payment Card</h3>
+                    <form onSubmit={handleAddPayment} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add Payment Card</h3>
                       <div className="space-y-3 text-xs">
                         <input
                           type="text"
-                          placeholder="Cardholder Name"
+                          placeholder="Cardholder Name as on Card"
                           value={newCard.holder}
                           onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
                           type="text"
-                          placeholder="Card Number (16 Digits)"
+                          placeholder="16-Digit Card Number"
                           maxLength={19}
                           value={newCard.cardNumber}
                           onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <div className="grid grid-cols-2 gap-3">
@@ -1008,31 +1190,31 @@ export default function AccountPage() {
                             maxLength={5}
                             value={newCard.expiry}
                             onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                             required
                           />
                           <input
                             type="password"
-                            placeholder="CVV"
+                            placeholder="Security CVV"
                             maxLength={4}
                             value={newCard.cvv}
                             onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                             required
                           />
                         </div>
                       </div>
-                      <div className="flex gap-2 justify-end pt-2">
+                      <div className="flex justify-end gap-2 pt-2">
                         <button
                           type="button"
                           onClick={() => setShowAddPaymentModal(false)}
-                          className="px-4 py-2 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d]"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
                         >
                           Save Card
                         </button>
@@ -1044,73 +1226,113 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 6: RETURNS & REFUNDS
+                PAGE 6: RETURNS & 30-DAY GUARANTEE
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'returns' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="border-b border-[#ede4d8] pb-4">
-                    <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Returns & Exchanges</h2>
-                    <p className="text-xs text-[#8a796c] font-light mt-0.5">30-Day complimentary return & bespoke exchange policy</p>
+                    <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Returns & Lifetime Warranty</h2>
+                    <p className="text-xs text-[#8a796c] mt-0.5">30-day return policy and complimentary jewellery resizing service</p>
                   </div>
 
-                  <div className="bg-[#faf6ee] border border-[#ded3c5] rounded-xl p-5 space-y-3 text-xs text-[#5a4b40] leading-relaxed">
-                    <h3 className="font-serif text-sm font-semibold text-[#1c1510]">Bhai Jeweller Guarantee</h3>
-                    <p>
-                      All genuine purchases from Bhai Jeweller Bradford showroom and online catalogue come with a 30-day money-back guarantee and complimentary inspection warranty.
-                    </p>
-                    <ul className="list-disc list-inside space-y-1 text-[#7a6a5c]">
-                      <li>Items must be unworn and in original luxury packaging</li>
-                      <li>Certificate of authenticity & valuation invoice required</li>
-                      <li>Refunds processed back to original payment within 3-5 working days</li>
-                    </ul>
+                  {returnSubmitted && (
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
+                      ✓ Your return/exchange request has been lodged! Our Bradford showroom team will contact you within 24 hours.
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
+                      <div className="text-2xl">✨</div>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">30-Day Money Back</h4>
+                      <p className="text-[11px] text-[#7a6a5c]">Complete refund or exchange within 30 days of parcel delivery.</p>
+                    </div>
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
+                      <div className="text-2xl">💎</div>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Complimentary Resizing</h4>
+                      <p className="text-[11px] text-[#7a6a5c]">Free ring sizing adjustment within 60 days of purchase.</p>
+                    </div>
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
+                      <div className="text-2xl">📦</div>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Free Insured Return</h4>
+                      <p className="text-[11px] text-[#7a6a5c]">Pre-paid insured Royal Mail Special Delivery label provided.</p>
+                    </div>
                   </div>
 
-                  <div className="pt-2 text-center">
-                    <Link
-                      href="/contact"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                  {/* Return Request Form */}
+                  <form onSubmit={(e) => { e.preventDefault(); setReturnSubmitted(true); }} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Submit a Return or Exchange Request</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Select Order ID</label>
+                        <select
+                          value={selectedReturnOrder}
+                          onChange={(e) => setSelectedReturnOrder(e.target.value)}
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
+                        >
+                          <option value="">Choose Order...</option>
+                          {realOrders.map((o) => (
+                            <option key={o.id} value={o.id}>{o.id} — {o.items}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Reason for Request</label>
+                        <select
+                          value={returnReason}
+                          onChange={(e) => setReturnReason(e.target.value)}
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
+                        >
+                          <option value="Ring Sizing / Exchange">Ring Sizing / Exchange</option>
+                          <option value="Refund & Return">Full Refund & Return</option>
+                          <option value="Inspection / Polishing">Inspection / Polishing</option>
+                        </select>
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
                     >
-                      <span>Contact Showroom for Return Request</span>
-                      <span>→</span>
-                    </Link>
-                  </div>
+                      Generate Return Label
+                    </button>
+                  </form>
                 </div>
               </ScrollReveal>
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                TAB 7: SETTINGS & SECURITY
+                PAGE 7: ACCOUNT SETTINGS, SECURITY & 2FA
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'settings' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 sm:p-6 shadow-xs space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="border-b border-[#ede4d8] pb-4">
                     <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Account & Security</h2>
-                    <p className="text-xs text-[#8a796c] font-light mt-0.5">Manage credentials, password and preferences</p>
+                    <p className="text-xs text-[#8a796c] mt-0.5">Manage authentication credentials, password, and notification alerts</p>
                   </div>
 
                   {settingsSaved && (
-                    <div className="p-3 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-medium border border-emerald-300">
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
                       ✓ Profile details updated successfully!
                     </div>
                   )}
 
                   {passwordChanged && (
-                    <div className="p-3 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-medium border border-emerald-300">
-                      ✓ Password updated successfully!
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
+                      ✓ Password changed successfully!
                     </div>
                   )}
 
                   {passwordError && (
-                    <div className="p-3 bg-red-100 text-red-800 rounded-lg text-xs font-medium border border-red-300">
+                    <div className="p-4 bg-red-100 text-red-900 border border-red-300 rounded-xl text-xs font-medium">
                       {passwordError}
                     </div>
                   )}
 
-                  {/* Profile Form */}
+                  {/* Profile Edit Form */}
                   <form onSubmit={(e) => { e.preventDefault(); setSettingsSaved(true); setTimeout(() => setSettingsSaved(false), 3000); }} className="space-y-4">
-                    <h3 className="font-serif text-sm font-semibold text-[#1c1510]">Personal Information</h3>
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Personal Profile</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div>
                         <label className="block text-[11px] text-[#8a796c] mb-1">Full Name</label>
@@ -1118,7 +1340,7 @@ export default function AccountPage() {
                           type="text"
                           value={user.name}
                           onChange={(e) => setUser({ ...user, name: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         />
                       </div>
                       <div>
@@ -1127,120 +1349,98 @@ export default function AccountPage() {
                           type="email"
                           value={user.email}
                           disabled
-                          className="w-full p-3 bg-[#ede4d8]/40 border border-[#ded3c5] rounded-lg text-[#7a6a5c] cursor-not-allowed"
+                          className="w-full p-3 bg-[#ede4d8]/40 border border-[#ded3c5] rounded-xl text-[#7a6a5c] cursor-not-allowed"
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-[11px] text-[#8a796c] mb-1">Phone Number</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Direct Phone Number</label>
                         <input
                           type="text"
                           value={user.phone}
                           onChange={(e) => setUser({ ...user, phone: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         />
                       </div>
                     </div>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
+                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
                     >
-                      Save Profile
+                      Save Profile Changes
                     </button>
                   </form>
 
-                  {/* Password Form */}
+                  {/* Security & Password */}
                   <form onSubmit={handlePasswordSubmit} className="pt-6 border-t border-[#ede4d8] space-y-4">
-                    <h3 className="font-serif text-sm font-semibold text-[#1c1510]">Change Password</h3>
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Update Password</h3>
                     <div className="space-y-3 text-xs">
                       <input
                         type="password"
                         placeholder="Current Password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                       <input
                         type="password"
-                        placeholder="New Password (min 8 characters)"
+                        placeholder="New Password (minimum 8 characters)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                       <input
                         type="password"
                         placeholder="Confirm New Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-lg focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                     </div>
                     <button
                       type="submit"
-                      className="px-5 py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-medium hover:bg-[#ded3c5] transition-all border border-[#ded3c5]"
+                      className="px-6 py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-semibold hover:bg-[#ded3c5] transition-all border border-[#ded3c5]"
                     >
                       Update Password
                     </button>
                   </form>
+
+                  {/* Two-Factor & Preferences */}
+                  <div className="pt-6 border-t border-[#ede4d8] space-y-3">
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Security & Notifications</h3>
+                    <div className="space-y-2 text-xs">
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>Two-Factor Authentication (2FA via Email)</span>
+                        <input
+                          type="checkbox"
+                          checked={twoFactorEnabled}
+                          onChange={(e) => setTwoFactorEnabled(e.target.checked)}
+                          className="w-4 h-4 accent-[#1c1510]"
+                        />
+                      </label>
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>SMS Order Tracking & Delivery Notifications</span>
+                        <input
+                          type="checkbox"
+                          checked={smsNotifs}
+                          onChange={(e) => setSmsNotifs(e.target.checked)}
+                          className="w-4 h-4 accent-[#1c1510]"
+                        />
+                      </label>
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>VIP Showroom Invitations & Private Sale Catalogue</span>
+                        <input
+                          type="checkbox"
+                          checked={emailNotifs}
+                          onChange={(e) => setEmailNotifs(e.target.checked)}
+                          className="w-4 h-4 accent-[#1c1510]"
+                        />
+                      </label>
+                    </div>
+                  </div>
+
                 </div>
               </ScrollReveal>
             )}
-
-          </div>
-
-
-          {/* ── RIGHT WIDGET COLUMN (Desktop Quick Links) ── */}
-          <div className="lg:col-span-3 space-y-6">
-            
-            {/* QUICK LINKS CARD */}
-            <ScrollReveal direction="up" delay={160}>
-              <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-5 shadow-2xs space-y-3">
-                <h3 className="font-serif text-sm text-[#1c1510] font-medium border-b border-[#ede4d8] pb-2">
-                  Client Services
-                </h3>
-                <nav className="space-y-1 text-xs">
-                  <Link href="/shop" className="flex items-center justify-between p-2 rounded-lg hover:bg-[#faf6ee] text-[#6b5c50] hover:text-[#1c1510] transition-colors">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0C2.678 5.572 2.25 6.052 2.25 6.62v.958" />
-                      </svg>
-                      Browse Catalogue
-                    </span>
-                    <span>›</span>
-                  </Link>
-
-                  <Link href="/locations/bradford" className="flex items-center justify-between p-2 rounded-lg hover:bg-[#faf6ee] text-[#6b5c50] hover:text-[#1c1510] transition-colors">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-                      </svg>
-                      Bradford Showroom
-                    </span>
-                    <span>›</span>
-                  </Link>
-
-                  <Link href="/return-policy" className="flex items-center justify-between p-2 rounded-lg hover:bg-[#faf6ee] text-[#6b5c50] hover:text-[#1c1510] transition-colors">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                      </svg>
-                      Return & Refund Policy
-                    </span>
-                    <span>›</span>
-                  </Link>
-
-                  <Link href="/contact" className="flex items-center justify-between p-2 rounded-lg hover:bg-[#faf6ee] text-[#6b5c50] hover:text-[#1c1510] transition-colors">
-                    <span className="flex items-center gap-2">
-                      <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M12 18h.008v.008H12V18z" />
-                      </svg>
-                      Need Help?
-                    </span>
-                    <span>›</span>
-                  </Link>
-                </nav>
-              </div>
-            </ScrollReveal>
 
           </div>
 
