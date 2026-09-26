@@ -1,149 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import { useShop, ProductItem } from '@/context/ShopContext';
 
-// Initial Hero / Banner Slider Data for Admin Slider Manager
-const INITIAL_SLIDES = [
-  {
-    id: 'slide-1',
-    title: 'The Royal Aurelia Collection',
-    subtitle: 'Handcrafted 22k Pure Gold & Diamond Masterpieces',
-    ctaText: 'Explore Collection',
-    ctaLink: '/shop?category=Necklaces',
-    image: '/images/hero-slider-1.jpg',
-    status: 'Active',
-    order: 1,
-  },
-  {
-    id: 'slide-2',
-    title: 'Bespoke Diamond Engagement Rings',
-    subtitle: 'Tailored by Master Artisans to Tell Your Unique Love Story',
-    ctaText: 'Book Consultation',
-    ctaLink: '/bespoke',
-    image: '/images/hero-slider-2.jpg',
-    status: 'Active',
-    order: 2,
-  },
-  {
-    id: 'slide-3',
-    title: 'Timeless Heritage Craftsmanship',
-    subtitle: 'Discover Fine Jewelry Engineered for Generations',
-    ctaText: 'Shop New Arrivals',
-    ctaLink: '/shop',
-    image: '/images/hero-slider-3.jpg',
-    status: 'Inactive',
-    order: 3,
-  },
-];
-
-// Initial Orders Data
-const INITIAL_ORDERS = [
-  {
-    id: 'BJ-98421',
-    customer: 'Sophia Reynolds',
-    email: 'sophia.r@example.com',
-    items: 'Solara Diamond Ring (18k Gold)',
-    amount: 1280,
-    date: '2026-09-26',
-    paymentMethod: 'Credit Card (Visa)',
-    status: 'Processing',
-    address: 'Bradford, West Yorkshire, UK',
-  },
-  {
-    id: 'BJ-98420',
-    customer: 'Alexander Wright',
-    email: 'a.wright@example.com',
-    items: 'Lumiere Gold Necklace',
-    amount: 980,
-    date: '2026-09-25',
-    paymentMethod: 'Apple Pay',
-    status: 'Shipped',
-    address: 'London, UK',
-  },
-  {
-    id: 'BJ-98419',
-    customer: 'Fatima Al-Mansoor',
-    email: 'fatima.m@example.com',
-    items: 'Royal Heritage Bangle + Gift Box',
-    amount: 1875,
-    date: '2026-09-25',
-    paymentMethod: 'Direct Bank Wire',
-    status: 'Processing',
-    address: 'Dubai, UAE',
-  },
-  {
-    id: 'BJ-98418',
-    customer: 'James Sterling',
-    email: 'james.s@example.com',
-    items: 'Valera Diamond Drop Earrings',
-    amount: 760,
-    date: '2026-09-24',
-    paymentMethod: 'Cash on Delivery',
-    status: 'Delivered',
-    address: 'Leeds, UK',
-  },
-  {
-    id: 'BJ-98417',
-    customer: 'Elena Rostova',
-    email: 'elena.r@example.com',
-    items: 'Solara Ring + Aurelia Pendant',
-    amount: 2700,
-    date: '2026-09-23',
-    paymentMethod: 'Credit Card (MC)',
-    status: 'Delivered',
-    address: 'Manchester, UK',
-  },
-];
-
-// Initial Custom Bespoke Enquiries
-const INITIAL_ENQUIRIES = [
-  {
-    id: 'ENQ-101',
-    name: 'Tariq Hussain',
-    email: 'tariq.h@example.com',
-    phone: '+44 7700 900123',
-    service: 'Bespoke Engagement Ring Design',
-    budget: '$3,000 - $5,000',
-    date: '2026-09-26',
-    message: 'Looking to customize a 1.5ct Oval Cut diamond ring in 18k yellow gold.',
-    status: 'New',
-  },
-  {
-    id: 'ENQ-100',
-    name: 'Amara Vance',
-    email: 'amara.vance@example.com',
-    phone: '+44 7700 900456',
-    service: 'Bridal Jewelry Set Customization',
-    budget: '$8,000 - $12,000',
-    date: '2026-09-24',
-    message: 'Require full matching necklace and bangle set in 22k pure gold for wedding in November.',
-    status: 'In Design',
-  },
-  {
-    id: 'ENQ-099',
-    name: 'Marcus Brody',
-    email: 'marcus.b@example.com',
-    phone: '+44 7700 900789',
-    service: 'Heirloom Ring Restoration',
-    budget: '$1,500 - $2,500',
-    date: '2026-09-22',
-    message: 'Restoration and resizing of vintage emerald gold ring.',
-    status: 'Completed',
-  },
-];
-
-// Initial Registered Customers
-const INITIAL_CUSTOMERS = [
-  { id: 'CUST-001', name: 'Sophia Reynolds', email: 'sophia.r@example.com', totalOrders: 4, totalSpent: 4850, tier: 'VIP Gold' },
-  { id: 'CUST-002', name: 'Alexander Wright', email: 'a.wright@example.com', totalOrders: 2, totalSpent: 2180, tier: 'Silver' },
-  { id: 'CUST-003', name: 'Fatima Al-Mansoor', email: 'fatima.m@example.com', totalOrders: 6, totalSpent: 14200, tier: 'Diamond VIP' },
-  { id: 'CUST-004', name: 'James Sterling', email: 'james.s@example.com', totalOrders: 1, totalSpent: 760, tier: 'Bronze' },
-  { id: 'CUST-005', name: 'Elena Rostova', email: 'elena.r@example.com', totalOrders: 3, totalSpent: 5900, tier: 'VIP Gold' },
-];
+// Initial Data States (Strictly 0 fake data by default - syncs live with Supabase Real-Time Database)
+const INITIAL_SLIDES: any[] = [];
+const INITIAL_ORDERS: any[] = [];
+const INITIAL_ENQUIRIES: any[] = [];
+const INITIAL_CUSTOMERS: any[] = [];
 
 export default function AdminDashboardPage() {
   // Real-time Shop Context
@@ -161,6 +28,36 @@ export default function AdminDashboardPage() {
   const [enquiries, setEnquiries] = useState(INITIAL_ENQUIRIES);
   const [slides, setSlides] = useState(INITIAL_SLIDES);
   const [customers] = useState(INITIAL_CUSTOMERS);
+
+  // Fetch real-time database data from Supabase API endpoints on mount
+  useEffect(() => {
+    fetch('/api/orders')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setOrders(data.data);
+        }
+      })
+      .catch((err) => console.error('Error loading orders from API:', err));
+
+    fetch('/api/enquiries')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setEnquiries(data.data);
+        }
+      })
+      .catch((err) => console.error('Error loading enquiries from API:', err));
+
+    fetch('/api/slides')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setSlides(data.data);
+        }
+      })
+      .catch((err) => console.error('Error loading slides from API:', err));
+  }, []);
 
   // Filter states
   const [productCategory, setProductCategory] = useState('All');

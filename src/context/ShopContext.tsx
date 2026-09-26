@@ -72,108 +72,7 @@ const CART_STORAGE_KEY = 'bhai_jeweller_cart';
 const WISHLIST_STORAGE_KEY = 'bhai_jeweller_wishlist';
 const PRODUCTS_STORAGE_KEY = 'bhai_jeweller_products';
 
-export const DEFAULT_PRODUCTS: ProductItem[] = [
-  {
-    id: 'solara-ring',
-    name: 'Solara Diamond Ring',
-    category: 'Rings',
-    price: 1280,
-    originalPrice: 1650,
-    stock: 14,
-    metal: '18k Yellow Gold',
-    status: 'In Stock',
-    isFeatured: true,
-    image: '/images/detail-ring-hero.jpg',
-    images: ['/images/detail-ring-hero.jpg', '/images/shop-prod-1.jpg', '/images/category-rings.jpg'],
-    sku: 'BJ-RNG-001',
-    description: 'Exquisite 18k yellow gold solitaire ring handcrafted with precision cut brilliant diamonds.',
-    slug: 'solara-diamond-ring',
-    weightGrams: 5.2,
-    seoTitle: 'Solara Diamond Ring | 18k Gold Solitaire | Bhai Jeweller',
-    seoDescription: 'Shop Solara Diamond Ring handcrafted in 18k Yellow Gold. Certified brilliant diamonds.',
-    focusKeywords: ['diamond ring', '18k yellow gold ring', 'bhai jeweller ring', 'solitaire ring'],
-  },
-  {
-    id: 'lumiere-necklace',
-    name: 'Lumiere Gold Necklace',
-    category: 'Necklaces',
-    price: 980,
-    originalPrice: 1200,
-    stock: 8,
-    metal: '22k Gold',
-    status: 'In Stock',
-    isFeatured: true,
-    image: '/images/shop-prod-2.jpg',
-    images: ['/images/shop-prod-2.jpg', '/images/category-necklaces.jpg'],
-    sku: 'BJ-NCK-002',
-    description: 'Timeless 22k pure gold necklace with intricate artisan filigree craftsmanship.',
-    slug: 'lumiere-gold-necklace',
-    weightGrams: 14.8,
-    seoTitle: 'Lumiere 22k Gold Necklace | Fine Jewelry | Bhai Jeweller',
-    seoDescription: 'Buy handcrafted 22k gold necklace. Pure gold heritage craftsmanship.',
-    focusKeywords: ['gold necklace', '22k gold necklace', 'bhai jeweller necklace'],
-  },
-  {
-    id: 'valera-earrings',
-    name: 'Valera Diamond Drop Earrings',
-    category: 'Earrings',
-    price: 760,
-    originalPrice: 950,
-    stock: 5,
-    metal: '18k White Gold',
-    status: 'Low Stock',
-    isFeatured: false,
-    image: '/images/shop-prod-3.jpg',
-    images: ['/images/shop-prod-3.jpg', '/images/category-earrings.jpg'],
-    sku: 'BJ-ERG-003',
-    description: 'Elegant 18k white gold drop earrings encrusted with pavé set diamonds.',
-    slug: 'valera-diamond-drop-earrings',
-    weightGrams: 6.4,
-    seoTitle: 'Valera Diamond Drop Earrings 18k White Gold | Bhai Jeweller',
-    seoDescription: 'Shop Valera Diamond Drop Earrings in 18k White Gold.',
-    focusKeywords: ['diamond earrings', 'white gold earrings', 'drop earrings'],
-  },
-  {
-    id: 'royal-bangle',
-    name: 'Royal Heritage Bangle',
-    category: 'Bracelets',
-    price: 1850,
-    originalPrice: 2100,
-    stock: 3,
-    metal: '22k Gold',
-    status: 'Low Stock',
-    isFeatured: true,
-    image: '/images/shop-prod-4.jpg',
-    images: ['/images/shop-prod-4.jpg', '/images/category-bracelets.jpg'],
-    sku: 'BJ-BRC-004',
-    description: 'Heritage 22k pure gold handcrafted royal bangle set.',
-    slug: 'royal-heritage-bangle',
-    weightGrams: 28.5,
-    seoTitle: 'Royal Heritage 22k Gold Bangle | Bhai Jeweller',
-    seoDescription: 'Authentic 22k gold royal heritage bangle.',
-    focusKeywords: ['22k gold bangle', 'gold bracelet', 'royal bangle'],
-  },
-  {
-    id: 'aurelia-solitaire',
-    name: 'Aurelia Solitaire Pendant',
-    category: 'Necklaces',
-    price: 1420,
-    originalPrice: 1700,
-    stock: 12,
-    metal: '18k Rose Gold',
-    status: 'In Stock',
-    isFeatured: false,
-    image: '/images/shop-prod-5.jpg',
-    images: ['/images/shop-prod-5.jpg', '/images/category-necklaces.jpg'],
-    sku: 'BJ-NCK-005',
-    description: 'Stunning 18k Rose Gold solitaire diamond pendant with chain.',
-    slug: 'aurelia-solitaire-pendant',
-    weightGrams: 8.1,
-    seoTitle: 'Aurelia Solitaire Pendant 18k Rose Gold | Bhai Jeweller',
-    seoDescription: 'Shop Aurelia Solitaire Pendant in 18k Rose Gold.',
-    focusKeywords: ['rose gold pendant', 'solitaire pendant', 'diamond pendant'],
-  },
-];
+export const DEFAULT_PRODUCTS: ProductItem[] = [];
 
 export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -181,7 +80,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<ProductItem[]>(DEFAULT_PRODUCTS);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage on mount
+  // Load from localStorage and sync live API products on mount
   useEffect(() => {
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
@@ -191,13 +90,24 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
       if (savedProducts) {
         const parsed = JSON.parse(savedProducts);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setProducts(parsed);
         }
       }
     } catch (e) {
       console.error('Failed to load shop state from localStorage:', e);
     }
+
+    // Fetch live real products from API / Supabase SQL DB
+    fetch('/api/products')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setProducts(data.data);
+        }
+      })
+      .catch((err) => console.error('Failed to fetch live products from API:', err));
+
     setIsLoaded(true);
   }, []);
 

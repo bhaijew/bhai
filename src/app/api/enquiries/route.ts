@@ -1,42 +1,45 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-let SERVER_ENQUIRIES_DB = [
-  {
-    id: 'ENQ-101',
-    name: 'Tariq Hussain',
-    email: 'tariq.h@example.com',
-    phone: '+44 7700 900123',
-    service: 'Bespoke Engagement Ring Design',
-    budget: '$3,000 - $5,000',
-    date: '2026-09-26',
-    message: 'Looking to customize a 1.5ct Oval Cut diamond ring in 18k yellow gold.',
-    status: 'New',
-  },
-  {
-    id: 'ENQ-100',
-    name: 'Amara Vance',
-    email: 'amara.vance@example.com',
-    phone: '+44 7700 900456',
-    service: 'Bridal Jewelry Set Customization',
-    budget: '$8,000 - $12,000',
-    date: '2026-09-24',
-    message: 'Require full matching necklace and bangle set in 22k pure gold for wedding in November.',
-    status: 'In Design',
-  },
-  {
-    id: 'ENQ-099',
-    name: 'Marcus Brody',
-    email: 'marcus.b@example.com',
-    phone: '+44 7700 900789',
-    service: 'Heirloom Ring Restoration',
-    budget: '$1,500 - $2,500',
-    date: '2026-09-22',
-    message: 'Restoration and resizing of vintage emerald gold ring.',
-    status: 'Completed',
-  },
-];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Clean in-memory fallback array (strictly 0 fake enquiries)
+let SERVER_ENQUIRIES_DB: any[] = [];
 
 export async function GET() {
+  try {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('bespoke_enquiries')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        const mappedEnquiries = data.map((e) => ({
+          id: e.id,
+          name: e.client_name,
+          email: e.client_email,
+          phone: e.client_phone,
+          service: e.service_requested,
+          budget: e.estimated_budget,
+          date: e.created_at ? e.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          message: e.design_notes || '',
+          status: e.enquiry_status,
+        }));
+        return NextResponse.json({
+          success: true,
+          count: mappedEnquiries.length,
+          data: mappedEnquiries,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Supabase Enquiries fetch error:', err);
+  }
+
   return NextResponse.json({
     success: true,
     count: SERVER_ENQUIRIES_DB.length,
@@ -59,7 +62,29 @@ export async function POST(request: Request) {
       status: body.status || 'New',
     };
 
-    SERVER_ENQUIRIES_DB.unshift(newEnquiry);
+    if (supabase) {
+      const { error } = await supabase.from('bespoke_enquiries').upsert({
+        id: newEnquiry.id,
+        client_name: newEnquiry.name,
+        client_email: newEnquiry.email,
+        client_phone: newEnquiry.phone,
+        service_requested: newEnquiry.service,
+        estimated_budget: newEnquiry.budget,
+        design_notes: newEnquiry.message,
+        enquiry_status: newEnquiry.status,
+      });
+
+      if (error) {
+        console.error('Supabase Enquiries insert error:', error);
+      }
+    }
+
+    const existingIndex = SERVER_ENQUIRIES_DB.findIndex((e) => e.id === newEnquiry.id);
+    if (existingIndex >= 0) {
+      SERVER_ENQUIRIES_DB[existingIndex] = newEnquiry;
+    } else {
+      SERVER_ENQUIRIES_DB.unshift(newEnquiry);
+    }
 
     return NextResponse.json({
       success: true,
@@ -84,7 +109,18 @@ export async function PATCH(request: Request) {
       );
     }
 
-    SERVER_ENQUIRIES_DB = SERVER_ENQUIRIES_DB.map(e => e.id === id ? { ...e, status } : e);
+    if (supabase) {
+      const { error } = await supabase
+        .from('bespoke_enquiries')
+        .update({ enquiry_status: status })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Supabase Enquiries update error:', error);
+      }
+    }
+
+    SERVER_ENQUIRIES_DB = SERVER_ENQUIRIES_DB.map((e) => (e.id === id ? { ...e, status } : e));
 
     return NextResponse.json({
       success: true,
@@ -97,3 +133,4 @@ export async function PATCH(request: Request) {
     );
   }
 }
+

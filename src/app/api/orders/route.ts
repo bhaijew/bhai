@@ -1,64 +1,45 @@
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
-let SERVER_ORDERS_DB = [
-  {
-    id: 'BJ-98421',
-    customer: 'Sophia Reynolds',
-    email: 'sophia.r@example.com',
-    items: 'Solara Diamond Ring (18k Gold)',
-    amount: 1280,
-    date: '2026-09-26',
-    paymentMethod: 'Credit Card (Visa)',
-    status: 'Processing',
-    address: 'Bradford, West Yorkshire, UK',
-  },
-  {
-    id: 'BJ-98420',
-    customer: 'Alexander Wright',
-    email: 'a.wright@example.com',
-    items: 'Lumiere Gold Necklace',
-    amount: 980,
-    date: '2026-09-25',
-    paymentMethod: 'Apple Pay',
-    status: 'Shipped',
-    address: 'London, UK',
-  },
-  {
-    id: 'BJ-98419',
-    customer: 'Fatima Al-Mansoor',
-    email: 'fatima.m@example.com',
-    items: 'Royal Heritage Bangle + Gift Box',
-    amount: 1875,
-    date: '2026-09-25',
-    paymentMethod: 'Direct Bank Wire',
-    status: 'Processing',
-    address: 'Dubai, UAE',
-  },
-  {
-    id: 'BJ-98418',
-    customer: 'James Sterling',
-    email: 'james.s@example.com',
-    items: 'Valera Diamond Drop Earrings',
-    amount: 760,
-    date: '2026-09-24',
-    paymentMethod: 'Cash on Delivery',
-    status: 'Delivered',
-    address: 'Leeds, UK',
-  },
-  {
-    id: 'BJ-98417',
-    customer: 'Elena Rostova',
-    email: 'elena.r@example.com',
-    items: 'Solara Ring + Aurelia Pendant',
-    amount: 2700,
-    date: '2026-09-23',
-    paymentMethod: 'Credit Card (MC)',
-    status: 'Delivered',
-    address: 'Manchester, UK',
-  },
-];
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+
+const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+
+// Clean in-memory fallback array (strictly 0 fake orders)
+let SERVER_ORDERS_DB: any[] = [];
 
 export async function GET() {
+  try {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        const mappedOrders = data.map((o) => ({
+          id: o.id,
+          customer: o.customer_name,
+          email: o.customer_email,
+          items: o.items_description,
+          amount: Number(o.total_amount),
+          date: o.created_at ? o.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          paymentMethod: o.payment_method,
+          status: o.order_status,
+          address: o.shipping_address,
+        }));
+        return NextResponse.json({
+          success: true,
+          count: mappedOrders.length,
+          data: mappedOrders,
+        });
+      }
+    }
+  } catch (err) {
+    console.error('Supabase Orders fetch error:', err);
+  }
+
   return NextResponse.json({
     success: true,
     count: SERVER_ORDERS_DB.length,
@@ -81,7 +62,29 @@ export async function POST(request: Request) {
       address: body.address || 'Standard Delivery Address',
     };
 
-    SERVER_ORDERS_DB.unshift(newOrder);
+    if (supabase) {
+      const { error } = await supabase.from('orders').upsert({
+        id: newOrder.id,
+        customer_name: newOrder.customer,
+        customer_email: newOrder.email,
+        items_description: newOrder.items,
+        total_amount: newOrder.amount,
+        payment_method: newOrder.paymentMethod,
+        order_status: newOrder.status,
+        shipping_address: newOrder.address,
+      });
+
+      if (error) {
+        console.error('Supabase Orders insert error:', error);
+      }
+    }
+
+    const existingIndex = SERVER_ORDERS_DB.findIndex((o) => o.id === newOrder.id);
+    if (existingIndex >= 0) {
+      SERVER_ORDERS_DB[existingIndex] = newOrder;
+    } else {
+      SERVER_ORDERS_DB.unshift(newOrder);
+    }
 
     return NextResponse.json({
       success: true,
@@ -106,7 +109,18 @@ export async function PATCH(request: Request) {
       );
     }
 
-    SERVER_ORDERS_DB = SERVER_ORDERS_DB.map(o => o.id === id ? { ...o, status } : o);
+    if (supabase) {
+      const { error } = await supabase
+        .from('orders')
+        .update({ order_status: status })
+        .eq('id', id);
+
+      if (error) {
+        console.error('Supabase Orders update error:', error);
+      }
+    }
+
+    SERVER_ORDERS_DB = SERVER_ORDERS_DB.map((o) => (o.id === id ? { ...o, status } : o));
 
     return NextResponse.json({
       success: true,
@@ -119,3 +133,4 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
