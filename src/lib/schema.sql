@@ -106,11 +106,29 @@ ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hero_section ENABLE ROW LEVEL SECURITY;
 ALTER TABLE announcement_bar ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if re-running to prevent "policy already exists" error
+DROP POLICY IF EXISTS "Allow Public Products Access" ON products;
+DROP POLICY IF EXISTS "Allow Public Orders Access" ON orders;
+DROP POLICY IF EXISTS "Allow Public Enquiries Access" ON bespoke_enquiries;
+DROP POLICY IF EXISTS "Allow Public Slides Access" ON hero_slides;
+DROP POLICY IF EXISTS "Allow Public Hero Access" ON hero_section;
+DROP POLICY IF EXISTS "Allow Public Announcement Access" ON announcement_bar;
+
 -- Allow public read & write access for API endpoints
-CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true);
-CREATE POLICY "Allow Public Orders Access" ON orders FOR ALL USING (true);
-CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING (true);
-CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true);
-CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true);
-CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true);
+CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Orders Access" ON orders FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true) WITH CHECK (true);
+
+-- Insert initial default config rows if they don't exist yet
+INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, headline_line3, description, primary_cta_text, primary_cta_href, hero_image, featured_title, featured_subtitle, featured_image)
+VALUES ('main_hero', 'BHAI JEWELLER', 'Jewellery, made', 'unforgettable', '', 'Timeless pieces for modern souls. Discover fine jewellery designed to celebrate your most precious moments.', 'Shop Collection', '/shop', '/images/hero-img.jpg', 'Diamond Elegance', 'Classic pieces, endless beauty.', '/images/featured-ring.jpg')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO announcement_bar (id, is_enabled, messages)
+VALUES ('main_announcement', true, '["Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK", "Complimentary luxury gift packaging on every order  |  Bespoke service", "Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available"]'::jsonb)
+ON CONFLICT (id) DO NOTHING;
+
 
