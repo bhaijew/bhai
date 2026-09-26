@@ -207,74 +207,7 @@ export default function AccountPage() {
     <div className="min-h-screen bg-[#faf7f2] text-[#1c1510] font-sans selection:bg-[#c5a059] selection:text-white flex flex-col justify-between overflow-x-hidden">
       
       {/* ─────────────────────────────────────────────────────────────
-          1. LUXURY TOP NAVIGATION BAR
-          ───────────────────────────────────────────────────────────── */}
-      <header className="w-full bg-[#140e0b] text-[#f5efe8] border-b border-[#2d221a] sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
-          {/* Left Mobile Menu Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open mobile account menu"
-            className="md:hidden p-2 text-[#e3c79e] hover:text-white transition-colors"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full border border-[#dec29b]/70 flex items-center justify-center bg-[#1a1410] shadow-sm">
-              <span className="font-serif text-sm text-[#dec29b] font-semibold italic">A</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif text-sm sm:text-base tracking-[0.22em] uppercase text-[#f5efe8]">
-                AURELIA
-              </span>
-              <span className="text-[7.5px] tracking-[0.4em] uppercase text-[#b8a798]">— JEWELS —</span>
-            </div>
-          </Link>
-
-          {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-7 lg:gap-9 text-xs tracking-wider uppercase font-light text-[#dfd5ca]">
-            <Link href="/" className="hover:text-[#dec29b] transition-colors">Home</Link>
-            <Link href="/shop" className="hover:text-[#dec29b] transition-colors">Shop</Link>
-            <Link href="/collections" className="hover:text-[#dec29b] transition-colors">Collections</Link>
-            <Link href="/about" className="hover:text-[#dec29b] transition-colors">About</Link>
-            <Link href="/journal" className="hover:text-[#dec29b] transition-colors">Journal</Link>
-            <Link href="/contact" className="hover:text-[#dec29b] transition-colors">Contact</Link>
-          </nav>
-
-          {/* Right Utility Icons */}
-          <div className="flex items-center gap-3 sm:gap-4 text-[#f5efe8]">
-            <button type="button" aria-label="Search" className="hover:text-[#dec29b] transition-colors p-1">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-            </button>
-
-            <Link href="/wishlist" aria-label="Wishlist" className="relative hover:text-[#dec29b] transition-colors p-1">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-              </svg>
-            </Link>
-
-            <Link href="/cart" aria-label="Cart" className="relative hover:text-[#dec29b] transition-colors p-1">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.7" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
-              </svg>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#dec29b] text-[#1c1510] text-[9px] font-bold rounded-full flex items-center justify-center">
-                2
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-
-      {/* ─────────────────────────────────────────────────────────────
-          2. HERO COVER BANNER & OVERLAPPING PROFILE CARD (EXACT MATCHING DESIGN 2)
+          HERO COVER BANNER & OVERLAPPING PROFILE CARD
           ───────────────────────────────────────────────────────────── */}
       <div className="relative w-full">
         {/* Cover Image Header */}
@@ -327,17 +260,48 @@ export default function AccountPage() {
               </div>
             </div>
 
-            {/* Right: Edit Profile Button (Sleek Dark Pill Button) */}
-            <button
-              type="button"
-              className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all flex items-center justify-center gap-1.5 shadow-sm self-start sm:self-end mt-2 sm:mt-0"
-            >
-              <svg className="w-3.5 h-3.5 text-[#dec29b]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-              </svg>
-              <span>Edit Profile</span>
-            </button>
+            {/* Right: Actions (Mobile Menu Toggle & Edit Profile Button) */}
+            <div className="flex items-center gap-2 self-start sm:self-end mt-2 sm:mt-0">
+              <button
+                type="button"
+                onClick={() => setMobileMenuOpen(true)}
+                className="lg:hidden px-4 py-2 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-medium hover:bg-[#ded3c5] transition-all flex items-center justify-center gap-1.5 border border-[#ded3c5] shadow-xs"
+              >
+                <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <span>Account Menu</span>
+              </button>
+              <button
+                type="button"
+                className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <svg className="w-3.5 h-3.5 text-[#dec29b]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
+                <span>Edit Profile</span>
+              </button>
+            </div>
 
+          </div>
+        </div>
+
+        {/* Mobile Horizontal Quick Tabs */}
+        <div className="lg:hidden max-w-7xl mx-auto px-4 sm:px-8 mt-3 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-2 pb-2">
+            {sideNavItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id as any)}
+                className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  activeTab === item.id
+                    ? 'bg-[#1c1510] text-[#f5efe8] shadow-xs'
+                    : 'bg-[#ede4d8]/70 text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] border border-[#ded3c5]'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -798,7 +762,7 @@ export default function AccountPage() {
               {/* Promo Banner Card inside Drawer */}
               <div className="relative rounded-[5px] overflow-hidden bg-[#faf7f2] border border-[#ded3c5] p-4 text-center shadow-2xs">
                 <h4 className="font-serif text-base text-[#1c1510] font-semibold">Luxury in Every Detail</h4>
-                <p className="text-[10px] text-[#9e7d56] tracking-[0.25em] uppercase mt-1">AURELIA JEWELS</p>
+                <p className="text-[10px] text-[#9e7d56] tracking-[0.25em] uppercase mt-1">BHAI JEWELLER — BRADFORD</p>
               </div>
             </div>
 

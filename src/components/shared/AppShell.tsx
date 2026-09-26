@@ -33,10 +33,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isSolidHeaderPage =
+    pathname === '/account' ||
+    pathname?.startsWith('/account') ||
+    pathname === '/checkout';
+
   return (
     <div className="min-h-screen w-full flex flex-col pb-16 md:pb-0">
       <AnnouncementBar />
-      <Header />
+      <Header solidBg={isSolidHeaderPage} isRelative={isSolidHeaderPage} />
       <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
         {children}
       </div>
