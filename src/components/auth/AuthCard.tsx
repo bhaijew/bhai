@@ -592,25 +592,25 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
             <div className="relative z-10 max-w-md min-h-[160px] flex flex-col justify-end">
               {isLogin ? (
                 <div key="login-quote" className="animate-fadeIn">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-[#dec29b] font-medium mb-2.5">
+                  <p className="text-[10.5px] tracking-[0.32em] uppercase text-[#e3c79e] font-bold mb-2.5 drop-shadow-xs">
                     TIMELESS ELEGANCE
                   </p>
-                  <h2 className="font-serif text-3xl xl:text-4xl text-[#f5efe8] font-normal leading-[1.2]">
+                  <h2 className="font-serif text-3xl xl:text-4xl text-[#ffffff] font-semibold leading-[1.2] drop-shadow-md">
                     Your Story,<br />Adorned in Gold
                   </h2>
-                  <p className="text-xs xl:text-sm text-[#c8bdb5] font-light mt-3 leading-relaxed">
+                  <p className="text-xs xl:text-sm text-[#d6c9be] font-light mt-3 leading-relaxed">
                     Discover fine jewellery pieces crafted for life&apos;s most precious moments.
                   </p>
                 </div>
               ) : (
                 <div key="signup-quote" className="animate-fadeIn">
-                  <p className="text-[10px] tracking-[0.3em] uppercase text-[#dec29b] font-medium mb-2.5">
+                  <p className="text-[10.5px] tracking-[0.32em] uppercase text-[#e3c79e] font-bold mb-2.5 drop-shadow-xs">
                     JOIN BHAI JEWELLER
                   </p>
-                  <h2 className="font-serif text-3xl xl:text-4xl text-[#f5efe8] font-normal leading-[1.2]">
+                  <h2 className="font-serif text-3xl xl:text-4xl text-[#ffffff] font-semibold leading-[1.2] drop-shadow-md">
                     Elegance Awaits<br />You
                   </h2>
-                  <p className="text-xs xl:text-sm text-[#c8bdb5] font-light mt-3 leading-relaxed">
+                  <p className="text-xs xl:text-sm text-[#d6c9be] font-light mt-3 leading-relaxed">
                     Create your account and be the first to know about new collections, bespoke previews and private releases.
                   </p>
                 </div>
@@ -628,7 +628,7 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
       <div className="lg:hidden flex flex-col w-full min-h-full">
         
         {/* Mobile Hero Top Banner */}
-        <div className="relative w-full h-56 sm:h-64 bg-[#140f0c] overflow-hidden flex flex-col justify-between">
+        <div className="relative w-full h-64 sm:h-72 bg-[#140f0c] overflow-hidden flex flex-col justify-between">
           <Image
             src="/images/auth-ring-full.jpg"
             alt="Bhai Jeweller Ring Header"
@@ -669,12 +669,12 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
             </button>
           </div>
 
-          {/* Dynamic Mobile Banner Quote */}
-          <div className="relative z-10 px-5 pb-4">
-            <p className="text-[9px] tracking-[0.3em] uppercase text-[#dec29b] font-medium">
+          {/* Dynamic Mobile Banner Quote (Bolder, Positioned Higher, Animated) */}
+          <div key={mode} className="relative z-10 px-6 pb-10 sm:pb-12 transition-all duration-500 animate-fadeIn">
+            <p className="text-[10px] sm:text-[11px] tracking-[0.32em] uppercase text-[#e3c79e] font-bold drop-shadow-xs">
               {isLogin ? 'WELCOME BACK' : 'JOIN THE FAMILY'}
             </p>
-            <h2 className="font-serif text-xl text-[#f5efe8] font-normal leading-tight mt-0.5">
+            <h2 className="font-serif text-xl sm:text-2xl text-[#ffffff] font-semibold leading-tight mt-1 drop-shadow-md">
               {isLogin ? 'Your Story, Adorned in Gold' : 'Elegance Awaits You'}
             </h2>
           </div>
