@@ -28,6 +28,9 @@ export default function AdminDashboardPage() {
   const [enquiries, setEnquiries] = useState(INITIAL_ENQUIRIES);
   const [slides, setSlides] = useState(INITIAL_SLIDES);
   const [customers] = useState(INITIAL_CUSTOMERS);
+  const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
+  const [loginAttemptsLogs, setLoginAttemptsLogs] = useState<any[]>([]);
+  const [userTabMode, setUserTabMode] = useState<'users' | 'security'>('users');
 
   // Real-Time Hero Section Form State
   const [heroForm, setHeroForm] = useState({
@@ -106,6 +109,16 @@ export default function AdminDashboardPage() {
         }
       })
       .catch((err) => console.error('Error loading announcement config from API:', err));
+
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          if (Array.isArray(data.users)) setRegisteredUsers(data.users);
+          if (Array.isArray(data.loginAttempts)) setLoginAttemptsLogs(data.loginAttempts);
+        }
+      })
+      .catch((err) => console.error('Error loading registered users from API:', err));
   }, []);
 
   // Filter states
@@ -497,13 +510,13 @@ export default function AdminDashboardPage() {
     },
     {
       id: 'customers',
-      label: 'VIP Clients',
+      label: 'Registered Users & Security',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
         </svg>
       ),
-      count: customers.length,
+      count: registeredUsers.length,
     },
     {
       id: 'goldrates',
@@ -1999,41 +2012,176 @@ export default function AdminDashboardPage() {
           </ScrollReveal>
         )}
 
-        {/* TAB 6: VIP CUSTOMERS */}
+        {/* TAB 6: REGISTERED ACCOUNTS & SECURITY LOGS */}
         {activeTab === 'customers' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
-                    <tr>
-                      <th className="p-4">Customer ID</th>
-                      <th className="p-4">Name</th>
-                      <th className="p-4">Email</th>
-                      <th className="p-4">Total Orders</th>
-                      <th className="p-4">Lifetime Spend</th>
-                      <th className="p-4">VIP Tier</th>
-                    </tr>
-                  </thead>
-                  <tbody className={`divide-y ${tableRowHover}`}>
-                    {customers.map((c) => (
-                      <tr key={c.id} className="transition-colors">
-                        <td className={`p-4 font-mono ${accentGold} font-bold`}>{c.id}</td>
-                        <td className={`p-4 font-semibold ${titleColor}`}>{c.name}</td>
-                        <td className={`p-4 ${subtitleColor}`}>{c.email}</td>
-                        <td className={`p-4 ${titleColor} font-semibold`}>{c.totalOrders}</td>
-                        <td className={`p-4 font-serif ${accentGold} font-bold`}>${c.totalSpent.toLocaleString()}</td>
-                        <td className="p-4">
-                          <span className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-semibold ${badgeBg}`}>
-                            ✨ {c.tier}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            {/* Sub-tab Switcher Header */}
+            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
+              <div>
+                <h2 className={`font-serif text-lg font-bold ${accentGold}`}>
+                  {userTabMode === 'users' ? '👤 Registered User Accounts' : '🛡️ Live IP Security & Login Audit Logs'}
+                </h2>
+                <p className={`text-xs ${subtitleColor}`}>
+                  {userTabMode === 'users'
+                    ? 'Real-time list of all signed up clients and admin accounts stored in Supabase.'
+                    : 'Security tracking of login attempts, IP addresses, and 5-attempt lockout blocks.'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setUserTabMode('users')}
+                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border ${
+                    userTabMode === 'users'
+                      ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-sm font-bold'
+                      : isLight
+                      ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
+                      : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
+                  }`}
+                >
+                  👤 User Accounts ({registeredUsers.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUserTabMode('security')}
+                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border ${
+                    userTabMode === 'security'
+                      ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-sm font-bold'
+                      : isLight
+                      ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
+                      : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
+                  }`}
+                >
+                  🛡️ Security Audit Logs ({loginAttemptsLogs.length})
+                </button>
               </div>
             </div>
+
+            {/* TAB MODE 1: REGISTERED USER ACCOUNTS TABLE */}
+            {userTabMode === 'users' && (
+              <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
+                      <tr>
+                        <th className="p-4">User ID</th>
+                        <th className="p-4">Full Name</th>
+                        <th className="p-4">Email Address</th>
+                        <th className="p-4">Phone</th>
+                        <th className="p-4">Role</th>
+                        <th className="p-4">Security Status</th>
+                        <th className="p-4">Failed Logins</th>
+                        <th className="p-4">Registered Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className={`divide-y ${tableRowHover}`}>
+                      {registeredUsers.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="p-8 text-center text-xs text-gray-500 italic">
+                            No registered users found.
+                          </td>
+                        </tr>
+                      ) : (
+                        registeredUsers.map((u) => (
+                          <tr key={u.id} className="transition-colors">
+                            <td className={`p-4 font-mono ${accentGold} font-bold`}>{u.id}</td>
+                            <td className={`p-4 font-semibold ${titleColor}`}>
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-[#1c1510] text-[#f5efe8] text-[10px] font-serif font-bold flex items-center justify-center">
+                                  {u.name.substring(0, 1).toUpperCase()}
+                                </div>
+                                <span>{u.name}</span>
+                              </div>
+                            </td>
+                            <td className={`p-4 ${subtitleColor} font-mono`}>{u.email}</td>
+                            <td className={`p-4 ${subtitleColor}`}>{u.phone}</td>
+                            <td className="p-4">
+                              <span
+                                className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
+                                  u.role === 'admin'
+                                    ? 'bg-purple-100 text-purple-900 border-purple-300 dark:bg-purple-950 dark:text-purple-300'
+                                    : badgeBg
+                                }`}
+                              >
+                                {u.role === 'admin' ? '👑 Admin' : '👤 Client'}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              {u.isLocked ? (
+                                <span className="px-2.5 py-1 rounded-[5px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-semibold text-[10px]">
+                                  🔒 15-Min Lockout Active
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-[5px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 font-semibold text-[10px]">
+                                  ✓ Active Account
+                                </span>
+                              )}
+                            </td>
+                            <td className={`p-4 font-mono font-bold ${u.failedAttempts > 0 ? 'text-amber-600' : subtitleColor}`}>
+                              {u.failedAttempts} / 5
+                            </td>
+                            <td className={`p-4 ${subtitleColor}`}>{u.registeredDate}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* TAB MODE 2: SECURITY LOGINS & IP BLOCK AUDIT LOGS TABLE */}
+            {userTabMode === 'security' && (
+              <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
+                      <tr>
+                        <th className="p-4">Log ID</th>
+                        <th className="p-4">IP Address</th>
+                        <th className="p-4">Email Attempted</th>
+                        <th className="p-4">Attempt Status</th>
+                        <th className="p-4">Failure / Security Note</th>
+                        <th className="p-4">Attempt Time</th>
+                      </tr>
+                    </thead>
+                    <tbody className={`divide-y ${tableRowHover}`}>
+                      {loginAttemptsLogs.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-8 text-center text-xs text-gray-500 italic">
+                            No security audit logs recorded yet.
+                          </td>
+                        </tr>
+                      ) : (
+                        loginAttemptsLogs.map((att) => (
+                          <tr key={att.id} className="transition-colors">
+                            <td className={`p-4 font-mono ${accentGold} font-bold`}>{att.id}</td>
+                            <td className={`p-4 font-mono font-bold ${titleColor}`}>{att.ip}</td>
+                            <td className={`p-4 ${subtitleColor} font-mono`}>{att.email}</td>
+                            <td className="p-4">
+                              <span
+                                className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
+                                  att.status === 'SUCCESS'
+                                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                                    : att.status === 'BLOCKED'
+                                    ? 'bg-red-100 text-red-900 border-red-300 dark:bg-red-950 dark:text-red-300 animate-pulse'
+                                    : 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                                }`}
+                              >
+                                {att.status === 'SUCCESS' ? '✓ SUCCESS' : att.status === 'BLOCKED' ? '🚫 BLOCKED (IP LOCK)' : '⚠️ FAILED'}
+                              </span>
+                            </td>
+                            <td className={`p-4 ${subtitleColor}`}>{att.reason}</td>
+                            <td className={`p-4 ${subtitleColor} font-mono`}>{att.time}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </ScrollReveal>
         )}
 
