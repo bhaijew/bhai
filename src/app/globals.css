@@ -116,6 +116,16 @@ body {
   animation: badgePulse 2s infinite ease-in-out;
 }
 
+@keyframes tabBounce {
+  0% { transform: scale(1); }
+  35% { transform: scale(0.85); }
+  65% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.animate-tabBounce {
+  animation: tabBounce 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 /* ── Ultra-Luxury Design Tokens & Utilities ── */
 .text-gold-gradient {
   background: linear-gradient(135deg, #f5ebd9 0%, #dec29b 45%, #b58d57 100%);

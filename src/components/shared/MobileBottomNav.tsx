@@ -64,8 +64,10 @@ export function MobileBottomNav() {
       className="
         md:hidden fixed bottom-0 left-0 right-0 z-50
         w-full max-w-full overflow-hidden
+        rounded-t-[8px]
         bg-[#faf7f4]/95 backdrop-blur-md
-        border-t border-[#e8ddd4]
+        border-t border-x border-[#e8ddd4]
+        shadow-[0_-4px_20px_rgba(0,0,0,0.08)]
         safe-area-inset-bottom
       "
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
@@ -77,10 +79,15 @@ export function MobileBottomNav() {
             <Link
               key={item.name}
               href={item.href}
-              className="flex flex-col items-center gap-0.5 min-w-[56px] py-1 relative group active:scale-95 transition-transform"
+              className="flex flex-col items-center gap-0.5 min-w-[56px] py-1 relative group active:scale-88 active:translate-y-0.5 active:opacity-80 transition-all duration-200 ease-out cursor-pointer select-none"
             >
-              {/* Icon with smooth scale animation */}
-              <div className={`transition-all duration-300 transform ${isActive ? 'text-[#9e7d56] scale-110 -translate-y-0.5' : 'text-[#8a7a6c] group-hover:scale-105'}`}>
+              {/* Top active indicator line */}
+              {isActive && (
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 w-6 h-0.5 rounded-full bg-[#9e7d56] shadow-xs animate-fadeInScale" />
+              )}
+
+              {/* Icon with smooth bounce & scale animation */}
+              <div className={`transition-all duration-300 transform ${isActive ? 'text-[#9e7d56] scale-115 -translate-y-0.5 animate-tabBounce' : 'text-[#8a7a6c] group-hover:scale-105'}`}>
                 {item.icon}
               </div>
 
@@ -99,11 +106,6 @@ export function MobileBottomNav() {
               >
                 {item.name}
               </span>
-
-              {/* Active dot indicator */}
-              {isActive && (
-                <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#9e7d56] shadow-xs animate-fadeIn" />
-              )}
             </Link>
           );
         })}
