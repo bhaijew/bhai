@@ -24,22 +24,18 @@ export function Header({
   const { cartCount, wishlistCount } = useShop();
   const router = useRouter();
 
-  // Handle ESC key press to close search mode or drawer
+  // Handle ESC key press to close search mode or drawer (empty deps array to avoid React HMR size change errors)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (isSearchOpen) {
-          setIsSearchOpen(false);
-          setSearchQuery('');
-        }
-        if (drawerOpen) {
-          setDrawerOpen(false);
-        }
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        setDrawerOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, drawerOpen]);
+  }, []);
 
   // Prevent background scroll when mobile drawer is open
   useEffect(() => {
@@ -275,18 +271,18 @@ export function Header({
         />
       )}
 
-      {/* ── Mobile Side Navigation Drawer (Slides from LEFT - Pure White Theme) ── */}
+      {/* ── Mobile Side Navigation Drawer (Slides OVER EVERYTHING including BottomNav - Pure White Theme) ── */}
       {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
+        <div className="fixed inset-0 z-[100] md:hidden">
           {/* Backdrop overlay */}
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity duration-300"
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity duration-300 z-[100]"
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
 
           {/* Drawer Content - Ultra-Luxury Pure White */}
-          <div className="fixed top-0 left-0 bottom-0 w-[86%] max-w-[340px] bg-white text-[#1c1510] border-r border-[#e8ded4] shadow-2xl flex flex-col z-50 animate-slideRight">
+          <div className="fixed top-0 left-0 bottom-0 w-[86%] max-w-[340px] bg-white text-[#1c1510] border-r border-[#e8ded4] shadow-2xl flex flex-col z-[101] animate-slideRight">
 
             {/* Drawer Header: Brand + Close button */}
             <div className="p-5 border-b border-[#f0e6dc] flex items-center justify-between bg-white">
