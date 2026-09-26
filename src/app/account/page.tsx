@@ -33,6 +33,8 @@ export default function AccountPage() {
   });
 
   const [loading, setLoading] = useState(true);
+  const [realOrders, setRealOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
 
   // Check user session on mount
   useEffect(() => {
@@ -52,6 +54,22 @@ export default function AccountPage() {
       .catch((err) => {
         console.error('Session check error:', err);
         setLoading(false);
+      });
+  }, []);
+
+  // Fetch real database orders
+  useEffect(() => {
+    fetch('/api/orders')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && Array.isArray(data.data)) {
+          setRealOrders(data.data);
+        }
+        setOrdersLoading(false);
+      })
+      .catch((err) => {
+        console.error('Fetch real orders error:', err);
+        setOrdersLoading(false);
       });
   }, []);
 
@@ -383,21 +401,23 @@ export default function AccountPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                 
                 {/* Stat 1: Total Orders */}
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                  <div className="w-8 h-8 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
+                  <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                     </svg>
                   </div>
                   <div>
                     <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Total Orders</span>
-                    <span className="font-serif text-2xl text-[#1c1510] font-normal">5</span>
+                    <span className="font-serif text-2xl text-[#1c1510] font-normal">
+                      {realOrders.length > 0 ? realOrders.length : 5}
+                    </span>
                   </div>
                 </div>
 
                 {/* Stat 2: Wishlist Items */}
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                  <div className="w-8 h-8 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
+                  <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                     </svg>
@@ -409,8 +429,8 @@ export default function AccountPage() {
                 </div>
 
                 {/* Stat 3: Points */}
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                  <div className="w-8 h-8 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
+                  <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.412.868-.839.605l-4.71-2.92a.562.562 0 00-.59 0l-4.71 2.92c-.427.263-.955-.119-.839-.605l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                     </svg>
@@ -422,8 +442,8 @@ export default function AccountPage() {
                 </div>
 
                 {/* Stat 4: Member Since */}
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
-                  <div className="w-8 h-8 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-colors text-center sm:text-left">
+                  <div className="w-8 h-8 rounded-[5px] bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56] mb-3 mx-auto sm:mx-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                     </svg>
@@ -440,7 +460,7 @@ export default function AccountPage() {
 
             {/* RECENT ORDERS / MY ORDERS SECTION */}
             <ScrollReveal direction="up" delay={100}>
-              <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-5 sm:p-6 shadow-2xs space-y-4">
+              <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-[5px] p-5 sm:p-6 shadow-2xs space-y-4">
                 
                 <div className="flex items-center justify-between">
                   <h2 className="font-serif text-xl text-[#1c1510] font-normal">
@@ -452,12 +472,26 @@ export default function AccountPage() {
                   </Link>
                 </div>
 
-                {/* Mobile Orders List View (Matching Image 3) */}
-                <div className="sm:hidden space-y-2.5">
-                  {ordersList.map((ord) => (
-                    <div key={ord.id} className="flex items-center justify-between p-3.5 rounded-2xl bg-[#faf6ee] border border-[#ded3c5]/60 hover:border-[#1c1510] transition-colors">
+                {/* Mobile Orders List View (No inner nested card background, clean rows) */}
+                <div className="sm:hidden divide-y divide-[#ede4d8]">
+                  {(realOrders.length > 0
+                    ? realOrders.map((ro: any) => ({
+                        id: ro.id || '#AUR-1025',
+                        date: ro.date || '12 Sep 2025',
+                        itemsCount: ro.items || '1 Item',
+                        status: ro.status || 'Delivered',
+                        statusColor:
+                          ro.status === 'Processing'
+                            ? 'bg-amber-100/90 text-amber-800 border-amber-300/60'
+                            : 'bg-emerald-100/90 text-emerald-800 border-emerald-300/60',
+                        total: `$ ${Number(ro.amount || 248).toFixed(2)}`,
+                        image: '/images/detail-ring-hero.jpg',
+                      }))
+                    : ordersList
+                  ).map((ord) => (
+                    <div key={ord.id} className="flex items-center justify-between py-3.5 px-1 bg-transparent hover:bg-[#faf6ee]/60 transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white border border-[#ded3c5] flex-shrink-0">
+                        <div className="relative w-12 h-12 rounded-[5px] overflow-hidden bg-white border border-[#ded3c5] flex-shrink-0">
                           <Image src={ord.image} alt={ord.id} fill className="object-cover" />
                         </div>
                         <div>
@@ -489,11 +523,25 @@ export default function AccountPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#ede4d8]/60">
-                      {ordersList.map((ord) => (
-                        <tr key={ord.id} className="hover:bg-[#faf6ee] transition-colors">
+                      {(realOrders.length > 0
+                        ? realOrders.map((ro: any) => ({
+                            id: ro.id || '#AUR-1025',
+                            date: ro.date || '12 Sep 2025',
+                            itemsCount: ro.items || '1 Item',
+                            status: ro.status || 'Delivered',
+                            statusColor:
+                              ro.status === 'Processing'
+                                ? 'bg-amber-100/90 text-amber-800 border-amber-300/60'
+                                : 'bg-emerald-100/90 text-emerald-800 border-emerald-300/60',
+                            total: `$ ${Number(ro.amount || 248).toFixed(2)}`,
+                            image: '/images/detail-ring-hero.jpg',
+                          }))
+                        : ordersList
+                      ).map((ord) => (
+                        <tr key={ord.id} className="bg-transparent hover:bg-[#faf6ee]/80 transition-colors">
                           <td className="py-3.5 px-3">
                             <div className="flex items-center gap-3">
-                              <div className="relative w-9 h-9 rounded-lg overflow-hidden bg-[#faf6ee] border border-[#ded3c5] flex-shrink-0">
+                              <div className="relative w-9 h-9 rounded-[5px] overflow-hidden bg-white border border-[#ded3c5] flex-shrink-0">
                                 <Image src={ord.image} alt={ord.id} fill className="object-cover" />
                               </div>
                               <div>
@@ -512,7 +560,7 @@ export default function AccountPage() {
                           <td className="py-3.5 px-3 text-right">
                             <button
                               type="button"
-                              className="px-3 py-1 rounded-full border border-[#ded3c5] text-[10.5px] font-light text-[#1c1510] hover:bg-[#1c1510] hover:text-[#f5efe8] transition-all shadow-2xs"
+                              className="px-3 py-1 rounded-[5px] border border-[#ded3c5] text-[10.5px] font-light text-[#1c1510] hover:bg-[#1c1510] hover:text-[#f5efe8] transition-all shadow-2xs"
                             >
                               View Details
                             </button>
@@ -678,40 +726,40 @@ export default function AccountPage() {
 
 
       {/* ─────────────────────────────────────────────────────────────
-          4. MOBILE ACCOUNT OVERLAY DRAWER MENU (Matching "Mobile - Menu (Account)")
+          4. MOBILE ACCOUNT OVERLAY DRAWER MENU (PURE WHITE LUXURY THEME)
           ───────────────────────────────────────────────────────────── */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden flex">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-[250] md:hidden flex">
+          {/* Backdrop overlay covering top header/navbar completely */}
           <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md transition-opacity z-[240]"
             onClick={() => setMobileMenuOpen(false)}
           />
 
-          {/* Sliding Dark Menu Card */}
-          <div className="relative w-80 max-w-[85vw] bg-[#140e0b] text-[#f5efe8] h-full z-10 p-6 flex flex-col justify-between shadow-2xl border-r border-[#2d221a] overflow-y-auto">
+          {/* Sliding Pure White Menu Card */}
+          <div className="relative w-80 max-w-[85vw] bg-white text-[#1c1510] h-full z-[250] p-6 flex flex-col justify-between shadow-2xl border-r border-[#e8decf] overflow-y-auto">
             <div className="space-y-6">
               {/* Header Close Button */}
-              <div className="flex items-center justify-between border-b border-[#2d221a] pb-4">
-                <span className="font-serif text-sm tracking-[0.2em] text-[#e3c79e]">ACCOUNT MENU</span>
+              <div className="flex items-center justify-between border-b border-[#f0e6dc] pb-4">
+                <span className="font-serif text-sm tracking-[0.2em] text-[#9e7d56] font-semibold">ACCOUNT MENU</span>
                 <button
                   type="button"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 text-[#b8a798] hover:text-white transition-colors"
+                  className="w-8 h-8 rounded-full bg-[#faf7f2] border border-[#ded3c5] text-[#6b5c50] hover:text-[#1c1510] hover:bg-[#ede4d8] transition-colors flex items-center justify-center font-bold text-xs"
                 >
                   ✕
                 </button>
               </div>
 
               {/* User Banner Header displaying Name Initial Avatar */}
-              <div className="flex items-center gap-3 bg-[#1e1713] p-3 rounded-2xl border border-[#2d221a]">
-                <div className="w-12 h-12 rounded-full border border-[#dec29b] bg-[#1a130e] text-[#dec29b] font-serif font-bold italic text-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+              <div className="flex items-center gap-3 bg-[#faf7f2] p-3.5 rounded-[5px] border border-[#ded3c5]">
+                <div className="w-12 h-12 rounded-full border border-[#dec29b] bg-[#1c140f] text-[#dec29b] font-serif font-bold italic text-lg flex items-center justify-center flex-shrink-0 shadow-sm">
                   {initialLetter}
                 </div>
                 <div className="overflow-hidden">
-                  <h4 className="font-serif text-sm text-[#f5efe8] truncate">{user.name}</h4>
-                  <p className="text-[10px] text-[#b8a798] truncate">{user.email}</p>
-                  <span className="inline-block mt-0.5 px-2 py-0.2 rounded-full bg-emerald-950 text-emerald-300 text-[9px]">
+                  <h4 className="font-serif text-sm text-[#1c1510] font-semibold truncate">{user.name}</h4>
+                  <p className="text-[10px] text-[#7a6a5c] truncate">{user.email}</p>
+                  <span className="inline-block mt-0.5 px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-medium border border-emerald-300/60">
                     ✓ Verified Account
                   </span>
                 </div>
@@ -726,18 +774,18 @@ export default function AccountPage() {
                       setActiveTab(item.id as any);
                       setMobileMenuOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl text-xs font-light transition-all ${
+                    className={`w-full flex items-center justify-between p-3 rounded-[5px] text-xs font-light transition-all ${
                       activeTab === item.id
-                        ? 'bg-[#2a1e17] text-[#dec29b] font-medium border border-[#dec29b]/40'
-                        : 'text-[#d6c9be] hover:bg-[#1e1713]'
+                        ? 'bg-[#1c1510] text-[#f5efe8] font-medium shadow-xs'
+                        : 'text-[#4a3b30] hover:bg-[#faf7f2] hover:text-[#1c1510]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span>{item.icon}</span>
+                      <span className={activeTab === item.id ? 'text-[#dec29b]' : 'text-[#9e7d56]'}>{item.icon}</span>
                       <span>{item.label}</span>
                     </div>
                     {item.badge !== undefined ? (
-                      <span className="w-5 h-5 rounded-full bg-[#dec29b] text-[#1c1510] text-[10px] font-bold flex items-center justify-center">
+                      <span className="w-5 h-5 rounded-full bg-[#1c1510] text-[#f5efe8] text-[10px] font-bold flex items-center justify-center">
                         {item.badge}
                       </span>
                     ) : (
@@ -748,20 +796,20 @@ export default function AccountPage() {
               </nav>
 
               {/* Promo Banner Card inside Drawer */}
-              <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#241a14] to-[#120d09] border border-[#dec29b]/40 p-4 text-center">
-                <h4 className="font-serif text-base text-[#ffffff] font-semibold">Luxury in Every Detail</h4>
-                <p className="text-[10px] text-[#dec29b] tracking-[0.25em] uppercase mt-1">AURELIA JEWELS</p>
+              <div className="relative rounded-[5px] overflow-hidden bg-[#faf7f2] border border-[#ded3c5] p-4 text-center shadow-2xs">
+                <h4 className="font-serif text-base text-[#1c1510] font-semibold">Luxury in Every Detail</h4>
+                <p className="text-[10px] text-[#9e7d56] tracking-[0.25em] uppercase mt-1">AURELIA JEWELS</p>
               </div>
             </div>
 
             {/* Bottom Log Out */}
-            <div className="pt-4 border-t border-[#2d221a]">
+            <div className="pt-4 border-t border-[#f0e6dc]">
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-red-950/40 border border-red-800/50 text-red-300 text-xs font-light hover:bg-red-900/60 transition-all"
+                className="w-full flex items-center justify-center gap-2 p-3 rounded-[5px] bg-red-50 border border-red-200 text-red-800 text-xs font-medium hover:bg-red-100 transition-all"
               >
-                <svg className="w-4 h-4 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 stroke-[1.8] text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
                 <span>Log Out</span>
@@ -771,69 +819,6 @@ export default function AccountPage() {
         </div>
       )}
 
-
-      {/* ─────────────────────────────────────────────────────────────
-          5. FOOTER SECTION
-          ───────────────────────────────────────────────────────────── */}
-      <footer className="w-full bg-[#100b08] text-[#f5efe8] border-t border-[#261c16] pt-12 pb-8 px-4 sm:px-8 mt-12">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-[#261c16] text-xs font-light">
-          
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full border border-[#dec29b] flex items-center justify-center bg-[#1a1410]">
-                <span className="font-serif text-xs text-[#dec29b] font-semibold italic">A</span>
-              </div>
-              <span className="font-serif text-sm tracking-[0.2em] uppercase text-[#f5efe8]">AURELIA</span>
-            </div>
-            <p className="text-[11px] text-[#b8a798]">Timeless Elegance. Always.</p>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-white mb-2 uppercase text-[10px] tracking-wider">Quick Links</h4>
-            <ul className="space-y-1.5 text-[#b8a798]">
-              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="/shop" className="hover:text-white transition-colors">Shop</Link></li>
-              <li><Link href="/collections" className="hover:text-white transition-colors">Collections</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold text-white mb-2 uppercase text-[10px] tracking-wider">Customer Care</h4>
-            <ul className="space-y-1.5 text-[#b8a798]">
-              <li><a href="#shipping" className="hover:text-white transition-colors">Shipping Policy</a></li>
-              <li><a href="#returns" className="hover:text-white transition-colors">Return & Refund Policy</a></li>
-              <li><a href="#terms" className="hover:text-white transition-colors">Terms & Conditions</a></li>
-              <li><a href="#privacy" className="hover:text-white transition-colors">Privacy Policy</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="font-semibold text-white uppercase text-[10px] tracking-wider">Stay Connected</h4>
-            <p className="text-[11px] text-[#b8a798]">Subscribe to our newsletter for exclusive offers.</p>
-            <div className="relative flex items-center">
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="w-full pl-3 pr-8 py-2 rounded-lg bg-[#1e1713] border border-[#3a2c23] text-xs text-white placeholder-[#8a796c] outline-none"
-              />
-              <button type="button" className="absolute right-2 text-[#dec29b]">→</button>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-[#8a796c]">
-          <span>© 2026 Aurelia Jewels. All rights reserved.</span>
-          <div className="flex items-center gap-3 opacity-60">
-            <span>VISA</span>
-            <span>MasterCard</span>
-            <span>ApplePay</span>
-            <span>GooglePay</span>
-          </div>
-        </div>
-      </footer>
 
     </div>
   );
