@@ -389,8 +389,8 @@ export default function AccountPage() {
   if (loading) {
     return (
       <div className="min-h-[75vh] bg-[#faf7f2] text-[#1c1510] flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-2 border-[#dec29b] border-t-[#1c1510] rounded-none animate-spin mb-4 shadow-sm" />
-        <p className="font-serif text-sm tracking-[0.2em] uppercase text-[#7a6a5c]">Connecting to your bespoke account...</p>
+        <div className="w-10 h-10 border-3 border-[#dec29b] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="font-serif text-base text-[#7a6a5c] tracking-wide">Connecting to your account...</p>
       </div>
     );
   }
@@ -399,12 +399,12 @@ export default function AccountPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-[85vh] bg-[#faf7f2] text-[#1c1510] flex items-center justify-center px-4 py-16">
-        <div className="max-w-md w-full bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-8 sm:p-10 shadow-2xl text-center space-y-6 transition-all duration-300 hover:border-[#1c1510]">
-          <div className="w-16 h-16 rounded-none bg-[#1c140f] border-2 border-[#dec29b] text-[#dec29b] font-serif font-bold italic text-2xl flex items-center justify-center mx-auto shadow-md transform hover:rotate-3 transition-transform duration-300">
+        <div className="max-w-md w-full bg-[#fdfbf7] border border-[#ded3c5] rounded-3xl p-8 shadow-xl text-center space-y-6">
+          <div className="w-16 h-16 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] font-serif font-bold italic text-2xl flex items-center justify-center mx-auto shadow-md">
             B
           </div>
           <div className="space-y-2">
-            <span className="text-[10px] tracking-[0.35em] uppercase text-[#9e7d56] font-semibold block">
+            <span className="text-[10px] tracking-[0.3em] uppercase text-[#9e7d56] font-medium block">
               BHAI JEWELLER — BRADFORD
             </span>
             <h1 className="font-serif text-2xl sm:text-3xl font-normal text-[#1c1510]">
@@ -418,28 +418,32 @@ export default function AccountPage() {
           <div className="space-y-3 pt-2">
             <Link
               href="/login"
-              className="w-full py-3.5 rounded-none bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d] font-medium text-xs tracking-widest uppercase transition-all duration-300 shadow-md flex items-center justify-center gap-2 group hover:shadow-lg"
+              className="w-full py-3.5 rounded-full bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d] font-medium text-xs tracking-wider uppercase transition-all shadow-sm flex items-center justify-center gap-2"
             >
               <span>Sign In</span>
-              <span className="group-hover:translate-x-1 transition-transform">→</span>
+              <span>→</span>
             </Link>
             <Link
               href="/signup"
-              className="w-full py-3.5 rounded-none bg-[#ede4d8] text-[#1c1510] hover:bg-[#ded3c5] font-medium text-xs tracking-widest uppercase transition-all duration-300 border border-[#ded3c5] shadow-xs flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-full bg-[#ede4d8] text-[#1c1510] hover:bg-[#ded3c5] font-medium text-xs tracking-wider uppercase transition-all border border-[#ded3c5] shadow-xs flex items-center justify-center gap-2"
             >
               <span>Create New Account</span>
             </Link>
           </div>
 
           <div className="pt-4 border-t border-[#ede4d8] flex items-center justify-center gap-4 text-[11px] text-[#8a796c]">
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-emerald-600 rounded-none inline-block" />
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
               Live Order Tracking
             </span>
             <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 bg-emerald-600 rounded-none inline-block" />
-              Encrypted Database
+            <span className="flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Secure 256-bit DB
             </span>
           </div>
         </div>
@@ -452,31 +456,30 @@ export default function AccountPage() {
     <div className="min-h-screen bg-[#faf7f2] text-[#1c1510] font-sans selection:bg-[#c5a059] selection:text-white flex flex-col justify-between overflow-x-hidden">
       
       {/* ─────────────────────────────────────────────────────────────
-          HERO COVER BANNER & OVERLAPPING SQUARE PROFILE CARD
+          HERO COVER BANNER & OVERLAPPING PROFILE CARD
           ───────────────────────────────────────────────────────────── */}
       <div className="relative w-full">
         {/* Cover Image Header */}
-        <div className="relative w-full h-44 sm:h-56 bg-[#18110c] overflow-hidden rounded-none">
+        <div className="relative w-full h-44 sm:h-56 bg-[#18110c] overflow-hidden">
           <Image
             src="/images/auth-ring-full.jpg"
             alt="Luxury Jewellery Background"
             fill
             priority
-            className="object-cover object-[center_35%] opacity-85 transition-transform duration-1000 hover:scale-105"
+            className="object-cover object-[center_35%] opacity-85"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/30 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none" />
         </div>
 
-        {/* Profile Details Overlay Card - Square Design */}
-        <div className="bg-[#faf7f2] border-b border-[#ded3c5] rounded-none -mt-6 relative z-10 px-4 sm:px-8 pb-5 shadow-xs">
+        {/* Profile Details Overlay Card */}
+        <div className="bg-[#faf7f2] border-b border-[#e8decf] rounded-t-3xl -mt-6 relative z-10 px-4 sm:px-8 pb-4 shadow-xs">
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             
-            {/* Left: Avatar Square + Name & Contacts */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
-              {/* Avatar Square Overlapping Cover Image */}
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-none border-4 border-[#faf7f2] bg-[#1c140f] text-[#dec29b] font-serif font-semibold italic text-3xl sm:text-4xl flex items-center justify-center shadow-xl flex-shrink-0 -mt-12 sm:-mt-14 relative z-20 ring-1 ring-[#dec29b]/40 transform hover:scale-105 transition-all duration-300">
+            {/* Left: Avatar Circle + Name & Contacts */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+              {/* Avatar Circle Overlapping Cover Image */}
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-[#faf7f2] bg-[#1c140f] text-[#dec29b] font-serif font-semibold italic text-3xl sm:text-4xl flex items-center justify-center shadow-lg flex-shrink-0 -mt-12 sm:-mt-14 relative z-20">
                 {initialLetter}
-                <div className="absolute bottom-1 right-1 w-3 h-3 bg-emerald-500 rounded-none border border-[#1c140f]" />
               </div>
 
               {/* Name, Verified Badge, Email, Phone */}
@@ -485,26 +488,26 @@ export default function AccountPage() {
                   <h1 className="font-serif text-xl sm:text-2xl font-semibold text-[#1c1510] tracking-wide">
                     {user.name}
                   </h1>
-                  <span className="px-2.5 py-0.5 rounded-none bg-emerald-100/90 border border-emerald-300 text-emerald-800 text-[10px] font-semibold tracking-wider uppercase flex items-center gap-1 shadow-2xs">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-100/90 border border-emerald-300 text-emerald-800 text-[10px] font-medium tracking-wide flex items-center gap-1 shadow-2xs">
                     <svg className="w-3 h-3 text-emerald-600 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                     </svg>
-                    Verified Patron
+                    Verified Account
                   </span>
                   {user.role === 'admin' && (
-                    <span className="px-2.5 py-0.5 rounded-none bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-[10px] font-semibold uppercase tracking-wider">
-                      Administrator
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-[10px] font-medium">
+                      Admin
                     </span>
                   )}
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 text-xs text-[#7a6a5c] font-normal">
-                  <span className="font-mono">{user.email}</span>
+                  <span>{user.email}</span>
                   {user.phone && (
                     <>
                       <span className="hidden sm:inline">•</span>
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                         </svg>
                         {user.phone}
@@ -520,7 +523,7 @@ export default function AccountPage() {
               {user.role === 'admin' && (
                 <Link
                   href="/admin"
-                  className="px-4 py-2.5 rounded-none bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-xs font-semibold hover:bg-[#2b1f17] transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm uppercase tracking-wider"
+                  className="px-4 py-2 rounded-full bg-[#1c140f] border border-[#dec29b] text-[#dec29b] text-xs font-medium hover:bg-[#2b1f17] transition-all flex items-center justify-center gap-1.5 shadow-sm"
                 >
                   <span>Admin Panel</span>
                 </Link>
@@ -528,9 +531,9 @@ export default function AccountPage() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-5 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm uppercase tracking-wider group cursor-pointer"
+                className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all flex items-center justify-center gap-1.5 shadow-sm"
               >
-                <svg className="w-3.5 h-3.5 text-[#dec29b] group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[#dec29b]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
                 <span>Log Out</span>
@@ -540,8 +543,8 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* ── SMOOTH HORIZONTAL SCROLLABLE TABS BAR (CRISP SQUARE WITH ANIMATIONS) ── */}
-        <div className="w-full bg-[#fdfbf7] border-b border-[#ded3c5] sticky top-16 md:top-20 z-30 shadow-xs">
+        {/* ── SMOOTH HORIZONTAL SCROLLABLE TABS BAR ── */}
+        <div className="w-full bg-[#fdfbf7] border-b border-[#ded3c5]/80 sticky top-16 md:top-20 z-30 shadow-2xs">
           <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar scroll-smooth">
               {sideNavItems.map((item) => {
@@ -550,16 +553,16 @@ export default function AccountPage() {
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`flex-shrink-0 px-4 py-2.5 rounded-none text-xs font-semibold uppercase tracking-wider transition-all duration-300 flex items-center gap-2 cursor-pointer border ${
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-2 ${
                       isActive
-                        ? 'bg-[#1c1510] text-[#f5efe8] border-[#1c1510] shadow-md -translate-y-0.5'
-                        : 'bg-[#ede4d8]/70 text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] border-[#ded3c5]'
+                        ? 'bg-[#1c1510] text-[#f5efe8] shadow-sm'
+                        : 'bg-[#ede4d8]/60 text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] border border-[#ded3c5]/70'
                     }`}
                   >
                     <span className={isActive ? 'text-[#dec29b]' : 'text-[#8a796c]'}>{item.icon}</span>
                     <span>{item.label}</span>
                     {item.badge !== undefined && (
-                      <span className={`px-1.5 py-0.5 rounded-none text-[9px] font-bold ${
+                      <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                         isActive ? 'bg-[#dec29b] text-[#1c1510]' : 'bg-[#1c1510] text-[#f5efe8]'
                       }`}>
                         {item.badge}
@@ -575,37 +578,35 @@ export default function AccountPage() {
 
 
       {/* ─────────────────────────────────────────────────────────────
-          MAIN CONTENT AREA (DIFFERENT UNIQUE VIEWS PER TAB - SQUARE LUXURY)
+          MAIN CONTENT AREA (DIFFERENT UNIQUE VIEWS PER TAB)
           ───────────────────────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* ── LEFT DESKTOP SIDEBAR NAVIGATION - SQUARE LUXURY ── */}
-          <aside className="hidden lg:block lg:col-span-3 bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-3 shadow-sm sticky top-36">
+          {/* ── LEFT DESKTOP SIDEBAR NAVIGATION ── */}
+          <aside className="hidden lg:block lg:col-span-3 bg-[#faf7f2] border border-[#ded3c5] rounded-2xl p-3 shadow-xs sticky top-36">
             <div className="px-3 py-2 mb-2 border-b border-[#ede4d8]">
-              <span className="text-[10px] font-bold tracking-[0.25em] text-[#9e7d56] uppercase">PORTAL MENU</span>
+              <span className="text-[10px] font-semibold tracking-widest text-[#9e7d56] uppercase">PORTAL MENU</span>
             </div>
-            <nav className="space-y-1.5">
+            <nav className="space-y-1">
               {sideNavItems.map((item) => {
                 const isActive = activeTab === item.id;
                 return (
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-none text-xs tracking-wider uppercase transition-all duration-300 cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-light transition-all ${
                       isActive
-                        ? 'bg-[#1c1510] text-[#f5efe8] font-bold shadow-md border-l-4 border-l-[#dec29b]'
-                        : 'text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] font-medium border-l-4 border-l-transparent'
+                        ? 'bg-[#ede4d8] text-[#1c1510] font-medium shadow-2xs border border-[#ded3c5]/60'
+                        : 'text-[#6b5c50] hover:bg-[#f3ece3] hover:text-[#1c1510]'
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className={isActive ? 'text-[#dec29b]' : 'text-[#8a796c]'}>{item.icon}</span>
+                      <span className={isActive ? 'text-[#9e7d56]' : 'text-[#8a796c]'}>{item.icon}</span>
                       <span>{item.label}</span>
                     </div>
                     {item.badge !== undefined && (
-                      <span className={`w-5 h-5 rounded-none text-[10px] font-bold flex items-center justify-center ${
-                        isActive ? 'bg-[#dec29b] text-[#1c1510]' : 'bg-[#1c1510] text-[#f5efe8]'
-                      }`}>
+                      <span className="w-5 h-5 rounded-full bg-[#1c1510] text-[#f5efe8] text-[10px] font-bold flex items-center justify-center">
                         {item.badge}
                       </span>
                     )}
@@ -617,7 +618,7 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-none text-xs font-semibold uppercase tracking-wider text-red-800 hover:bg-red-50 transition-all duration-300 cursor-pointer"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-light text-red-800 hover:bg-red-50 transition-all"
                 >
                   <svg className="w-4 h-4 text-red-700 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -629,8 +630,8 @@ export default function AccountPage() {
           </aside>
 
 
-          {/* ── CENTER / MAIN CONTENT (INDIVIDUALLY CRAFTED DISTINCT SQUARE TAB PAGES) ── */}
-          <div className="lg:col-span-9 space-y-8 animate-fadeIn">
+          {/* ── CENTER / MAIN CONTENT (INDIVIDUALLY CRAFTED DISTINCT TAB PAGES) ── */}
+          <div className="lg:col-span-9 space-y-8">
             
             {/* ═══════════════════════════════════════════════════════════
                 PAGE 1: MY ACCOUNT OVERVIEW & VIP PRIVILEGES
@@ -638,13 +639,13 @@ export default function AccountPage() {
             {activeTab === 'account' && (
               <div className="space-y-6">
                 
-                {/* VIP Patron Header Card - Square Architectural */}
+                {/* VIP Patron Header Card */}
                 <ScrollReveal direction="up">
-                  <div className="relative overflow-hidden rounded-none bg-gradient-to-r from-[#1c140f] via-[#2c2018] to-[#120e0b] text-[#f5efe8] p-6 sm:p-8 border-2 border-[#dec29b]/60 shadow-2xl group">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#dec29b]/10 blur-3xl pointer-events-none group-hover:bg-[#dec29b]/20 transition-all duration-700" />
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1c140f] via-[#2c2018] to-[#120e0b] text-[#f5efe8] p-6 sm:p-8 border border-[#dec29b]/50 shadow-xl">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#dec29b]/10 rounded-full blur-3xl pointer-events-none" />
                     <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                       <div className="space-y-2">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#dec29b]/15 border border-[#dec29b]/50 text-[#dec29b] text-[10px] tracking-widest uppercase font-bold">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#dec29b]/15 border border-[#dec29b]/40 text-[#dec29b] text-[10px] tracking-widest uppercase font-semibold">
                           ✦ VIP Private Client Status
                         </div>
                         <h2 className="font-serif text-2xl sm:text-3xl text-white font-normal">
@@ -657,13 +658,13 @@ export default function AccountPage() {
                       <div className="flex flex-col sm:flex-row gap-3">
                         <Link
                           href="/shop"
-                          className="px-5 py-3 rounded-none bg-[#dec29b] text-[#1c1510] text-xs font-bold uppercase tracking-wider hover:bg-[#e8d2b5] transition-all duration-300 shadow-md text-center hover:shadow-lg"
+                          className="px-5 py-2.5 rounded-full bg-[#dec29b] text-[#1c1510] text-xs font-semibold hover:bg-[#e8d2b5] transition-all shadow-md text-center"
                         >
                           Explore Collection
                         </Link>
                         <Link
                           href="/contact"
-                          className="px-5 py-3 rounded-none border border-[#dec29b]/70 text-[#f5efe8] text-xs font-semibold uppercase tracking-wider hover:bg-[#dec29b]/15 transition-all duration-300 text-center"
+                          className="px-5 py-2.5 rounded-full border border-[#dec29b]/60 text-[#f5efe8] text-xs font-light hover:bg-[#dec29b]/10 transition-all text-center"
                         >
                           Book Showroom VIP
                         </Link>
@@ -672,24 +673,24 @@ export default function AccountPage() {
                   </div>
                 </ScrollReveal>
 
-                {/* 4-Card Stats Grid - Square with Animated Hover Lift */}
+                {/* 4-Card Stats Grid */}
                 <ScrollReveal direction="up" delay={50}>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {/* Stat 1: Total Orders */}
                     <div 
                       onClick={() => setActiveTab('orders')}
-                      className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group"
+                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <div className="w-9 h-9 rounded-none bg-[#1c1510] border border-[#dec29b]/60 flex items-center justify-center text-[#dec29b] group-hover:bg-[#9e7d56] group-hover:text-white transition-colors">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                           </svg>
                         </div>
-                        <span className="text-xs text-[#9e7d56] group-hover:translate-x-1 transition-transform">→</span>
+                        <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-semibold uppercase tracking-wider block">Total Orders</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Total Orders</span>
                         <span className="font-serif text-2xl text-[#1c1510] font-normal">{ordersLoading ? '...' : realOrders.length}</span>
                       </div>
                     </div>
@@ -697,64 +698,64 @@ export default function AccountPage() {
                     {/* Stat 2: Wishlist */}
                     <div 
                       onClick={() => setActiveTab('wishlist')}
-                      className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group"
+                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
                     >
                       <div className="flex items-center justify-between mb-3">
-                        <div className="w-9 h-9 rounded-none bg-[#1c1510] border border-[#dec29b]/60 flex items-center justify-center text-[#dec29b] group-hover:bg-[#9e7d56] group-hover:text-white transition-colors">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                           </svg>
                         </div>
-                        <span className="text-xs text-[#9e7d56] group-hover:translate-x-1 transition-transform">→</span>
+                        <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-semibold uppercase tracking-wider block">Wishlist</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Wishlist</span>
                         <span className="font-serif text-2xl text-[#1c1510] font-normal">{wishlist.length}</span>
                       </div>
                     </div>
 
                     {/* Stat 3: Loyalty Points */}
-                    <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="w-9 h-9 rounded-none bg-[#1c1510] border border-[#dec29b]/60 flex items-center justify-center text-[#dec29b] group-hover:bg-[#9e7d56] group-hover:text-white transition-colors">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.412.868-.839.605l-4.71-2.92a.562.562 0 00-.59 0l-4.71 2.92c-.427.263-.955-.119-.839-.605l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
                           </svg>
                         </div>
-                        <span className="text-[10px] bg-[#ede4d8] text-[#1c1510] px-2 py-0.5 rounded-none border border-[#ded3c5] font-mono font-semibold">1 pt / $10</span>
+                        <span className="text-[10px] bg-[#faf6ee] text-[#9e7d56] px-2 py-0.5 rounded-full border border-[#ded3c5]">1 pt / $10</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-semibold uppercase tracking-wider block">Reward Points</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Reward Points</span>
                         <span className="font-serif text-2xl text-[#1c1510] font-normal">{rewardPoints}</span>
                       </div>
                     </div>
 
                     {/* Stat 4: Member Status */}
-                    <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all">
                       <div className="flex items-center justify-between mb-3">
-                        <div className="w-9 h-9 rounded-none bg-[#1c1510] border border-[#dec29b]/60 flex items-center justify-center text-[#dec29b] group-hover:bg-[#9e7d56] group-hover:text-white transition-colors">
+                        <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                           </svg>
                         </div>
-                        <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-none font-semibold uppercase">Active</span>
+                        <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Active</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-semibold uppercase tracking-wider block">Membership</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Membership</span>
                         <span className="font-serif text-sm text-[#1c1510] font-medium truncate block mt-1">{user.memberSince}</span>
                       </div>
                     </div>
                   </div>
                 </ScrollReveal>
 
-                {/* 2-Column Overview Details - Square Design */}
+                {/* 2-Column Overview Details */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Recent Activity */}
-                  <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 shadow-xs space-y-4 hover:border-[#1c1510] transition-colors duration-300">
+                  <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-[#ede4d8] pb-3">
                       <h3 className="font-serif text-lg text-[#1c1510] font-normal">Recent Purchases</h3>
-                      <button onClick={() => setActiveTab('orders')} className="text-xs text-[#9e7d56] hover:underline font-semibold uppercase tracking-wider cursor-pointer">
-                        View all →
+                      <button onClick={() => setActiveTab('orders')} className="text-xs text-[#9e7d56] hover:underline">
+                        View all
                       </button>
                     </div>
                     {realOrders.length === 0 ? (
@@ -764,7 +765,7 @@ export default function AccountPage() {
                     ) : (
                       <div className="divide-y divide-[#ede4d8]/70">
                         {realOrders.slice(0, 3).map((ord) => (
-                          <div key={ord.id} className="py-3 flex items-center justify-between hover:bg-[#ede4d8]/20 transition-colors px-1">
+                          <div key={ord.id} className="py-3 flex items-center justify-between">
                             <div>
                               <p className="font-mono text-xs font-semibold text-[#1c1510]">{ord.id}</p>
                               <p className="text-[10px] text-[#8a796c]">{ord.date} • {ord.items}</p>
@@ -777,7 +778,7 @@ export default function AccountPage() {
                   </div>
 
                   {/* Showroom & Client Services */}
-                  <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 shadow-xs space-y-4 hover:border-[#1c1510] transition-colors duration-300">
+                  <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-4">
                     <div className="border-b border-[#ede4d8] pb-3">
                       <h3 className="font-serif text-lg text-[#1c1510] font-normal">Bradford Showroom Care</h3>
                     </div>
@@ -798,10 +799,10 @@ export default function AccountPage() {
                     <div className="pt-2">
                       <Link
                         href="/contact"
-                        className="w-full py-3 rounded-none bg-[#ede4d8] text-[#1c1510] text-xs font-bold uppercase tracking-wider hover:bg-[#ded3c5] transition-all duration-300 flex items-center justify-center gap-2 group"
+                        className="w-full py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-medium hover:bg-[#ded3c5] transition-all flex items-center justify-center gap-2"
                       >
                         <span>Schedule Bespoke Appointment</span>
-                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                        <span>→</span>
                       </Link>
                     </div>
                   </div>
@@ -811,11 +812,11 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 2: ORDERS & LIVE TRACKING HUB (SQUARE DESIGN + ANIMATION)
+                PAGE 2: ORDERS & LIVE TRACKING HUB
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'orders' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#ede4d8] pb-4">
                     <div>
@@ -824,22 +825,22 @@ export default function AccountPage() {
                     </div>
                     <Link
                       href="/shop"
-                      className="px-5 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all duration-300 self-start sm:self-auto font-semibold uppercase tracking-wider shadow-sm"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all self-start sm:self-auto font-medium"
                     >
                       + New Purchase
                     </Link>
                   </div>
 
-                  {/* Filter & Search Bar - Square */}
+                  {/* Filter & Search Bar */}
                   <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
                     <div className="flex items-center gap-2 w-full sm:w-auto">
                       {(['all', 'processing', 'delivered'] as const).map((filter) => (
                         <button
                           key={filter}
                           onClick={() => setOrderFilter(filter)}
-                          className={`px-4 py-2 rounded-none text-xs font-semibold uppercase tracking-wider transition-all duration-300 cursor-pointer ${
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium capitalize transition-all ${
                             orderFilter === filter
-                              ? 'bg-[#1c1510] text-[#f5efe8] shadow-sm'
+                              ? 'bg-[#1c1510] text-[#f5efe8]'
                               : 'bg-white border border-[#ded3c5] text-[#6b5c50] hover:bg-[#faf6ee]'
                           }`}
                         >
@@ -852,18 +853,18 @@ export default function AccountPage() {
                       placeholder="Search order ID or items..."
                       value={orderSearchQuery}
                       onChange={(e) => setOrderSearchQuery(e.target.value)}
-                      className="w-full sm:w-72 p-2.5 text-xs bg-white border border-[#ded3c5] rounded-none px-4 focus:outline-none focus:border-[#1c1510] transition-colors"
+                      className="w-full sm:w-64 p-2.5 text-xs bg-white border border-[#ded3c5] rounded-full px-4 focus:outline-none focus:border-[#1c1510]"
                     />
                   </div>
 
                   {ordersLoading ? (
                     <div className="py-16 text-center">
-                      <div className="w-10 h-10 border-2 border-[#dec29b] border-t-[#1c1510] rounded-none animate-spin mx-auto mb-3" />
+                      <div className="w-10 h-10 border-3 border-[#dec29b] border-t-transparent rounded-full animate-spin mx-auto mb-3" />
                       <p className="text-xs text-[#8a796c]">Loading database orders...</p>
                     </div>
                   ) : realOrders.length === 0 ? (
                     <div className="py-16 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-none bg-[#1c1510] border-2 border-[#dec29b] flex items-center justify-center text-[#dec29b] mx-auto shadow-md">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007z" />
                         </svg>
@@ -874,7 +875,7 @@ export default function AccountPage() {
                       </p>
                       <Link
                         href="/shop"
-                        className="inline-block px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-semibold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         Explore Catalogue
                       </Link>
@@ -892,55 +893,42 @@ export default function AccountPage() {
                           return true;
                         })
                         .map((ord: any) => (
-                          <div 
-                            key={ord.id} 
-                            className="border-2 border-[#ded3c5] rounded-none p-5 sm:p-6 bg-white space-y-4 shadow-sm hover:border-[#1c1510] transition-all duration-300 hover:shadow-md"
-                          >
+                          <div key={ord.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-4 shadow-2xs hover:border-[#1c1510] transition-colors">
                             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#ede4d8] pb-3">
                               <div className="flex items-center gap-3">
-                                <span className="font-mono text-sm font-bold text-[#1c1510] bg-[#faf6ee] px-2 py-0.5 border border-[#ded3c5]">{ord.id}</span>
-                                <span className="text-xs text-[#8a796c]">Date: {ord.date}</span>
+                                <span className="font-mono text-sm font-bold text-[#1c1510]">{ord.id}</span>
+                                <span className="text-xs text-[#8a796c]">Order Date: {ord.date}</span>
                               </div>
-                              <span className={`px-3 py-1 rounded-none text-[11px] font-bold uppercase tracking-wider ${
+                              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                 ord.status === 'Processing'
-                                  ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
                                   : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
                               }`}>
-                                ■ {ord.status || 'Delivered'}
+                                ● {ord.status || 'Delivered'}
                               </span>
                             </div>
 
-                            {/* Tracking Timeline Bar - Square Geometric with Animation */}
-                            <div className="py-3 bg-[#faf6ee] p-4 border border-[#ded3c5]">
-                              <div className="grid grid-cols-4 text-center text-[10px] uppercase tracking-wider text-[#7a6a5c] mb-2 font-bold">
-                                <span className="text-emerald-800 flex items-center justify-center gap-1">
-                                  <span className="w-2 h-2 bg-emerald-700 rounded-none inline-block" /> 1. Placed
-                                </span>
-                                <span className="text-emerald-800 flex items-center justify-center gap-1">
-                                  <span className="w-2 h-2 bg-emerald-700 rounded-none inline-block" /> 2. Hallmarking
-                                </span>
-                                <span className="text-emerald-800 flex items-center justify-center gap-1">
-                                  <span className="w-2 h-2 bg-emerald-700 rounded-none inline-block" /> 3. Dispatched
-                                </span>
-                                <span className={ord.status === 'Processing' ? 'text-[#8a796c] flex items-center justify-center gap-1' : 'text-emerald-800 font-bold flex items-center justify-center gap-1'}>
-                                  <span className={`w-2 h-2 rounded-none inline-block ${ord.status === 'Processing' ? 'bg-[#ded3c5]' : 'bg-emerald-700'}`} /> 4. Delivered
-                                </span>
+                            {/* Tracking Timeline Bar */}
+                            <div className="py-2">
+                              <div className="grid grid-cols-4 text-center text-[10px] text-[#7a6a5c] mb-1 font-medium">
+                                <span className="text-emerald-800">1. Order Placed</span>
+                                <span className="text-emerald-800">2. Hallmarking</span>
+                                <span className="text-emerald-800">3. Dispatched</span>
+                                <span className={ord.status === 'Processing' ? 'text-[#8a796c]' : 'text-emerald-800 font-bold'}>4. Delivered</span>
                               </div>
-                              <div className="w-full bg-[#ede4d8] h-2 rounded-none overflow-hidden flex">
-                                <div className={`h-full rounded-none transition-all duration-1000 ${
-                                  ord.status === 'Processing' ? 'w-3/4 bg-amber-600' : 'w-full bg-emerald-600'
-                                }`} />
+                              <div className="w-full bg-[#ede4d8] h-2 rounded-full overflow-hidden flex">
+                                <div className="bg-emerald-600 h-full w-3/4 rounded-full" />
                               </div>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pt-1">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs pt-2">
                               <div>
-                                <p className="font-semibold text-[#1c1510] text-sm">{ord.items}</p>
+                                <p className="font-medium text-[#1c1510]">{ord.items}</p>
                                 <p className="text-[11px] text-[#8a796c] mt-0.5">Shipping Address: {ord.address || 'Showroom Collection, Bradford'}</p>
                               </div>
                               <div className="text-left sm:text-right">
                                 <span className="font-serif text-lg font-bold text-[#1c1510] block">$ {Number(ord.amount || 0).toFixed(2)}</span>
-                                <span className="text-[10px] text-[#8a796c] uppercase font-mono">{ord.paymentMethod || 'Credit Card Payment'}</span>
+                                <span className="text-[10px] text-[#8a796c]">{ord.paymentMethod || 'Credit Card Payment'}</span>
                               </div>
                             </div>
                           </div>
@@ -952,11 +940,11 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 3: WISHLIST HUB (SQUARE CARDS & SMOOTH ACTIONS)
+                PAGE 3: WISHLIST HUB
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'wishlist' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
                       <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Saved Wishlist ({wishlist.length})</h2>
@@ -966,7 +954,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={clearWishlist}
-                        className="text-xs text-red-700 hover:underline font-semibold uppercase tracking-wider cursor-pointer"
+                        className="text-xs text-red-700 hover:underline font-medium"
                       >
                         Clear All
                       </button>
@@ -975,7 +963,7 @@ export default function AccountPage() {
 
                   {wishlist.length === 0 ? (
                     <div className="py-16 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-none bg-[#1c1510] border-2 border-[#dec29b] flex items-center justify-center text-[#dec29b] mx-auto shadow-md">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
                         </svg>
@@ -986,42 +974,34 @@ export default function AccountPage() {
                       </p>
                       <Link
                         href="/shop"
-                        className="inline-block px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-semibold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         Explore Catalogue
                       </Link>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {wishlist.map((item) => (
-                        <div 
-                          key={item.id} 
-                          className="border-2 border-[#ded3c5] rounded-none p-4 bg-white space-y-3 shadow-sm hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between group"
-                        >
+                        <div key={item.id} className="border border-[#ded3c5] rounded-2xl p-4 bg-white space-y-3 shadow-2xs hover:border-[#1c1510] transition-colors flex flex-col justify-between">
                           <div>
-                            <div className="relative w-full aspect-square rounded-none overflow-hidden bg-[#faf6ee] mb-3 border border-[#ded3c5]">
-                              <Image 
-                                src={item.image} 
-                                alt={item.name} 
-                                fill 
-                                className="object-cover group-hover:scale-105 transition-transform duration-500" 
-                              />
+                            <div className="relative w-full h-44 rounded-xl overflow-hidden bg-[#faf6ee] mb-3">
+                              <Image src={item.image} alt={item.name} fill className="object-cover" />
                               <button
                                 type="button"
                                 onClick={() => removeFromWishlist(item.id)}
-                                className="absolute top-2 right-2 w-7 h-7 bg-white/95 rounded-none flex items-center justify-center text-red-600 hover:bg-red-600 hover:text-white text-xs shadow-md transition-colors cursor-pointer border border-[#ded3c5]"
+                                className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-red-600 hover:bg-white text-xs shadow-xs"
                               >
                                 ✕
                               </button>
                             </div>
-                            <span className="text-[10px] tracking-widest text-[#9e7d56] uppercase font-bold">{item.category}</span>
+                            <span className="text-[10px] tracking-widest text-[#9e7d56] uppercase font-semibold">{item.category}</span>
                             <h4 className="font-serif text-base font-medium text-[#1c1510] line-clamp-1 mt-0.5">{item.name}</h4>
-                            <p className="font-serif text-lg font-bold text-[#1c1510] mt-1">$ {item.price.toFixed(2)}</p>
+                            <p className="font-serif text-lg font-semibold text-[#1c1510] mt-1">$ {item.price.toFixed(2)}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => handleAddToCart(item)}
-                            className={`w-full py-3 rounded-none text-xs font-bold uppercase tracking-wider transition-all duration-300 cursor-pointer shadow-xs ${
+                            className={`w-full py-2.5 rounded-full text-xs font-medium transition-all ${
                               addedMap[item.id]
                                 ? 'bg-emerald-800 text-white'
                                 : 'bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d]'
@@ -1038,11 +1018,11 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 4: REAL ADDRESS BOOK (SQUARE LUXURY + MODAL)
+                PAGE 4: REAL ADDRESS BOOK & SHOWROOM PICKUP
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'addresses' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
                       <h2 className="font-serif text-2xl text-[#1c1510] font-normal">My Delivery Addresses ({addresses.length})</h2>
@@ -1051,7 +1031,7 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddAddressModal(true)}
-                      className="px-5 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all duration-300 font-semibold uppercase tracking-wider cursor-pointer shadow-sm"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
                     >
                       + Add Address
                     </button>
@@ -1059,7 +1039,7 @@ export default function AccountPage() {
 
                   {addresses.length === 0 ? (
                     <div className="py-16 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-none bg-[#1c1510] border-2 border-[#dec29b] flex items-center justify-center text-[#dec29b] mx-auto shadow-md">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
@@ -1072,51 +1052,48 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddAddressModal(true)}
-                        className="inline-block px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-semibold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm cursor-pointer"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         + Add Your First Address
                       </button>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {addresses.map((addr) => (
-                        <div 
-                          key={addr.id} 
-                          className="border-2 border-[#ded3c5] rounded-none p-5 sm:p-6 bg-white space-y-3 relative shadow-sm flex flex-col justify-between hover:border-[#1c1510] transition-all duration-300 hover:shadow-md"
-                        >
+                        <div key={addr.id} className="border border-[#ded3c5] rounded-2xl p-5 bg-white space-y-3 relative shadow-2xs flex flex-col justify-between">
                           <div>
-                            <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#ede4d8]">
+                            <div className="flex items-center justify-between mb-2">
                               <span className="font-serif text-base font-semibold text-[#1c1510]">{addr.title}</span>
                               {addr.isDefault && (
-                                <span className="px-2.5 py-0.5 rounded-none bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider border border-emerald-300">
-                                  Default Address
+                                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-semibold border border-emerald-300">
+                                  Default
                                 </span>
                               )}
                             </div>
-                            <div className="space-y-1.5 text-xs text-[#5a4b40] leading-relaxed">
-                              <p className="font-bold text-[#1c1510] text-sm">{addr.name}</p>
+                            <div className="space-y-1 text-xs text-[#5a4b40] leading-relaxed">
+                              <p className="font-semibold text-[#1c1510]">{addr.name}</p>
                               <p>{addr.street}</p>
-                              <p>{addr.city}, <span className="font-mono">{addr.postcode}</span></p>
+                              <p>{addr.city}, {addr.postcode}</p>
                               <p>{addr.country}</p>
                               <p className="text-[11px] text-[#8a796c] pt-1">Tel: {addr.phone}</p>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between pt-3 border-t border-[#ede4d8] text-xs mt-3">
+                          <div className="flex items-center justify-between pt-3 border-t border-[#ede4d8] text-xs">
                             {!addr.isDefault ? (
                               <button
                                 type="button"
                                 onClick={() => handleSetDefaultAddress(addr.id)}
-                                className="text-[11px] text-[#9e7d56] hover:underline font-bold uppercase tracking-wider cursor-pointer"
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
                               >
                                 Set as Default
                               </button>
                             ) : (
-                              <span className="text-[11px] text-emerald-700 font-bold uppercase tracking-wider">■ Primary Address</span>
+                              <span className="text-[11px] text-emerald-700 font-medium">✓ Primary Address</span>
                             )}
                             <button
                               type="button"
                               onClick={() => handleDeleteAddress(addr.id)}
-                              className="text-[11px] text-red-600 hover:underline uppercase font-semibold cursor-pointer"
+                              className="text-[11px] text-red-600 hover:underline"
                             >
                               Delete
                             </button>
@@ -1127,18 +1104,15 @@ export default function AccountPage() {
                   )}
 
                   {showAddAddressModal && (
-                    <form onSubmit={handleAddAddress} className="border-2 border-[#1c1510] rounded-none p-6 bg-[#faf6ee] space-y-4 shadow-xl animate-fadeInScale">
-                      <div className="flex items-center justify-between border-b border-[#ded3c5] pb-2">
-                        <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add New Shipping Address</h3>
-                        <span className="text-[10px] text-[#9e7d56] uppercase font-bold tracking-widest">Real Address Form</span>
-                      </div>
+                    <form onSubmit={handleAddAddress} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add New Shipping Address</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                         <input
                           type="text"
                           placeholder="Label (e.g. Home, Office)"
                           value={newAddress.title}
                           onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -1146,7 +1120,7 @@ export default function AccountPage() {
                           placeholder="Recipient Full Name"
                           value={newAddress.name}
                           onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -1154,7 +1128,7 @@ export default function AccountPage() {
                           placeholder="Street Address"
                           value={newAddress.street}
                           onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
-                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="sm:col-span-2 p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -1162,7 +1136,7 @@ export default function AccountPage() {
                           placeholder="City"
                           value={newAddress.city}
                           onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -1170,7 +1144,7 @@ export default function AccountPage() {
                           placeholder="Postal Code"
                           value={newAddress.postcode}
                           onChange={(e) => setNewAddress({ ...newAddress, postcode: e.target.value })}
-                          className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                       </div>
@@ -1178,13 +1152,13 @@ export default function AccountPage() {
                         <button
                           type="button"
                           onClick={() => setShowAddAddressModal(false)}
-                          className="px-5 py-2.5 rounded-none border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white uppercase font-semibold cursor-pointer"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-6 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-bold uppercase tracking-wider hover:bg-[#33261d] cursor-pointer shadow-sm"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
                         >
                           Save Address
                         </button>
@@ -1196,11 +1170,11 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 5: REAL PAYMENT METHODS & CARDS (SQUARE DIGITAL CARDS)
+                PAGE 5: REAL PAYMENT METHODS & CARDS
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'payments' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
                     <div>
                       <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Payment Methods ({paymentMethods.length})</h2>
@@ -1209,7 +1183,7 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddPaymentModal(true)}
-                      className="px-5 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all duration-300 font-semibold uppercase tracking-wider cursor-pointer shadow-sm"
+                      className="px-5 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] transition-all font-medium"
                     >
                       + Add Card
                     </button>
@@ -1217,7 +1191,7 @@ export default function AccountPage() {
 
                   {paymentMethods.length === 0 ? (
                     <div className="py-16 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-none bg-[#1c1510] border-2 border-[#dec29b] flex items-center justify-center text-[#dec29b] mx-auto shadow-md">
+                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
                         <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                         </svg>
@@ -1229,7 +1203,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddPaymentModal(true)}
-                        className="inline-block px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-semibold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm cursor-pointer"
+                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
                       >
                         + Add Your First Card
                       </button>
@@ -1237,40 +1211,40 @@ export default function AccountPage() {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {paymentMethods.map((pm) => (
-                        <div key={pm.id} className="space-y-2 group">
+                        <div key={pm.id} className="space-y-2">
                           <div
-                            className={`relative bg-gradient-to-br ${pm.cardColor} text-[#f5efe8] rounded-none p-6 shadow-xl border-2 border-[#dec29b]/60 flex flex-col justify-between min-h-[180px] overflow-hidden transform group-hover:-translate-y-1 group-hover:shadow-2xl transition-all duration-300`}
+                            className={`relative bg-gradient-to-br ${pm.cardColor} text-[#f5efe8] rounded-2xl p-6 shadow-xl border border-[#dec29b]/40 flex flex-col justify-between min-h-[170px] overflow-hidden`}
                           >
                             <div className="flex items-center justify-between relative z-10">
-                              <span className="font-serif text-sm tracking-wider text-[#dec29b] font-bold uppercase">{pm.type}</span>
-                              <div className="w-9 h-7 bg-[#dec29b]/25 border border-[#dec29b] rounded-none flex items-center justify-center text-[9px] font-mono text-[#dec29b] font-bold shadow-inner">
-                                EMV
+                              <span className="font-serif text-sm tracking-wider text-[#dec29b] font-semibold">{pm.type}</span>
+                              <div className="w-8 h-6 bg-[#dec29b]/20 border border-[#dec29b]/50 rounded flex items-center justify-center text-[9px] text-[#dec29b]">
+                                CHIP
                               </div>
                             </div>
                             <p className="font-mono text-lg tracking-[0.28em] text-white my-3 relative z-10">
                               •••• •••• •••• {pm.last4}
                             </p>
                             <div className="flex items-center justify-between text-[11px] text-[#d6c9be] relative z-10">
-                              <span className="tracking-wider uppercase font-semibold">{pm.holder}</span>
-                              <span className="font-mono font-semibold">EXP {pm.expiry}</span>
+                              <span className="tracking-wider uppercase">{pm.holder}</span>
+                              <span>EXP {pm.expiry}</span>
                             </div>
                           </div>
-                          <div className="flex items-center justify-between px-1 text-xs">
+                          <div className="flex items-center justify-between px-2 text-xs">
                             {!pm.isDefault ? (
                               <button
                                 type="button"
                                 onClick={() => handleSetDefaultPayment(pm.id)}
-                                className="text-[11px] text-[#9e7d56] hover:underline font-bold uppercase tracking-wider cursor-pointer"
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
                               >
                                 Set as Default Card
                               </button>
                             ) : (
-                              <span className="text-[11px] text-emerald-700 font-bold uppercase tracking-wider">■ Primary Card</span>
+                              <span className="text-[11px] text-emerald-700 font-medium">✓ Default Card</span>
                             )}
                             <button
                               type="button"
                               onClick={() => handleDeletePayment(pm.id)}
-                              className="text-[11px] text-red-600 hover:underline uppercase font-semibold cursor-pointer"
+                              className="text-[11px] text-red-600 hover:underline"
                             >
                               Remove Card
                             </button>
@@ -1280,28 +1254,25 @@ export default function AccountPage() {
                     </div>
                   )}
 
-                  {/* Security Assurance - Square */}
-                  <div className="p-4 bg-[#faf6ee] border-2 border-[#ded3c5] rounded-none flex items-center gap-3 text-xs text-[#6b5c50]">
+                  {/* Security Assurance */}
+                  <div className="p-4 bg-[#faf6ee] border border-[#ded3c5] rounded-xl flex items-center gap-3 text-xs text-[#6b5c50]">
                     <span className="text-xl">🔒</span>
                     <div>
-                      <p className="font-bold text-[#1c1510] uppercase tracking-wider text-[11px]">PCI-DSS Level 1 Banking Security</p>
+                      <p className="font-semibold text-[#1c1510]">PCI-DSS Level 1 Banking Security</p>
                       <p className="text-[11px] text-[#8a796c]">Your payment details are end-to-end encrypted with AES-256 standards.</p>
                     </div>
                   </div>
 
                   {showAddPaymentModal && (
-                    <form onSubmit={handleAddPayment} className="border-2 border-[#1c1510] rounded-none p-6 bg-[#faf6ee] space-y-4 shadow-xl animate-fadeInScale">
-                      <div className="flex items-center justify-between border-b border-[#ded3c5] pb-2">
-                        <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add Payment Card</h3>
-                        <span className="text-[10px] text-[#9e7d56] uppercase font-bold tracking-widest">Real Card Gateway</span>
-                      </div>
+                    <form onSubmit={handleAddPayment} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                      <h3 className="font-serif text-lg font-semibold text-[#1c1510]">Add Payment Card</h3>
                       <div className="space-y-3 text-xs">
                         <input
                           type="text"
                           placeholder="Cardholder Name as on Card"
                           value={newCard.holder}
                           onChange={(e) => setNewCard({ ...newCard, holder: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <input
@@ -1310,7 +1281,7 @@ export default function AccountPage() {
                           maxLength={19}
                           value={newCard.cardNumber}
                           onChange={(e) => setNewCard({ ...newCard, cardNumber: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510] font-mono"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                           required
                         />
                         <div className="grid grid-cols-2 gap-3">
@@ -1320,7 +1291,7 @@ export default function AccountPage() {
                             maxLength={5}
                             value={newCard.expiry}
                             onChange={(e) => setNewCard({ ...newCard, expiry: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510] font-mono"
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                             required
                           />
                           <input
@@ -1329,7 +1300,7 @@ export default function AccountPage() {
                             maxLength={4}
                             value={newCard.cvv}
                             onChange={(e) => setNewCard({ ...newCard, cvv: e.target.value })}
-                            className="p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510] font-mono"
+                            className="p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                             required
                           />
                         </div>
@@ -1338,13 +1309,13 @@ export default function AccountPage() {
                         <button
                           type="button"
                           onClick={() => setShowAddPaymentModal(false)}
-                          className="px-5 py-2.5 rounded-none border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white uppercase font-semibold cursor-pointer"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-6 py-2.5 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-bold uppercase tracking-wider hover:bg-[#33261d] cursor-pointer shadow-sm"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d]"
                         >
                           Save Card
                         </button>
@@ -1356,50 +1327,50 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 6: RETURNS & 30-DAY GUARANTEE (SQUARE DESIGN)
+                PAGE 6: RETURNS & 30-DAY GUARANTEE
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'returns' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="border-b border-[#ede4d8] pb-4">
                     <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Returns & Lifetime Warranty</h2>
                     <p className="text-xs text-[#8a796c] mt-0.5">30-day return policy and complimentary jewellery resizing service</p>
                   </div>
 
                   {returnSubmitted && (
-                    <div className="p-4 bg-emerald-100 text-emerald-900 border-2 border-emerald-400 rounded-none text-xs font-bold animate-fadeIn">
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
                       ✓ Your return/exchange request has been lodged! Our Bradford showroom team will contact you within 24 hours.
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-5 bg-white border-2 border-[#ded3c5] rounded-none text-center space-y-2 hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 shadow-2xs">
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
                       <div className="text-2xl">✨</div>
-                      <h4 className="font-serif text-sm font-bold text-[#1c1510] uppercase tracking-wider">30-Day Money Back</h4>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">30-Day Money Back</h4>
                       <p className="text-[11px] text-[#7a6a5c]">Complete refund or exchange within 30 days of parcel delivery.</p>
                     </div>
-                    <div className="p-5 bg-white border-2 border-[#ded3c5] rounded-none text-center space-y-2 hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 shadow-2xs">
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
                       <div className="text-2xl">💎</div>
-                      <h4 className="font-serif text-sm font-bold text-[#1c1510] uppercase tracking-wider">Complimentary Resizing</h4>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Complimentary Resizing</h4>
                       <p className="text-[11px] text-[#7a6a5c]">Free ring sizing adjustment within 60 days of purchase.</p>
                     </div>
-                    <div className="p-5 bg-white border-2 border-[#ded3c5] rounded-none text-center space-y-2 hover:border-[#1c1510] transition-all duration-300 hover:-translate-y-1 shadow-2xs">
+                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
                       <div className="text-2xl">📦</div>
-                      <h4 className="font-serif text-sm font-bold text-[#1c1510] uppercase tracking-wider">Free Insured Return</h4>
+                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Free Insured Return</h4>
                       <p className="text-[11px] text-[#7a6a5c]">Pre-paid insured Royal Mail Special Delivery label provided.</p>
                     </div>
                   </div>
 
-                  {/* Return Request Form - Square */}
-                  <form onSubmit={(e) => { e.preventDefault(); setReturnSubmitted(true); }} className="border-2 border-[#ded3c5] rounded-none p-6 bg-[#faf6ee] space-y-4">
-                    <h3 className="font-serif text-base font-bold text-[#1c1510] uppercase tracking-wider">Submit a Return or Exchange Request</h3>
+                  {/* Return Request Form */}
+                  <form onSubmit={(e) => { e.preventDefault(); setReturnSubmitted(true); }} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Submit a Return or Exchange Request</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1 font-semibold uppercase tracking-wider">Select Order ID</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Select Order ID</label>
                         <select
                           value={selectedReturnOrder}
                           onChange={(e) => setSelectedReturnOrder(e.target.value)}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         >
                           <option value="">Choose Order...</option>
                           {realOrders.map((o) => (
@@ -1408,11 +1379,11 @@ export default function AccountPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1 font-semibold uppercase tracking-wider">Reason for Request</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Reason for Request</label>
                         <select
                           value={returnReason}
                           onChange={(e) => setReturnReason(e.target.value)}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         >
                           <option value="Ring Sizing / Exchange">Ring Sizing / Exchange</option>
                           <option value="Refund & Return">Full Refund & Return</option>
@@ -1422,7 +1393,7 @@ export default function AccountPage() {
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-bold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm cursor-pointer"
+                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
                     >
                       Generate Return Label
                     </button>
@@ -1432,137 +1403,137 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 7: ACCOUNT SETTINGS, SECURITY & 2FA (SQUARE DESIGN)
+                PAGE 7: ACCOUNT SETTINGS, SECURITY & 2FA
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'settings' && (
               <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border-2 border-[#ded3c5] rounded-none p-6 sm:p-8 shadow-sm space-y-6">
+                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
                   <div className="border-b border-[#ede4d8] pb-4">
                     <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Account & Security</h2>
                     <p className="text-xs text-[#8a796c] mt-0.5">Manage authentication credentials, password, and notification alerts</p>
                   </div>
 
                   {settingsSaved && (
-                    <div className="p-4 bg-emerald-100 text-emerald-900 border-2 border-emerald-400 rounded-none text-xs font-bold animate-fadeIn">
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
                       ✓ Profile details updated successfully!
                     </div>
                   )}
 
                   {passwordChanged && (
-                    <div className="p-4 bg-emerald-100 text-emerald-900 border-2 border-emerald-400 rounded-none text-xs font-bold animate-fadeIn">
+                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
                       ✓ Password changed successfully!
                     </div>
                   )}
 
                   {passwordError && (
-                    <div className="p-4 bg-red-100 text-red-900 border-2 border-red-400 rounded-none text-xs font-bold animate-fadeIn">
+                    <div className="p-4 bg-red-100 text-red-900 border border-red-300 rounded-xl text-xs font-medium">
                       {passwordError}
                     </div>
                   )}
 
-                  {/* Profile Edit Form - Square */}
+                  {/* Profile Edit Form */}
                   <form onSubmit={(e) => { e.preventDefault(); setSettingsSaved(true); setTimeout(() => setSettingsSaved(false), 3000); }} className="space-y-4">
-                    <h3 className="font-serif text-base font-bold text-[#1c1510] uppercase tracking-wider">Personal Profile</h3>
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Personal Profile</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1 font-semibold uppercase tracking-wider">Full Name</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Full Name</label>
                         <input
                           type="text"
                           value={user.name}
                           onChange={(e) => setUser({ ...user, name: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1 font-semibold uppercase tracking-wider">Email Address</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Email Address</label>
                         <input
                           type="email"
                           value={user.email}
                           disabled
-                          className="w-full p-3 bg-[#ede4d8]/40 border border-[#ded3c5] rounded-none text-[#7a6a5c] cursor-not-allowed font-mono"
+                          className="w-full p-3 bg-[#ede4d8]/40 border border-[#ded3c5] rounded-xl text-[#7a6a5c] cursor-not-allowed"
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-[11px] text-[#8a796c] mb-1 font-semibold uppercase tracking-wider">Direct Phone Number</label>
+                        <label className="block text-[11px] text-[#8a796c] mb-1">Direct Phone Number</label>
                         <input
                           type="text"
                           value={user.phone}
                           onChange={(e) => setUser({ ...user, phone: e.target.value })}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                         />
                       </div>
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-3 rounded-none bg-[#1c1510] text-[#f5efe8] text-xs font-bold uppercase tracking-wider hover:bg-[#33261d] transition-all duration-300 shadow-sm cursor-pointer"
+                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
                     >
                       Save Profile Changes
                     </button>
                   </form>
 
-                  {/* Security & Password - Square */}
+                  {/* Security & Password */}
                   <form onSubmit={handlePasswordSubmit} className="pt-6 border-t border-[#ede4d8] space-y-4">
-                    <h3 className="font-serif text-base font-bold text-[#1c1510] uppercase tracking-wider">Update Password</h3>
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Update Password</h3>
                     <div className="space-y-3 text-xs">
                       <input
                         type="password"
                         placeholder="Current Password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                       <input
                         type="password"
                         placeholder="New Password (minimum 8 characters)"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                       <input
                         type="password"
                         placeholder="Confirm New Password"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
-                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-none focus:outline-none focus:border-[#1c1510]"
+                        className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
                       />
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-3 rounded-none bg-[#ede4d8] text-[#1c1510] text-xs font-bold uppercase tracking-wider hover:bg-[#ded3c5] transition-all duration-300 border border-[#ded3c5] cursor-pointer"
+                      className="px-6 py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-semibold hover:bg-[#ded3c5] transition-all border border-[#ded3c5]"
                     >
                       Update Password
                     </button>
                   </form>
 
-                  {/* Two-Factor & Preferences - Square */}
+                  {/* Two-Factor & Preferences */}
                   <div className="pt-6 border-t border-[#ede4d8] space-y-3">
-                    <h3 className="font-serif text-base font-bold text-[#1c1510] uppercase tracking-wider">Security & Notifications</h3>
+                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Security & Notifications</h3>
                     <div className="space-y-2 text-xs">
-                      <label className="flex items-center justify-between p-3.5 bg-white border border-[#ded3c5] rounded-none cursor-pointer hover:border-[#1c1510] transition-colors">
-                        <span className="font-medium">Two-Factor Authentication (2FA via Email)</span>
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>Two-Factor Authentication (2FA via Email)</span>
                         <input
                           type="checkbox"
                           checked={twoFactorEnabled}
                           onChange={(e) => setTwoFactorEnabled(e.target.checked)}
-                          className="w-4 h-4 accent-[#1c1510] rounded-none"
+                          className="w-4 h-4 accent-[#1c1510]"
                         />
                       </label>
-                      <label className="flex items-center justify-between p-3.5 bg-white border border-[#ded3c5] rounded-none cursor-pointer hover:border-[#1c1510] transition-colors">
-                        <span className="font-medium">SMS Order Tracking & Delivery Notifications</span>
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>SMS Order Tracking & Delivery Notifications</span>
                         <input
                           type="checkbox"
                           checked={smsNotifs}
                           onChange={(e) => setSmsNotifs(e.target.checked)}
-                          className="w-4 h-4 accent-[#1c1510] rounded-none"
+                          className="w-4 h-4 accent-[#1c1510]"
                         />
                       </label>
-                      <label className="flex items-center justify-between p-3.5 bg-white border border-[#ded3c5] rounded-none cursor-pointer hover:border-[#1c1510] transition-colors">
-                        <span className="font-medium">VIP Showroom Invitations & Private Sale Catalogue</span>
+                      <label className="flex items-center justify-between p-3 bg-white border border-[#ded3c5] rounded-xl cursor-pointer">
+                        <span>VIP Showroom Invitations & Private Sale Catalogue</span>
                         <input
                           type="checkbox"
                           checked={emailNotifs}
                           onChange={(e) => setEmailNotifs(e.target.checked)}
-                          className="w-4 h-4 accent-[#1c1510] rounded-none"
+                          className="w-4 h-4 accent-[#1c1510]"
                         />
                       </label>
                     </div>
