@@ -244,8 +244,8 @@ export function Header({
 
                 {/* Account Icon */}
                 <Link
-                  href="/login"
-                  aria-label="Account Login"
+                  href="/account"
+                  aria-label="User Account"
                   className="hidden md:block hover:text-[#d8bb93] transition-colors p-1"
                 >
                   <svg className="w-5 h-5 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

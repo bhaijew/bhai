@@ -99,6 +99,10 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
           setTimeout(() => {
             window.location.href = '/admin';
           }, 800);
+        } else {
+          setTimeout(() => {
+            window.location.href = '/account';
+          }, 800);
         }
       } else {
         setLoginError(data.error || 'Login failed.');
@@ -258,10 +262,10 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                     Welcome to Bhai Jeweller, {signupFullName}. You can now save your wishlist and track your orders.
                   </p>
                   <Link
-                    href="/shop"
+                    href="/account"
                     className="inline-flex px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-light hover:bg-[#33261d] transition-all"
                   >
-                    Start Exploring →
+                    Go to My Account →
                   </Link>
                 </div>
               ) : (
@@ -531,10 +535,10 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
                   <h3 className="font-serif text-lg text-[#1c1510]">Welcome back!</h3>
                   <p className="text-xs text-[#736355] font-light mt-1 mb-4">You have successfully logged in.</p>
                   <Link
-                    href="/shop"
+                    href="/account"
                     className="inline-flex px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-light hover:bg-[#33261d] transition-all"
                   >
-                    Continue Shopping →
+                    Go to My Account →
                   </Link>
                 </div>
               ) : (
