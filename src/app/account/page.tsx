@@ -5,15 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ScrollReveal from '@/components/shared/ScrollReveal';
-import { useShop, WishlistItem } from '@/context/ShopContext';
 
 export default function AccountPage() {
   const router = useRouter();
-  const { wishlist, removeFromWishlist, addToCart, clearWishlist } = useShop();
 
-  // Active Tab State
+  // Active Tab State (Wishlist & Returns removed as requested)
   const [activeTab, setActiveTab] = useState<
-    'account' | 'orders' | 'wishlist' | 'addresses' | 'payments' | 'returns' | 'settings'
+    'account' | 'orders' | 'addresses' | 'payments' | 'settings'
   >('account');
 
   // User Session State (Connected to real database session)
@@ -71,29 +69,6 @@ export default function AccountPage() {
   const [emailNotifs, setEmailNotifs] = useState(true);
   const [smsNotifs, setSmsNotifs] = useState(true);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
-
-  // Return Request Form State
-  const [selectedReturnOrder, setSelectedReturnOrder] = useState('');
-  const [returnReason, setReturnReason] = useState('Ring Sizing / Exchange');
-  const [returnSubmitted, setReturnSubmitted] = useState(false);
-
-  // Added to cart feedback map
-  const [addedMap, setAddedMap] = useState<Record<string, boolean>>({});
-
-  const handleAddToCart = (item: WishlistItem) => {
-    addToCart({
-      id: item.id,
-      name: item.name,
-      variant: item.category,
-      price: item.price,
-      image: item.image,
-      slug: item.slug,
-    });
-    setAddedMap((prev) => ({ ...prev, [item.id]: true }));
-    setTimeout(() => {
-      setAddedMap((prev) => ({ ...prev, [item.id]: false }));
-    }, 2000);
-  };
 
   // Check user session on mount from real Supabase auth session
   useEffect(() => {
@@ -309,11 +284,7 @@ export default function AccountPage() {
   // Derive initial letter for avatar
   const initialLetter = user.name ? user.name.trim().charAt(0).toUpperCase() : 'B';
 
-  // Calculate dynamic reward points based on real order totals
-  const totalSpent = realOrders.reduce((sum, ord) => sum + (Number(ord.amount) || 0), 0);
-  const rewardPoints = Math.floor(totalSpent / 10);
-
-  // Navigation Items list
+  // Navigation Items list (Wishlist and Returns removed)
   const sideNavItems = [
     {
       id: 'account',
@@ -335,16 +306,6 @@ export default function AccountPage() {
       ),
     },
     {
-      id: 'wishlist',
-      label: 'Wishlist',
-      badge: wishlist.length > 0 ? wishlist.length : undefined,
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-        </svg>
-      ),
-    },
-    {
       id: 'addresses',
       label: 'Addresses',
       badge: addresses.length > 0 ? addresses.length : undefined,
@@ -362,15 +323,6 @@ export default function AccountPage() {
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-        </svg>
-      ),
-    },
-    {
-      id: 'returns',
-      label: 'Returns & Refunds',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.7} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
         </svg>
       ),
     },
@@ -507,7 +459,7 @@ export default function AccountPage() {
                     <>
                       <span className="hidden sm:inline">•</span>
                       <span className="flex items-center gap-1">
-                        <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                        <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                         </svg>
                         {user.phone}
@@ -531,9 +483,9 @@ export default function AccountPage() {
               <button
                 type="button"
                 onClick={handleLogout}
-                className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                className="px-5 py-2 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
               >
-                <svg className="w-3.5 h-3.5 text-[#dec29b]" fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 text-[#dec29b]" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
                 <span>Log Out</span>
@@ -543,7 +495,7 @@ export default function AccountPage() {
           </div>
         </div>
 
-        {/* ── SMOOTH HORIZONTAL SCROLLABLE TABS BAR ── */}
+        {/* ── SMOOTH HORIZONTAL SCROLLABLE TABS BAR (CLEAN 5 TABS) ── */}
         <div className="w-full bg-[#fdfbf7] border-b border-[#ded3c5]/80 sticky top-16 md:top-20 z-30 shadow-2xs">
           <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar scroll-smooth">
@@ -553,7 +505,7 @@ export default function AccountPage() {
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-2 ${
+                    className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition-all flex items-center gap-2 cursor-pointer ${
                       isActive
                         ? 'bg-[#1c1510] text-[#f5efe8] shadow-sm'
                         : 'bg-[#ede4d8]/60 text-[#6b5c50] hover:bg-[#ede4d8] hover:text-[#1c1510] border border-[#ded3c5]/70'
@@ -578,7 +530,7 @@ export default function AccountPage() {
 
 
       {/* ─────────────────────────────────────────────────────────────
-          MAIN CONTENT AREA (DIFFERENT UNIQUE VIEWS PER TAB)
+          MAIN CONTENT AREA (FOCUSED 5 VIEWS)
           ───────────────────────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-8 py-8 flex-1">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -595,7 +547,7 @@ export default function AccountPage() {
                   <button
                     key={item.id}
                     onClick={() => setActiveTab(item.id as any)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-light transition-all ${
+                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-light transition-all cursor-pointer ${
                       isActive
                         ? 'bg-[#ede4d8] text-[#1c1510] font-medium shadow-2xs border border-[#ded3c5]/60'
                         : 'text-[#6b5c50] hover:bg-[#f3ece3] hover:text-[#1c1510]'
@@ -618,7 +570,7 @@ export default function AccountPage() {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-light text-red-800 hover:bg-red-50 transition-all"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-light text-red-800 hover:bg-red-50 transition-all cursor-pointer"
                 >
                   <svg className="w-4 h-4 text-red-700 stroke-[1.7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -630,7 +582,7 @@ export default function AccountPage() {
           </aside>
 
 
-          {/* ── CENTER / MAIN CONTENT (INDIVIDUALLY CRAFTED DISTINCT TAB PAGES) ── */}
+          {/* ── CENTER / MAIN CONTENT (5 TAILORED SUB-PAGES) ── */}
           <div className="lg:col-span-9 space-y-8">
             
             {/* ═══════════════════════════════════════════════════════════
@@ -695,38 +647,42 @@ export default function AccountPage() {
                       </div>
                     </div>
 
-                    {/* Stat 2: Wishlist */}
+                    {/* Stat 2: Saved Addresses */}
                     <div 
-                      onClick={() => setActiveTab('wishlist')}
+                      onClick={() => setActiveTab('addresses')}
                       className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
                     >
                       <div className="flex items-center justify-between mb-3">
                         <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
                           </svg>
                         </div>
                         <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Wishlist</span>
-                        <span className="font-serif text-2xl text-[#1c1510] font-normal">{wishlist.length}</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Saved Addresses</span>
+                        <span className="font-serif text-2xl text-[#1c1510] font-normal">{addresses.length}</span>
                       </div>
                     </div>
 
-                    {/* Stat 3: Loyalty Points */}
-                    <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] transition-all">
+                    {/* Stat 3: Saved Payment Cards */}
+                    <div 
+                      onClick={() => setActiveTab('payments')}
+                      className="bg-[#fdfbf7] border border-[#ded3c5] rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#1c1510] cursor-pointer transition-all hover:scale-[1.02]"
+                    >
                       <div className="flex items-center justify-between mb-3">
                         <div className="w-9 h-9 rounded-lg bg-[#faf6ee] border border-[#dec29b]/40 flex items-center justify-center text-[#9e7d56]">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385c.116.486-.412.868-.839.605l-4.71-2.92a.562.562 0 00-.59 0l-4.71 2.92c-.427.263-.955-.119-.839-.605l1.285-5.385a.562.562 0 00-.182-.557l-4.204-3.602c-.38-.325-.178-.948.32-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                           </svg>
                         </div>
-                        <span className="text-[10px] bg-[#faf6ee] text-[#9e7d56] px-2 py-0.5 rounded-full border border-[#ded3c5]">1 pt / $10</span>
+                        <span className="text-xs text-[#9e7d56]">→</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Reward Points</span>
-                        <span className="font-serif text-2xl text-[#1c1510] font-normal">{rewardPoints}</span>
+                        <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Payment Cards</span>
+                        <span className="font-serif text-2xl text-[#1c1510] font-normal">{paymentMethods.length}</span>
                       </div>
                     </div>
 
@@ -738,7 +694,7 @@ export default function AccountPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                           </svg>
                         </div>
-                        <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">Active</span>
+                        <span className="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full font-medium">Active</span>
                       </div>
                       <div>
                         <span className="text-[10px] text-[#8a796c] font-light uppercase tracking-wider block">Membership</span>
@@ -754,7 +710,7 @@ export default function AccountPage() {
                   <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-4">
                     <div className="flex items-center justify-between border-b border-[#ede4d8] pb-3">
                       <h3 className="font-serif text-lg text-[#1c1510] font-normal">Recent Purchases</h3>
-                      <button onClick={() => setActiveTab('orders')} className="text-xs text-[#9e7d56] hover:underline">
+                      <button onClick={() => setActiveTab('orders')} className="text-xs text-[#9e7d56] hover:underline cursor-pointer">
                         View all
                       </button>
                     </div>
@@ -838,7 +794,7 @@ export default function AccountPage() {
                         <button
                           key={filter}
                           onClick={() => setOrderFilter(filter)}
-                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium capitalize transition-all ${
+                          className={`px-3.5 py-1.5 rounded-full text-xs font-medium capitalize transition-all cursor-pointer ${
                             orderFilter === filter
                               ? 'bg-[#1c1510] text-[#f5efe8]'
                               : 'bg-white border border-[#ded3c5] text-[#6b5c50] hover:bg-[#faf6ee]'
@@ -940,85 +896,7 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 3: WISHLIST HUB
-                ═══════════════════════════════════════════════════════════ */}
-            {activeTab === 'wishlist' && (
-              <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
-                  <div className="flex items-center justify-between border-b border-[#ede4d8] pb-4">
-                    <div>
-                      <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Saved Wishlist ({wishlist.length})</h2>
-                      <p className="text-xs text-[#8a796c] mt-0.5">Your curated collection of bespoke jewellery and rings</p>
-                    </div>
-                    {wishlist.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={clearWishlist}
-                        className="text-xs text-red-700 hover:underline font-medium"
-                      >
-                        Clear All
-                      </button>
-                    )}
-                  </div>
-
-                  {wishlist.length === 0 ? (
-                    <div className="py-16 text-center space-y-4">
-                      <div className="w-16 h-16 rounded-full bg-[#faf6ee] border border-[#ded3c5] flex items-center justify-center text-[#9e7d56] mx-auto shadow-xs">
-                        <svg className="w-8 h-8 stroke-[1.4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
-                        </svg>
-                      </div>
-                      <h3 className="font-serif text-xl font-medium text-[#1c1510]">Your Wishlist is Empty</h3>
-                      <p className="text-xs text-[#8a796c] max-w-sm mx-auto">
-                        Click the heart icon on any fine jewellery piece in our shop to save it to your private portfolio.
-                      </p>
-                      <Link
-                        href="/shop"
-                        className="inline-block px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] transition-all"
-                      >
-                        Explore Catalogue
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {wishlist.map((item) => (
-                        <div key={item.id} className="border border-[#ded3c5] rounded-2xl p-4 bg-white space-y-3 shadow-2xs hover:border-[#1c1510] transition-colors flex flex-col justify-between">
-                          <div>
-                            <div className="relative w-full h-44 rounded-xl overflow-hidden bg-[#faf6ee] mb-3">
-                              <Image src={item.image} alt={item.name} fill className="object-cover" />
-                              <button
-                                type="button"
-                                onClick={() => removeFromWishlist(item.id)}
-                                className="absolute top-2 right-2 w-7 h-7 bg-white/90 rounded-full flex items-center justify-center text-red-600 hover:bg-white text-xs shadow-xs"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                            <span className="text-[10px] tracking-widest text-[#9e7d56] uppercase font-semibold">{item.category}</span>
-                            <h4 className="font-serif text-base font-medium text-[#1c1510] line-clamp-1 mt-0.5">{item.name}</h4>
-                            <p className="font-serif text-lg font-semibold text-[#1c1510] mt-1">$ {item.price.toFixed(2)}</p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleAddToCart(item)}
-                            className={`w-full py-2.5 rounded-full text-xs font-medium transition-all ${
-                              addedMap[item.id]
-                                ? 'bg-emerald-800 text-white'
-                                : 'bg-[#1c1510] text-[#f5efe8] hover:bg-[#33261d]'
-                            }`}
-                          >
-                            {addedMap[item.id] ? '✓ Added to Bag' : 'Add to Shopping Bag'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </ScrollReveal>
-            )}
-
-            {/* ═══════════════════════════════════════════════════════════
-                PAGE 4: REAL ADDRESS BOOK & SHOWROOM PICKUP
+                PAGE 3: REAL ADDRESS BOOK & SHOWROOM PICKUP
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'addresses' && (
               <ScrollReveal direction="up">
@@ -1031,7 +909,7 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddAddressModal(!showAddAddressModal)}
-                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs"
+                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       {showAddAddressModal ? '✕ Close' : '+ Add Address'}
                     </button>
@@ -1090,13 +968,13 @@ export default function AccountPage() {
                         <button
                           type="button"
                           onClick={() => setShowAddAddressModal(false)}
-                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors cursor-pointer"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs cursor-pointer"
                         >
                           Save Address
                         </button>
@@ -1119,7 +997,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddAddressModal(true)}
-                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs cursor-pointer"
                       >
                         <span>+ Add Your First Address</span>
                       </button>
@@ -1150,7 +1028,7 @@ export default function AccountPage() {
                               <button
                                 type="button"
                                 onClick={() => handleSetDefaultAddress(addr.id)}
-                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium cursor-pointer"
                               >
                                 Set as Default
                               </button>
@@ -1160,7 +1038,7 @@ export default function AccountPage() {
                             <button
                               type="button"
                               onClick={() => handleDeleteAddress(addr.id)}
-                              className="text-[11px] text-red-600 hover:underline"
+                              className="text-[11px] text-red-600 hover:underline cursor-pointer"
                             >
                               Delete
                             </button>
@@ -1174,7 +1052,7 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 5: REAL PAYMENT METHODS & CARDS
+                PAGE 4: REAL PAYMENT METHODS & CARDS
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'payments' && (
               <ScrollReveal direction="up">
@@ -1187,7 +1065,7 @@ export default function AccountPage() {
                     <button
                       type="button"
                       onClick={() => setShowAddPaymentModal(!showAddPaymentModal)}
-                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs"
+                      className="whitespace-nowrap flex-shrink-0 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs hover:bg-[#33261d] active:scale-95 transition-all font-medium flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       {showAddPaymentModal ? '✕ Close' : '+ Add Card'}
                     </button>
@@ -1243,13 +1121,13 @@ export default function AccountPage() {
                         <button
                           type="button"
                           onClick={() => setShowAddPaymentModal(false)}
-                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors"
+                          className="px-5 py-2.5 rounded-full border border-[#ded3c5] text-xs text-[#6b5c50] hover:bg-white transition-colors cursor-pointer"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                          className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] active:scale-95 transition-all shadow-xs cursor-pointer"
                         >
                           Save Card
                         </button>
@@ -1271,7 +1149,7 @@ export default function AccountPage() {
                       <button
                         type="button"
                         onClick={() => setShowAddPaymentModal(true)}
-                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs"
+                        className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-medium hover:bg-[#33261d] active:scale-95 transition-all shadow-xs cursor-pointer"
                       >
                         <span>+ Add Your First Card</span>
                       </button>
@@ -1302,7 +1180,7 @@ export default function AccountPage() {
                               <button
                                 type="button"
                                 onClick={() => handleSetDefaultPayment(pm.id)}
-                                className="text-[11px] text-[#9e7d56] hover:underline font-medium"
+                                className="text-[11px] text-[#9e7d56] hover:underline font-medium cursor-pointer"
                               >
                                 Set as Default Card
                               </button>
@@ -1312,7 +1190,7 @@ export default function AccountPage() {
                             <button
                               type="button"
                               onClick={() => handleDeletePayment(pm.id)}
-                              className="text-[11px] text-red-600 hover:underline"
+                              className="text-[11px] text-red-600 hover:underline cursor-pointer"
                             >
                               Remove Card
                             </button>
@@ -1335,83 +1213,7 @@ export default function AccountPage() {
             )}
 
             {/* ═══════════════════════════════════════════════════════════
-                PAGE 6: RETURNS & 30-DAY GUARANTEE
-                ═══════════════════════════════════════════════════════════ */}
-            {activeTab === 'returns' && (
-              <ScrollReveal direction="up">
-                <div className="bg-[#fdfbf7] border border-[#ded3c5] rounded-2xl p-6 shadow-xs space-y-6">
-                  <div className="border-b border-[#ede4d8] pb-4">
-                    <h2 className="font-serif text-2xl text-[#1c1510] font-normal">Returns & Lifetime Warranty</h2>
-                    <p className="text-xs text-[#8a796c] mt-0.5">30-day return policy and complimentary jewellery resizing service</p>
-                  </div>
-
-                  {returnSubmitted && (
-                    <div className="p-4 bg-emerald-100 text-emerald-900 border border-emerald-300 rounded-xl text-xs font-medium">
-                      ✓ Your return/exchange request has been lodged! Our Bradford showroom team will contact you within 24 hours.
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
-                      <div className="text-2xl">✨</div>
-                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">30-Day Money Back</h4>
-                      <p className="text-[11px] text-[#7a6a5c]">Complete refund or exchange within 30 days of parcel delivery.</p>
-                    </div>
-                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
-                      <div className="text-2xl">💎</div>
-                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Complimentary Resizing</h4>
-                      <p className="text-[11px] text-[#7a6a5c]">Free ring sizing adjustment within 60 days of purchase.</p>
-                    </div>
-                    <div className="p-4 bg-white border border-[#ded3c5] rounded-xl text-center space-y-2">
-                      <div className="text-2xl">📦</div>
-                      <h4 className="font-serif text-sm font-semibold text-[#1c1510]">Free Insured Return</h4>
-                      <p className="text-[11px] text-[#7a6a5c]">Pre-paid insured Royal Mail Special Delivery label provided.</p>
-                    </div>
-                  </div>
-
-                  {/* Return Request Form */}
-                  <form onSubmit={(e) => { e.preventDefault(); setReturnSubmitted(true); }} className="border border-[#ded3c5] rounded-2xl p-6 bg-[#faf6ee] space-y-4">
-                    <h3 className="font-serif text-base font-semibold text-[#1c1510]">Submit a Return or Exchange Request</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                      <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1">Select Order ID</label>
-                        <select
-                          value={selectedReturnOrder}
-                          onChange={(e) => setSelectedReturnOrder(e.target.value)}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                        >
-                          <option value="">Choose Order...</option>
-                          {realOrders.map((o) => (
-                            <option key={o.id} value={o.id}>{o.id} — {o.items}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-[11px] text-[#8a796c] mb-1">Reason for Request</label>
-                        <select
-                          value={returnReason}
-                          onChange={(e) => setReturnReason(e.target.value)}
-                          className="w-full p-3 bg-white border border-[#ded3c5] rounded-xl focus:outline-none focus:border-[#1c1510]"
-                        >
-                          <option value="Ring Sizing / Exchange">Ring Sizing / Exchange</option>
-                          <option value="Refund & Return">Full Refund & Return</option>
-                          <option value="Inspection / Polishing">Inspection / Polishing</option>
-                        </select>
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
-                    >
-                      Generate Return Label
-                    </button>
-                  </form>
-                </div>
-              </ScrollReveal>
-            )}
-
-            {/* ═══════════════════════════════════════════════════════════
-                PAGE 7: ACCOUNT SETTINGS, SECURITY & 2FA
+                PAGE 5: ACCOUNT SETTINGS, SECURITY & 2FA
                 ═══════════════════════════════════════════════════════════ */}
             {activeTab === 'settings' && (
               <ScrollReveal direction="up">
@@ -1473,7 +1275,7 @@ export default function AccountPage() {
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all"
+                      className="px-6 py-2.5 rounded-full bg-[#1c1510] text-[#f5efe8] text-xs font-semibold hover:bg-[#33261d] transition-all cursor-pointer"
                     >
                       Save Profile Changes
                     </button>
@@ -1507,7 +1309,7 @@ export default function AccountPage() {
                     </div>
                     <button
                       type="submit"
-                      className="px-6 py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-semibold hover:bg-[#ded3c5] transition-all border border-[#ded3c5]"
+                      className="px-6 py-2.5 rounded-full bg-[#ede4d8] text-[#1c1510] text-xs font-semibold hover:bg-[#ded3c5] transition-all border border-[#ded3c5] cursor-pointer"
                     >
                       Update Password
                     </button>
