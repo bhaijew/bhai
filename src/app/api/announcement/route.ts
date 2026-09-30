@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/auth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
@@ -9,7 +10,7 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 let SERVER_ANNOUNCEMENT_CONFIG = {
   isEnabled: true,
   messages: [
-    'Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK',
+    'Free worldwide shipping on all orders over £150  |  Handcrafted with passion in the UK',
     'Complimentary luxury gift packaging on every order  |  Bespoke service',
     'Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available',
   ],
@@ -43,6 +44,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const body = await request.json();
 
     const updatedConfig = {

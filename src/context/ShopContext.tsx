@@ -61,6 +61,7 @@ interface ShopContextType {
   clearWishlist: () => void;
   addProduct: (product: ProductItem) => void;
   deleteProduct: (id: string) => void;
+  updateProductStock: (id: string, newStock: number) => void;
   cartCount: number;
   wishlistCount: number;
   cartSubtotal: number;
@@ -228,6 +229,23 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     fetch(`/api/products?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
   };
 
+  const updateProductStock = (id: string, newStock: number) => {
+    setProducts((prev) => {
+      const updated = prev.map((p) => {
+        if (p.id === id) {
+          const stock = Math.max(0, newStock);
+          const status = stock > 0 ? (stock <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock';
+          return { ...p, stock, status };
+        }
+        return p;
+      });
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
   const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -249,6 +267,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         clearWishlist,
         addProduct,
         deleteProduct,
+        updateProductStock,
         cartCount,
         wishlistCount,
         cartSubtotal,

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { hashPassword, signSession, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey =
@@ -10,21 +12,30 @@ const supabaseKey =
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'BHAI_JEWELLER_SALT_2026').digest('hex');
-}
-
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    // Rate limit: Max 5 registration attempts per 15 minutes per IP
+    const rateCheck = checkRateLimit(`signup_${ip}`, 5, 15 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many account registration attempts. Please try again in ${Math.ceil(rateCheck.resetSeconds / 60)} minute(s).`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
-    const fullName = (body.fullName || '').trim();
-    const email = (body.email || '').trim().toLowerCase();
-    const phone = (body.phone || '').trim();
+    const fullName = sanitizeString(body.fullName, 100);
+    const email = sanitizeEmail(body.email);
+    const phone = sanitizePhone(body.phone);
     const password = body.password || '';
 
     if (!fullName || !email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Full name, email, and password are required.' },
+        { success: false, error: 'Valid full name, email address, and password are required.' },
         { status: 400 }
       );
     }
@@ -55,7 +66,8 @@ export async function POST(request: Request) {
 
     const userId = `usr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const hashedPassword = hashPassword(password);
-    const role = email.includes('admin') ? 'admin' : 'client';
+    // Security: New registrations are ALWAYS client role. Admin privileges cannot be self-assigned.
+    const role: 'client' = 'client';
 
     if (supabase) {
       const { error } = await supabase.from('users').insert({
@@ -79,10 +91,12 @@ export async function POST(request: Request) {
       email: email,
       name: fullName,
       phone: phone,
-      role: role,
+      role,
       createdAt: new Date().toISOString(),
       loginTime: new Date().toISOString(),
     };
+
+    const signedToken = signSession(sessionPayload);
 
     const response = NextResponse.json({
       success: true,
@@ -90,8 +104,8 @@ export async function POST(request: Request) {
       user: sessionPayload,
     });
 
-    response.cookies.set('bhai_auth_session', JSON.stringify(sessionPayload), {
-      httpOnly: false,
+    response.cookies.set(SESSION_COOKIE_NAME, signedToken, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,

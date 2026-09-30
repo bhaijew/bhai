@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/auth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const supabaseKey =
@@ -63,6 +64,11 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const body = await request.json();
 
     if (!body.name || !body.price) {
@@ -144,6 +150,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 

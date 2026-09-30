@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+import { getSessionUser } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get('bhai_auth_session');
+    const user = await getSessionUser(request);
 
-    if (!sessionCookie || !sessionCookie.value) {
+    if (!user) {
       return NextResponse.json({
         success: false,
         authenticated: false,
@@ -14,17 +13,24 @@ export async function GET() {
       });
     }
 
-    const user = JSON.parse(sessionCookie.value);
     return NextResponse.json({
       success: true,
       authenticated: true,
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone || '',
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     });
   } catch (error: any) {
     return NextResponse.json({
       success: false,
       authenticated: false,
       user: null,
+      error: error?.message,
     });
   }
 }

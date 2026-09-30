@@ -392,6 +392,8 @@ export function Footer() {
             <Link href="/refund-policy" className="hover:text-[#dec29b] transition-colors">Refunds</Link>
             <span>•</span>
             <Link href="/return-policy" className="hover:text-[#dec29b] transition-colors">Returns</Link>
+            <span>•</span>
+            <Link href="/admin/login" className="hover:text-[#dec29b] text-[#dec29b]/70 hover:text-[#dec29b] transition-colors">Staff Portal</Link>
           </div>
           <p className="text-[11px] text-[#d8cdcf] font-normal">
             © {new Date().getFullYear()} Bhai Jeweller, Bradford. All rights reserved.

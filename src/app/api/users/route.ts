@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/auth';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
 const supabaseKey =
@@ -14,16 +15,21 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // In-memory fallback overrides for user status (active | inactive | banned)
 export const USER_STATUS_STORE: Map<string, { status: string; isBanned: boolean }> = new Map();
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     let usersList: any[] = [];
     let attemptsList: any[] = [];
 
     if (supabase) {
-      // 1. Fetch Users from Supabase
+      // 1. Fetch Users from Supabase - Exclude password hashes!
       const { data: usersData, error: usersErr } = await supabase
         .from('users')
-        .select('*')
+        .select('id, full_name, email, phone, role, status, is_banned, failed_attempts, lock_until, created_at')
         .order('created_at', { ascending: false });
 
       if (!usersErr && usersData) {
@@ -81,6 +87,11 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const body = await request.json();
     const { userId, email, status, action } = body;
 

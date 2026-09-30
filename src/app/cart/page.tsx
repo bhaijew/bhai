@@ -96,14 +96,14 @@ export default function CartPage() {
                           </Link>
                           <p className="text-[11px] text-[#8a796c] font-light mt-0.5">{item.variant}</p>
                           <p className="md:hidden text-xs font-semibold text-[#1c1510] mt-1">
-                            ${item.price.toLocaleString()}
+                            £{item.price.toLocaleString()}
                           </p>
                         </div>
                       </div>
 
                       {/* Price (Col 7-8) - Desktop */}
                       <div className="hidden md:block col-span-2 text-center text-sm font-light text-[#1c1510]">
-                        ${item.price.toLocaleString()}
+                        £{item.price.toLocaleString()}
                       </div>
 
                       {/* Quantity Stepper (Col 9-10) */}
@@ -131,7 +131,7 @@ export default function CartPage() {
                         {/* Mobile Total & Remove */}
                         <div className="md:hidden flex items-center gap-3">
                           <span className="text-xs font-semibold text-[#1c1510]">
-                            ${(item.price * item.quantity).toLocaleString()}
+                            £{(item.price * item.quantity).toLocaleString()}
                           </span>
                           <button
                             type="button"
@@ -147,7 +147,7 @@ export default function CartPage() {
                       {/* Desktop Total & Delete (Col 11-12) */}
                       <div className="hidden md:flex col-span-2 items-center justify-end gap-3 text-right">
                         <span className="text-sm font-semibold text-[#1c1510]">
-                          ${(item.price * item.quantity).toLocaleString()}
+                          £{(item.price * item.quantity).toLocaleString()}
                         </span>
                         <button
                           type="button"
@@ -186,13 +186,13 @@ export default function CartPage() {
                   <div className="space-y-3 py-4 text-xs font-light text-[#6b5c50] border-b border-[#e8ded4]">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span className="font-medium text-[#1c1510]">${subtotal.toLocaleString()}</span>
+                      <span className="font-medium text-[#1c1510]">£{subtotal.toLocaleString()}</span>
                     </div>
 
                     {promoApplied && (
                       <div className="flex justify-between text-[#2d7a48]">
                         <span>Promo Discount (10%)</span>
-                        <span>-${discount.toLocaleString()}</span>
+                        <span>-£{discount.toLocaleString()}</span>
                       </div>
                     )}
 
@@ -203,14 +203,14 @@ export default function CartPage() {
 
                     <div className="flex justify-between">
                       <span>Estimated Tax</span>
-                      <span className="text-[#1c1510]">${tax.toLocaleString()}</span>
+                      <span className="text-[#1c1510]">£{tax.toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="flex justify-between items-center py-4 border-b border-[#e8ded4]">
                     <span className="text-sm font-medium text-[#1c1510]">Total</span>
                     <span className="font-serif text-xl sm:text-2xl font-semibold text-[#1c1510]">
-                      ${total.toLocaleString()}
+                      £{total.toLocaleString()}
                     </span>
                   </div>
 
@@ -257,7 +257,7 @@ export default function CartPage() {
                       <svg className="w-4 h-4 text-[#9e7d56] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                       </svg>
-                      <span><strong>Free Shipping:</strong> On all orders over $150</span>
+                      <span><strong>Free Shipping:</strong> On all orders over £150</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-[#9e7d56] flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">

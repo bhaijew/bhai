@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import crypto from 'crypto';
+import { hashPassword, signSession, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { sanitizeString } from '@/lib/sanitize';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey =
@@ -10,29 +12,32 @@ const supabaseKey =
 
 const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
 
-// In-memory security tracker (fallback if database is offline)
-// Stores: { [key: string]: { failedCount: number, lockUntil: number | null } }
+// In-memory security tracker
 const MEMORY_SECURITY_STORE: Map<string, { failedCount: number; lockUntil: number | null }> = new Map();
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes lockout
 
-// Simple secure password hasher using SHA-256 with salt
-function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'BHAI_JEWELLER_SALT_2026').digest('hex');
-}
-
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const identifier = (body.identifier || body.email || '').trim().toLowerCase();
-    const password = body.password || '';
+    const ip = getClientIp(request);
 
-    // Get client IP address
-    const ip =
-      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
-      request.headers.get('x-real-ip') ||
-      '127.0.0.1';
+    // Global IP rate limit: max 15 login requests per minute per IP to mitigate distributed brute force
+    const ipCheck = checkRateLimit(`login_ip_${ip}`, 15, 60 * 1000);
+    if (!ipCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          isBlocked: true,
+          error: `Too many login requests from your network. Please wait ${ipCheck.resetSeconds} seconds.`,
+        },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    const identifier = sanitizeString(body.identifier || body.email, 150).toLowerCase();
+    const password = body.password || '';
 
     const securityKey = `${ip}_${identifier}`;
 
@@ -105,13 +110,16 @@ export async function POST(request: Request) {
     // 3. CREDENTIAL VALIDATION
     const inputHash = hashPassword(password);
     let isAuthenticated = false;
-    let userRole = 'client';
+    let userRole: 'admin' | 'client' = 'client';
     let userName = identifier.split('@')[0];
     let userPhone = '';
     let userCreatedAt = new Date().toISOString();
 
-    // Master Admin fallback check
-    if (identifier === 'admin@bhaijeweller.com' && password === 'admin123') {
+    // Secure Admin verification via env vars or database
+    const configuredAdminEmail = (process.env.ADMIN_EMAIL || 'admin@bhaijeweller.com').toLowerCase();
+    const configuredAdminPassword = process.env.ADMIN_PASSWORD || 'BhaiAdmin@Bradford2026!';
+
+    if (identifier === configuredAdminEmail && password === configuredAdminPassword) {
       isAuthenticated = true;
       userRole = 'admin';
       userName = 'Master Admin';
@@ -149,16 +157,11 @@ export async function POST(request: Request) {
 
         if (foundUser.password_hash === inputHash) {
           isAuthenticated = true;
-          userRole = foundUser.role || 'client';
+          userRole = foundUser.role === 'admin' ? 'admin' : 'client';
           userName = foundUser.full_name || userName;
           userPhone = foundUser.phone || '';
           userCreatedAt = foundUser.created_at || userCreatedAt;
         }
-      }
-    } else {
-      // Offline fallback authentication if user input matches standard format
-      if (password.length >= 6) {
-        isAuthenticated = true;
       }
     }
 
@@ -218,6 +221,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // 4.5 ADMIN PORTAL ACCESS VERIFICATION
+    if (body.roleRequired === 'admin' && userRole !== 'admin') {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Access Denied: This administrative terminal is strictly reserved for authorized store administrators.',
+        },
+        { status: 403 }
+      );
+    }
+
     // 5. SUCCESSFUL LOGIN -> RESET SECURITY COUNTERS & CREATE SESSION
     MEMORY_SECURITY_STORE.delete(securityKey);
 
@@ -246,15 +260,17 @@ export async function POST(request: Request) {
       loginTime: new Date().toISOString(),
     };
 
+    const signedToken = signSession(sessionPayload);
+
     const response = NextResponse.json({
       success: true,
       message: 'Login successful! Welcome to Bhai Jeweller.',
       user: sessionPayload,
     });
 
-    // Set secure cookie
-    response.cookies.set('bhai_auth_session', JSON.stringify(sessionPayload), {
-      httpOnly: false,
+    // Set secure, tamper-proof httpOnly cookie
+    response.cookies.set(SESSION_COOKIE_NAME, signedToken, {
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60, // 7 days

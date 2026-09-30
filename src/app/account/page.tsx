@@ -726,7 +726,7 @@ export default function AccountPage() {
                               <p className="font-mono text-xs font-semibold text-[#1c1510]">{ord.id}</p>
                               <p className="text-[10px] text-[#8a796c]">{ord.date} • {ord.items}</p>
                             </div>
-                            <span className="font-serif text-sm font-semibold text-[#1c1510]">$ {Number(ord.amount || 0).toFixed(2)}</span>
+                            <span className="font-serif text-sm font-semibold text-[#1c1510]">£{Number(ord.amount || 0).toFixed(2)}</span>
                           </div>
                         ))}
                       </div>
@@ -883,7 +883,7 @@ export default function AccountPage() {
                                 <p className="text-[11px] text-[#8a796c] mt-0.5">Shipping Address: {ord.address || 'Showroom Collection, Bradford'}</p>
                               </div>
                               <div className="text-left sm:text-right">
-                                <span className="font-serif text-lg font-bold text-[#1c1510] block">$ {Number(ord.amount || 0).toFixed(2)}</span>
+                                <span className="font-serif text-lg font-bold text-[#1c1510] block">£{Number(ord.amount || 0).toFixed(2)}</span>
                                 <span className="text-[10px] text-[#8a796c]">{ord.paymentMethod || 'Credit Card Payment'}</span>
                               </div>
                             </div>

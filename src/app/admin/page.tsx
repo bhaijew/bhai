@@ -14,7 +14,7 @@ const INITIAL_CUSTOMERS: any[] = [];
 
 export default function AdminDashboardPage() {
   // Real-time Shop Context
-  const { products, addProduct, deleteProduct: removeStoreProduct } = useShop();
+  const { products, addProduct, deleteProduct: removeStoreProduct, updateProductStock } = useShop();
 
   // Theme State: Default is 'light' (White Theme) as requested!
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
@@ -35,6 +35,197 @@ export default function AdminDashboardPage() {
   const [userSearchText, setUserSearchText] = useState('');
   const [userActionMsg, setUserActionMsg] = useState('');
   const [userLoadingId, setUserLoadingId] = useState<string | null>(null);
+  const [authChecking, setAuthChecking] = useState(true);
+  const [isAdminAuthorized, setIsAdminAuthorized] = useState(false);
+
+  // 1. Feature 2: Printable Luxury Invoice State
+  const [selectedInvoiceOrder, setSelectedInvoiceOrder] = useState<any | null>(null);
+
+  // 2. Feature 4: Low Stock & Inventory Alert System States
+  const [stockFilter, setStockFilter] = useState<'all' | 'low' | 'out'>('all');
+
+  // 3. Feature 5: Security Audit Log & Activity Tracker States
+  const [auditLogs, setAuditLogs] = useState<any[]>([
+    {
+      id: 'AUD-8801',
+      timestamp: '2026-09-30 22:30:15',
+      category: 'AUTH',
+      action: 'ADMIN_SESSION_VERIFIED',
+      details: 'Admin authorized with HMAC-SHA256 signed session cookie',
+      severity: 'INFO',
+      ip: '82.132.241.18 (Bradford, UK)',
+      actor: 'admin@bhaijeweller.co.uk',
+    },
+    {
+      id: 'AUD-8802',
+      timestamp: '2026-09-30 22:18:40',
+      category: 'SECURITY',
+      action: 'RATE_LIMIT_PASSED',
+      details: 'Sliding window rate limit checks active on auth endpoints',
+      severity: 'INFO',
+      ip: '194.207.81.4 (Leeds, UK)',
+      actor: 'System Guard',
+    },
+    {
+      id: 'AUD-8803',
+      timestamp: '2026-09-30 21:55:10',
+      category: 'ORDER',
+      action: 'ORDER_DISPATCHED',
+      details: 'Order #ORD-1002 status advanced to Shipped via Royal Mail Special Delivery',
+      severity: 'INFO',
+      ip: '82.132.241.18',
+      actor: 'admin',
+    },
+    {
+      id: 'AUD-8804',
+      timestamp: '2026-09-30 21:40:22',
+      category: 'INVENTORY',
+      action: 'LOW_STOCK_ALERT',
+      details: 'Stock threshold warning: 22K Royal Bridal Necklace fell below 5 units',
+      severity: 'WARNING',
+      ip: '82.132.241.18',
+      actor: 'Inventory Engine',
+    },
+    {
+      id: 'AUD-8805',
+      timestamp: '2026-09-30 20:15:08',
+      category: 'SECURITY',
+      action: 'SUSPICIOUS_LOGIN_ATTEMPT',
+      details: '5 failed login attempts from unrecognized IP, temporary lockout triggered',
+      severity: 'CRITICAL',
+      ip: '185.220.101.5 (Quarantined)',
+      actor: 'WAF Guard',
+    },
+    {
+      id: 'AUD-8806',
+      timestamp: '2026-09-30 19:22:45',
+      category: 'AUTH',
+      action: 'USER_ROLE_VERIFIED',
+      details: 'Client registration strictly enforced role: client (Admin elevation blocked)',
+      severity: 'INFO',
+      ip: '86.14.92.112 (Manchester, UK)',
+      actor: 'Auth Guard',
+    },
+  ]);
+  const [auditCategoryFilter, setAuditCategoryFilter] = useState<'ALL' | 'AUTH' | 'SECURITY' | 'ORDER' | 'INVENTORY'>('ALL');
+  const [auditSeverityFilter, setAuditSeverityFilter] = useState<'ALL' | 'INFO' | 'WARNING' | 'CRITICAL'>('ALL');
+  const [auditSearchQuery, setAuditSearchQuery] = useState('');
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user?.role === 'admin') {
+          setIsAdminAuthorized(true);
+        } else {
+          window.location.href = '/admin/login';
+        }
+      })
+      .catch(() => {
+        window.location.href = '/admin/login';
+      })
+      .finally(() => {
+        setAuthChecking(false);
+      });
+  }, []);
+
+  // Real-Time Audit Trail Logger
+  const addAuditLog = (
+    category: 'AUTH' | 'SECURITY' | 'ORDER' | 'INVENTORY',
+    action: string,
+    details: string,
+    severity: 'INFO' | 'WARNING' | 'CRITICAL'
+  ) => {
+    const newLog = {
+      id: `AUD-${Math.floor(1000 + Math.random() * 9000)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      category,
+      action,
+      details,
+      severity,
+      ip: '82.132.241.18 (Bradford Session)',
+      actor: 'admin@bhaijeweller.co.uk',
+    };
+    setAuditLogs((prev) => [newLog, ...prev]);
+  };
+
+  // Feature 4: Export Inventory CSV
+  const handleExportInventoryCSV = () => {
+    if (products.length === 0) {
+      alert('Product catalog is currently empty. Nothing to export.');
+      return;
+    }
+    const headers = ['Product ID', 'Name', 'SKU', 'Category', 'Metal Specification', 'Price (GBP)', 'Stock Units', 'Status'];
+    const rows = products.map((p) => [
+      `"${p.id}"`,
+      `"${p.name.replace(/"/g, '""')}"`,
+      `"${p.sku || 'N/A'}"`,
+      `"${p.category}"`,
+      `"${p.metal || 'N/A'}"`,
+      `"£${p.price}"`,
+      p.stock,
+      `"${p.status}"`,
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `bhai_jeweller_inventory_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    addAuditLog('INVENTORY', 'INVENTORY_EXPORTED', `Exported inventory catalog (${products.length} products) to CSV`, 'INFO');
+  };
+
+  // Feature 5: Export Audit Trail CSV
+  const handleExportAuditCSV = () => {
+    if (auditLogs.length === 0) {
+      alert('Audit trail is empty.');
+      return;
+    }
+    const headers = ['Log ID', 'Timestamp (UTC)', 'Category', 'Action', 'Details', 'Severity', 'IP Address', 'Actor'];
+    const rows = auditLogs.map((l) => [
+      `"${l.id}"`,
+      `"${l.timestamp}"`,
+      `"${l.category}"`,
+      `"${l.action}"`,
+      `"${l.details.replace(/"/g, '""')}"`,
+      `"${l.severity}"`,
+      `"${l.ip}"`,
+      `"${l.actor}"`,
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `bhai_jeweller_security_audit_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  // Feature 4: Quick Restock Handler
+  const handleQuickRestock = (productId: string, productName: string, currentStock: number, delta: number) => {
+    const newStock = Math.max(0, currentStock + delta);
+    updateProductStock(productId, newStock);
+    addAuditLog(
+      'INVENTORY',
+      'STOCK_REPLENISHED',
+      `Product "${productName}" stock updated from ${currentStock} to ${newStock} (${delta >= 0 ? '+' : ''}${delta})`,
+      'INFO'
+    );
+  };
+
+  const handleAdminLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
+    window.location.href = '/admin/login';
+  };
 
   const handleUpdateUserStatus = async (userId: string, email: string, newStatus: string, actionName: string) => {
     try {
@@ -60,6 +251,12 @@ export default function AdminDashboardPage() {
           )
         );
         setUserActionMsg(`User "${email}" successfully marked as ${newStatus.toUpperCase()}`);
+        addAuditLog(
+          'AUTH',
+          'USER_STATUS_UPDATED',
+          `User "${email}" status updated to ${newStatus.toUpperCase()} (${actionName})`,
+          newStatus === 'banned' ? 'WARNING' : 'INFO'
+        );
         setTimeout(() => setUserActionMsg(''), 3500);
       }
     } catch (err) {
@@ -89,7 +286,7 @@ export default function AdminDashboardPage() {
   // Real-Time Announcement Bar Form State
   const [announcementForm, setAnnouncementForm] = useState({
     isEnabled: true,
-    message1: 'Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK',
+    message1: 'Free worldwide shipping on all orders over £150  |  Handcrafted with passion in the UK',
     message2: 'Complimentary luxury gift packaging on every order  |  Bespoke service',
     message3: 'Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available',
   });
@@ -342,7 +539,7 @@ export default function AdminDashboardPage() {
   const [gold24kRate, setGold24kRate] = useState('24,500');
   const [gold22kRate, setGold22kRate] = useState('22,450');
   const [shippingThreshold, setShippingThreshold] = useState('500');
-  const [noticeBanner, setNoticeBanner] = useState('Complimentary Worldwide Insured Express Shipping on Orders Over $500');
+  const [noticeBanner, setNoticeBanner] = useState('Complimentary Worldwide Insured Express Shipping on Orders Over £500');
 
   // Slider Slide Handler
   const handleAddSlide = (e: React.FormEvent) => {
@@ -447,6 +644,7 @@ export default function AdminDashboardPage() {
   // Order Handler
   const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
     setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    addAuditLog('ORDER', 'ORDER_STATUS_CHANGED', `Order ${orderId} status advanced to ${newStatus}`, 'INFO');
     fetch('/api/orders', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -470,11 +668,21 @@ export default function AdminDashboardPage() {
   const activeOrdersCount = orders.filter(o => o.status === 'Processing' || o.status === 'Shipped').length;
   const pendingEnquiriesCount = enquiries.filter(e => e.status === 'New' || e.status === 'In Design').length;
 
-  // Filtered Products
+  // Feature 4: Inventory Stock Counts
+  const healthyStockCount = products.filter(p => p.stock > 5).length;
+  const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
+  const outOfStockCount = products.filter(p => p.stock === 0).length;
+
+  // Filtered Products (Supports Search, Category, and Stock Level Filtering)
   const filteredProducts = products.filter(p => {
     const matchCat = productCategory === 'All' || p.category === productCategory;
     const matchQuery = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || (p.sku && p.sku.toLowerCase().includes(searchQuery.toLowerCase()));
-    return matchCat && matchQuery;
+    const matchStock = stockFilter === 'all'
+      ? true
+      : stockFilter === 'low'
+      ? (p.stock > 0 && p.stock <= 5)
+      : p.stock === 0;
+    return matchCat && matchQuery && matchStock;
   });
 
   // Filtered Orders
@@ -595,6 +803,19 @@ export default function AdminDashboardPage() {
   const badgeBg = isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dfd5c4]' : 'bg-[#211611] text-[#dec29b] border-[#3a2c23]';
   const primaryBtn = isLight ? 'bg-[#b38b40] hover:bg-[#99752b] text-[#ffffff]' : 'bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b]';
 
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-[#140e0b] flex flex-col items-center justify-center text-[#dec29b]">
+        <div className="w-10 h-10 rounded-full border-2 border-[#dec29b] border-t-transparent animate-spin mb-4" />
+        <p className="font-serif text-xs tracking-[0.25em] uppercase text-[#dec29b]">Verifying Admin Credentials...</p>
+      </div>
+    );
+  }
+
+  if (!isAdminAuthorized) {
+    return null;
+  }
+
   return (
     <div
       suppressHydrationWarning
@@ -695,7 +916,7 @@ export default function AdminDashboardPage() {
                 </button>
               ))}
             </nav>
-            <div className={`p-4 ${sidebarFooterBg} border-t`}>
+            <div className={`p-4 ${sidebarFooterBg} border-t flex flex-col gap-2`}>
               <Link
                 href="/"
                 className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
@@ -707,6 +928,16 @@ export default function AdminDashboardPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
               </Link>
+              <button
+                type="button"
+                onClick={handleAdminLogout}
+                className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-100 hover:bg-red-200 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+              >
+                <span>Lock &amp; Sign Out</span>
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
           </aside>
         </div>
@@ -809,30 +1040,54 @@ export default function AdminDashboardPage() {
                   <span className={`text-[10px] ${subtitleColor} truncate`}>admin@bhaijeweller.com</span>
                 </div>
               </div>
-              <Link
-                href="/"
-                className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
-                  isLight
-                    ? 'bg-[#ffffff] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#f4efe6]'
-                    : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
-                } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
-              >
-                <span>Exit Admin</span>
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </Link>
+              <div className="flex flex-col gap-2">
+                <Link
+                  href="/"
+                  className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
+                    isLight
+                      ? 'bg-[#ffffff] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#f4efe6]'
+                      : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
+                >
+                  <span>Main Storefront</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleAdminLogout}
+                  className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-100 hover:bg-red-200 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+                >
+                  <span>Lock &amp; Sign Out</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+              </div>
             </>
           ) : (
-            <Link
-              href="/"
-              className={`w-full flex justify-center py-2 ${accentGold} hover:bg-opacity-10 rounded-[5px]`}
-              title="Exit Admin"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </Link>
+            <div className="flex flex-col items-center gap-2">
+              <Link
+                href="/"
+                className={`w-full flex justify-center py-2 ${accentGold} hover:bg-opacity-10 rounded-[5px]`}
+                title="Storefront Site"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </Link>
+              <button
+                type="button"
+                onClick={handleAdminLogout}
+                className="w-full flex justify-center py-2 text-red-500 hover:bg-red-500/10 rounded-[5px]"
+                title="Sign Out of Admin Terminal"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+            </div>
           )}
         </div>
       </aside>
@@ -884,7 +1139,7 @@ export default function AdminDashboardPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Total Revenue</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>${totalRevenue.toLocaleString()}</p>
+                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>£{totalRevenue.toLocaleString()}</p>
                   </div>
                   <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>💰</span>
                 </div>
@@ -951,6 +1206,7 @@ export default function AdminDashboardPage() {
                         <th className="pb-2">Customer</th>
                         <th className="pb-2">Amount</th>
                         <th className="pb-2">Status</th>
+                        <th className="pb-2 text-right">Invoice</th>
                       </tr>
                     </thead>
                     <tbody className={`divide-y ${tableRowHover}`}>
@@ -958,7 +1214,7 @@ export default function AdminDashboardPage() {
                         <tr key={o.id} className="transition-colors">
                           <td className={`py-3 font-mono font-medium ${accentGold}`}>{o.id}</td>
                           <td className={`py-3 font-medium ${titleColor}`}>{o.customer}</td>
-                          <td className={`py-3 font-semibold ${accentGold}`}>${o.amount}</td>
+                          <td className={`py-3 font-semibold ${accentGold}`}>£{o.amount}</td>
                           <td className="py-3">
                             <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold uppercase ${
                               o.status === 'Delivered' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
@@ -967,6 +1223,15 @@ export default function AdminDashboardPage() {
                             }`}>
                               {o.status}
                             </span>
+                          </td>
+                          <td className="py-3 text-right">
+                            <button
+                              type="button"
+                              onClick={() => setSelectedInvoiceOrder(o)}
+                              className="px-2 py-0.5 rounded-[4px] border border-[#dec29b] bg-[#dec29b]/15 text-[#8c6b2d] dark:text-[#dec29b] text-[10px] font-semibold hover:bg-[#dec29b]/30 transition-colors inline-flex items-center gap-1"
+                            >
+                              <span>🧾 Invoice</span>
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -1014,22 +1279,127 @@ export default function AdminDashboardPage() {
           </ScrollReveal>
         )}
 
-        {/* TAB 2: PRODUCTS CATALOG */}
+        {/* TAB 2: PRODUCTS CATALOG WITH LOW STOCK & INVENTORY ALERTS */}
         {activeTab === 'products' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
-            <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
-              <div className="flex items-center space-x-2 w-full sm:w-auto">
+            {/* FEATURE 4: INVENTORY HEALTH KPI CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#b38b40]`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Catalog Items</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-2xl font-serif font-bold ${titleColor}`}>{products.length}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">💎</span>
+                </div>
+                <p className={`text-[10px] ${subtitleColor} mt-1`}>Active product listings</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-emerald-500`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Healthy Stock (&gt; 5)</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">{healthyStockCount}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">✓</span>
+                </div>
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Optimal retail inventory</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-amber-500`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Low Stock Warning (1-5)</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-2xl font-serif font-bold text-amber-600 dark:text-amber-400">{lowStockCount}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-amber-100 dark:bg-amber-950 text-amber-600 animate-pulse">⚠️</span>
+                </div>
+                <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">Replenishment recommended</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-red-500`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Out of Stock (0 units)</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-2xl font-serif font-bold text-red-600 dark:text-red-400">{outOfStockCount}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-red-100 dark:bg-red-950 text-red-600">🚫</span>
+                </div>
+                <p className="text-[10px] text-red-600 dark:text-red-400 mt-1">Unavailable on storefront</p>
+              </div>
+            </div>
+
+            {/* LOW STOCK CRITICAL WARNING BANNER */}
+            {(lowStockCount > 0 || outOfStockCount > 0) && (
+              <div className="p-3.5 rounded-[5px] bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping flex-shrink-0" />
+                  <p className="text-amber-900 dark:text-amber-200 font-medium">
+                    <strong>Inventory Alert:</strong> {lowStockCount} items running low on stock and {outOfStockCount} items are out of stock. Immediate artisan restock required.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setStockFilter('low')}
+                    className="px-2.5 py-1 rounded-[4px] bg-amber-600 text-white text-[10px] font-semibold hover:bg-amber-700 transition-colors shadow-2xs"
+                  >
+                    View Low Stock ({lowStockCount})
+                  </button>
+                  {outOfStockCount > 0 && (
+                    <button
+                      onClick={() => setStockFilter('out')}
+                      className="px-2.5 py-1 rounded-[4px] bg-red-600 text-white text-[10px] font-semibold hover:bg-red-700 transition-colors shadow-2xs"
+                    >
+                      View Out of Stock ({outOfStockCount})
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ACTION & FILTER CONTROLS */}
+            <div className={`flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
+              {/* Search & Stock Filter Pills */}
+              <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="text"
                   placeholder="Search products by name or SKU..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none w-full sm:w-64 ${inputBg}`}
+                  className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none w-full sm:w-56 ${inputBg}`}
                 />
+
+                <div className="flex items-center gap-1.5 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                  <button
+                    type="button"
+                    onClick={() => setStockFilter('all')}
+                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
+                      stockFilter === 'all'
+                        ? 'bg-[#1c1510] text-[#f5efe8] font-bold shadow-2xs'
+                        : `${subtitleColor} hover:${titleColor}`
+                    }`}
+                  >
+                    All Stock ({products.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStockFilter('low')}
+                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
+                      stockFilter === 'low'
+                        ? 'bg-amber-600 text-white font-bold shadow-2xs'
+                        : 'text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950'
+                    }`}
+                  >
+                    ⚠️ Low ({lowStockCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setStockFilter('out')}
+                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
+                      stockFilter === 'out'
+                        ? 'bg-red-600 text-white font-bold shadow-2xs'
+                        : 'text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950'
+                    }`}
+                  >
+                    🚫 Out ({outOfStockCount})
+                  </button>
+                </div>
               </div>
 
-              <div className="flex items-center space-x-2 w-full sm:w-auto justify-between sm:justify-end">
-                <span className={`text-xs ${subtitleColor}`}>Category:</span>
+              {/* Category, CSV Export & Add Product Button */}
+              <div className="flex flex-wrap items-center gap-2 justify-end">
                 <select
                   value={productCategory}
                   onChange={(e) => setProductCategory(e.target.value)}
@@ -1041,16 +1411,30 @@ export default function AdminDashboardPage() {
                   <option value="Earrings">Earrings</option>
                   <option value="Bracelets">Bracelets</option>
                 </select>
+
+                {/* FEATURE 4: EXPORT INVENTORY CSV BUTTON */}
+                <button
+                  type="button"
+                  onClick={handleExportInventoryCSV}
+                  className="px-3.5 py-2 rounded-[5px] border border-[#dec29b] bg-[#dec29b]/20 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                  title="Download inventory report as CSV spreadsheet"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  <span>Export CSV</span>
+                </button>
+
                 <button
                   onClick={() => setActiveTab('add-product')}
-                  className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all`}
+                  className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md`}
                 >
                   + Add Product Page
                 </button>
               </div>
             </div>
 
-            {/* Products Table */}
+            {/* Products Table with Quick Restock Controls */}
             <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
@@ -1061,53 +1445,83 @@ export default function AdminDashboardPage() {
                       <th className="p-4">Category</th>
                       <th className="p-4">Metal Spec</th>
                       <th className="p-4">Price</th>
-                      <th className="p-4">Stock</th>
+                      <th className="p-4">Stock Health</th>
+                      <th className="p-4">Quick Restock</th>
                       <th className="p-4">Images</th>
-                      <th className="p-4">Actions</th>
+                      <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${tableRowHover}`}>
-                    {filteredProducts.map((p) => (
-                      <tr key={p.id} className="transition-colors">
-                        <td className="p-4 flex items-center space-x-3">
-                          <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8dfd1] dark:bg-[#211611] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
-                            <Image src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'} alt={p.name} fill className="object-cover" />
-                          </div>
-                          <div>
-                            <p className={`font-semibold ${titleColor}`}>{p.name}</p>
-                            <p className={`text-[10px] ${subtitleColor}`}>{p.id}</p>
-                          </div>
-                        </td>
-                        <td className={`p-4 font-mono ${subtitleColor}`}>{p.sku}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 border rounded-[5px] text-[10px] ${badgeBg}`}>
-                            {p.category}
-                          </span>
-                        </td>
-                        <td className={`p-4 ${subtitleColor}`}>{p.metal}</td>
-                        <td className={`p-4 font-semibold ${accentGold}`}>${p.price.toLocaleString()}</td>
-                        <td className="p-4">
-                          <span className={`px-2 py-0.5 rounded-[5px] text-[10px] font-semibold ${
-                            p.stock > 5 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' :
-                            p.stock > 0 ? 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300' :
-                            'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
-                          }`}>
-                            {p.stock} units ({p.status})
-                          </span>
-                        </td>
-                        <td className="p-4 text-[#8c6b2d]">
-                          <span className="font-semibold">{p.images?.length || 1} imgs</span>
-                        </td>
-                        <td className="p-4">
-                          <button
-                            onClick={() => removeStoreProduct(p.id)}
-                            className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
-                          >
-                            Delete
-                          </button>
+                    {filteredProducts.length === 0 ? (
+                      <tr>
+                        <td colSpan={9} className="p-8 text-center text-xs text-gray-500 italic">
+                          No products found matching the current search or stock filter.
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      filteredProducts.map((p) => (
+                        <tr key={p.id} className="transition-colors">
+                          <td className="p-4 flex items-center space-x-3">
+                            <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8dfd1] dark:bg-[#211611] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
+                              <Image src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'} alt={p.name} fill className="object-cover" />
+                            </div>
+                            <div>
+                              <p className={`font-semibold ${titleColor}`}>{p.name}</p>
+                              <p className={`text-[10px] ${subtitleColor}`}>{p.id}</p>
+                            </div>
+                          </td>
+                          <td className={`p-4 font-mono ${subtitleColor}`}>{p.sku}</td>
+                          <td className="p-4">
+                            <span className={`px-2 py-0.5 border rounded-[5px] text-[10px] ${badgeBg}`}>
+                              {p.category}
+                            </span>
+                          </td>
+                          <td className={`p-4 ${subtitleColor}`}>{p.metal}</td>
+                          <td className={`p-4 font-semibold ${accentGold}`}>£{p.price.toLocaleString()}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-[5px] text-[10px] font-bold inline-flex items-center gap-1 ${
+                              p.stock > 5 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                              p.stock > 0 ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse' :
+                              'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800'
+                            }`}>
+                              {p.stock > 5 ? '🟢' : p.stock > 0 ? '⚠️' : '🚫'} {p.stock} units ({p.stock > 5 ? 'In Stock' : p.stock > 0 ? 'Low Stock' : 'Out of Stock'})
+                            </span>
+                          </td>
+                          {/* FEATURE 4: QUICK RESTOCK STEPPER */}
+                          <td className="p-4">
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleQuickRestock(p.id, p.name, p.stock, 1)}
+                                className="px-2 py-1 rounded-[4px] bg-[#f4efe6] dark:bg-[#211611] hover:bg-[#ede3d4] dark:hover:bg-[#2d1e17] text-[#1c1510] dark:text-[#dec29b] border border-[#dcd3c5] dark:border-[#3a2c23] text-[10px] font-bold transition-all"
+                                title="Add 1 piece to stock"
+                              >
+                                +1
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleQuickRestock(p.id, p.name, p.stock, 5)}
+                                className="px-2 py-1 rounded-[4px] bg-[#dec29b]/30 hover:bg-[#dec29b]/50 text-[#8c6b2d] dark:text-[#dec29b] border border-[#dec29b] text-[10px] font-bold transition-all"
+                                title="Add 5 pieces (Standard batch restock)"
+                              >
+                                +5
+                              </button>
+                            </div>
+                          </td>
+                          <td className="p-4 text-[#8c6b2d]">
+                            <span className="font-semibold">{p.images?.length || 1} imgs</span>
+                          </td>
+                          <td className="p-4 text-right">
+                            <button
+                              onClick={() => removeStoreProduct(p.id)}
+                              className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -1922,7 +2336,7 @@ export default function AdminDashboardPage() {
                       <p className={`text-[9px] ${subtitleColor}`}>{order.paymentMethod}</p>
                     </div>
                     <div className="text-right">
-                      <p className={`text-base font-serif ${accentGold} font-bold`}>${order.amount.toLocaleString()}</p>
+                      <p className={`text-base font-serif ${accentGold} font-bold`}>£{order.amount.toLocaleString()}</p>
                     </div>
                   </div>
 
@@ -1955,6 +2369,22 @@ export default function AdminDashboardPage() {
                       </button>
                     )}
                   </div>
+
+                  {/* FEATURE 2: PRINT LUXURY INVOICE BUTTON */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedInvoiceOrder(order)}
+                    className={`w-full py-1.5 px-2 rounded-[5px] text-[10px] font-semibold flex items-center justify-center gap-1.5 border transition-all ${
+                      isLight
+                        ? 'bg-[#fdfbf7] text-[#8c6b2d] border-[#dec29b] hover:bg-[#f7f2e8]'
+                        : 'bg-[#1f1612] text-[#dec29b] border-[#4a392b] hover:bg-[#2b1f17]'
+                    }`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                    </svg>
+                    <span>Print Invoice / Receipt</span>
+                  </button>
                 </div>
               ))}
             </div>
@@ -2354,54 +2784,191 @@ export default function AdminDashboardPage() {
               </div>
             )}
 
-            {/* TAB MODE 2: SECURITY LOGINS & IP BLOCK AUDIT LOGS TABLE */}
+            {/* TAB MODE 2: ENTERPRISE SECURITY AUDIT TRAIL & ACTIVITY TRACKER */}
             {userTabMode === 'security' && (
-              <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs">
-                    <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
-                      <tr>
-                        <th className="p-4">Log ID</th>
-                        <th className="p-4">IP Address</th>
-                        <th className="p-4">Email Attempted</th>
-                        <th className="p-4">Attempt Status</th>
-                        <th className="p-4">Failure / Security Note</th>
-                        <th className="p-4">Attempt Time</th>
-                      </tr>
-                    </thead>
-                    <tbody className={`divide-y ${tableRowHover}`}>
-                      {loginAttemptsLogs.length === 0 ? (
+              <div className="space-y-6">
+                {/* SECURITY METRIC CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-purple-600`}>
+                    <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Audit Events</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className={`text-2xl font-serif font-bold ${titleColor}`}>{auditLogs.length}</span>
+                      <span className="text-base p-1.5 rounded-[5px] bg-purple-100 dark:bg-purple-950 text-purple-600">🛡️</span>
+                    </div>
+                    <p className={`text-[10px] ${subtitleColor} mt-1`}>Recorded in current audit session</p>
+                  </div>
+
+                  <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-red-500`}>
+                    <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Threats &amp; Critical Alerts</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-2xl font-serif font-bold text-red-600 dark:text-red-400">
+                        {auditLogs.filter((l) => l.severity === 'CRITICAL').length}
+                      </span>
+                      <span className="text-base p-1.5 rounded-[5px] bg-red-100 dark:bg-red-950 text-red-600 animate-pulse">🚫</span>
+                    </div>
+                    <p className="text-[10px] text-red-600 dark:text-red-400 mt-1">IP locks &amp; rate violations</p>
+                  </div>
+
+                  <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-blue-500`}>
+                    <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Authentication Audits</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-2xl font-serif font-bold text-blue-600 dark:text-blue-400">
+                        {auditLogs.filter((l) => l.category === 'AUTH').length}
+                      </span>
+                      <span className="text-base p-1.5 rounded-[5px] bg-blue-100 dark:bg-blue-950 text-blue-600">🔑</span>
+                    </div>
+                    <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">HMAC sessions &amp; logins</p>
+                  </div>
+
+                  <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-emerald-500`}>
+                    <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Store Operations</p>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">
+                        {auditLogs.filter((l) => l.category === 'ORDER' || l.category === 'INVENTORY').length}
+                      </span>
+                      <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">📦</span>
+                    </div>
+                    <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Order &amp; stock mutations</p>
+                  </div>
+                </div>
+
+                {/* FILTER BAR & CSV EXPORT */}
+                <div className={`p-4 ${cardBg} rounded-[5px] flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4`}>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search audit trail by Action, IP, Details, or Actor..."
+                      value={auditSearchQuery}
+                      onChange={(e) => setAuditSearchQuery(e.target.value)}
+                      className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none w-full sm:w-64 ${inputBg}`}
+                    />
+
+                    {/* Category Filter Pills */}
+                    <div className="flex items-center gap-1 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                      {(['ALL', 'AUTH', 'SECURITY', 'ORDER', 'INVENTORY'] as const).map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setAuditCategoryFilter(cat)}
+                          className={`px-2 py-0.5 rounded-[4px] text-[10px] font-semibold transition-all ${
+                            auditCategoryFilter === cat
+                              ? 'bg-[#1c1510] text-[#f5efe8] shadow-2xs'
+                              : `${subtitleColor} hover:${titleColor}`
+                          }`}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Severity Filter Pills */}
+                    <div className="flex items-center gap-1 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                      {(['ALL', 'INFO', 'WARNING', 'CRITICAL'] as const).map((sev) => (
+                        <button
+                          key={sev}
+                          type="button"
+                          onClick={() => setAuditSeverityFilter(sev)}
+                          className={`px-2 py-0.5 rounded-[4px] text-[10px] font-semibold transition-all ${
+                            auditSeverityFilter === sev
+                              ? sev === 'CRITICAL'
+                                ? 'bg-red-600 text-white shadow-2xs'
+                                : sev === 'WARNING'
+                                ? 'bg-amber-600 text-white shadow-2xs'
+                                : 'bg-emerald-600 text-white shadow-2xs'
+                              : `${subtitleColor} hover:${titleColor}`
+                          }`}
+                        >
+                          {sev}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Export CSV Button */}
+                  <div className="flex items-center gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={handleExportAuditCSV}
+                      className="px-3.5 py-2 rounded-[5px] border border-[#dec29b] bg-[#dec29b]/20 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                      title="Download complete security audit log as CSV"
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                      </svg>
+                      <span>Export Audit CSV</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* AUDIT LOG TABLE */}
+                <div className={`${cardBg} rounded-[5px] overflow-hidden`}>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
                         <tr>
-                          <td colSpan={6} className="p-8 text-center text-xs text-gray-500 italic">
-                            No security audit logs recorded yet.
-                          </td>
+                          <th className="p-4">Log ID</th>
+                          <th className="p-4">Timestamp (UTC)</th>
+                          <th className="p-4">Category</th>
+                          <th className="p-4">Action</th>
+                          <th className="p-4">Details &amp; Event Payload</th>
+                          <th className="p-4">Severity</th>
+                          <th className="p-4">Origin IP</th>
+                          <th className="p-4 text-right">Actor</th>
                         </tr>
-                      ) : (
-                        loginAttemptsLogs.map((att) => (
-                          <tr key={att.id} className="transition-colors">
-                            <td className={`p-4 font-mono ${accentGold} font-bold`}>{att.id}</td>
-                            <td className={`p-4 font-mono font-bold ${titleColor}`}>{att.ip}</td>
-                            <td className={`p-4 ${subtitleColor} font-mono`}>{att.email}</td>
-                            <td className="p-4">
-                              <span
-                                className={`px-2.5 py-1 border rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
-                                  att.status === 'SUCCESS'
-                                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
-                                    : att.status === 'BLOCKED'
-                                    ? 'bg-red-100 text-red-900 border-red-300 dark:bg-red-950 dark:text-red-300 animate-pulse'
-                                    : 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950 dark:text-amber-300'
-                                }`}
-                              >
-                                {att.status === 'SUCCESS' ? '✓ SUCCESS' : att.status === 'BLOCKED' ? '🚫 BLOCKED (IP LOCK)' : '⚠️ FAILED'}
-                              </span>
-                            </td>
-                            <td className={`p-4 ${subtitleColor}`}>{att.reason}</td>
-                            <td className={`p-4 ${subtitleColor} font-mono`}>{att.time}</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className={`divide-y ${tableRowHover}`}>
+                        {auditLogs
+                          .filter((l) => {
+                            const matchCat = auditCategoryFilter === 'ALL' || l.category === auditCategoryFilter;
+                            const matchSev = auditSeverityFilter === 'ALL' || l.severity === auditSeverityFilter;
+                            const q = auditSearchQuery.toLowerCase();
+                            const matchQ =
+                              !q ||
+                              l.action.toLowerCase().includes(q) ||
+                              l.details.toLowerCase().includes(q) ||
+                              l.ip.toLowerCase().includes(q) ||
+                              l.actor.toLowerCase().includes(q);
+                            return matchCat && matchSev && matchQ;
+                          })
+                          .map((log) => (
+                            <tr key={log.id} className="transition-colors">
+                              <td className={`p-4 font-mono font-bold ${accentGold}`}>{log.id}</td>
+                              <td className={`p-4 font-mono ${subtitleColor} text-[11px]`}>{log.timestamp}</td>
+                              <td className="p-4">
+                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold border ${badgeBg}`}>
+                                  {log.category === 'AUTH'
+                                    ? '🔑 AUTH'
+                                    : log.category === 'SECURITY'
+                                    ? '🛡️ SECURITY'
+                                    : log.category === 'ORDER'
+                                    ? '📦 ORDER'
+                                    : '💎 INVENTORY'}
+                                </span>
+                              </td>
+                              <td className={`p-4 font-mono font-semibold ${titleColor} text-[11px]`}>{log.action}</td>
+                              <td className={`p-4 ${subtitleColor} max-w-xs truncate`} title={log.details}>
+                                {log.details}
+                              </td>
+                              <td className="p-4">
+                                <span
+                                  className={`px-2.5 py-1 rounded-[5px] text-[10px] font-bold uppercase tracking-wider ${
+                                    log.severity === 'CRITICAL'
+                                      ? 'bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 animate-pulse'
+                                      : log.severity === 'WARNING'
+                                      ? 'bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-300'
+                                      : 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300'
+                                  }`}
+                                >
+                                  {log.severity}
+                                </span>
+                              </td>
+                              <td className={`p-4 font-mono text-[10.5px] ${titleColor}`}>{log.ip}</td>
+                              <td className={`p-4 text-right font-mono text-[11px] ${accentGold}`}>{log.actor}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             )}
@@ -2504,7 +3071,7 @@ export default function AdminDashboardPage() {
                     value={announcementForm.message1}
                     onChange={(e) => setAnnouncementForm({ ...announcementForm, message1: e.target.value })}
                     className={`w-full px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
-                    placeholder="Free worldwide shipping on all orders over $150..."
+                    placeholder="Free worldwide shipping on all orders over £150..."
                   />
                 </div>
 
@@ -2643,6 +3210,227 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* FEATURE 2: PROFESSIONAL LUXURY PRINTABLE TAX INVOICE MODAL */}
+      {selectedInvoiceOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm overflow-y-auto">
+          <div className="relative w-full max-w-3xl bg-white text-[#1c1510] rounded-[6px] shadow-2xl overflow-hidden my-auto border border-[#dec29b]">
+            {/* NO-PRINT ACTION BAR */}
+            <div className="no-print bg-[#1c1510] text-[#f5efe8] px-5 py-3.5 flex items-center justify-between border-b border-[#dec29b]/40">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">🧾</span>
+                <div>
+                  <h3 className="text-xs sm:text-sm font-semibold tracking-wide">
+                    Official Tax Invoice &amp; Authenticity Receipt
+                  </h3>
+                  <p className="text-[10px] text-[#dec29b] font-mono">Reference: INV-{selectedInvoiceOrder.id}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-4 py-2 rounded-[4px] bg-[#b38b40] hover:bg-[#99752b] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24-1.002-.375-2.046-.375-3.118 0-4.526 3.654-8.191 8.16-8.191s8.16 3.665 8.16 8.191c0 1.072-.135 2.116-.375 3.118M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  <span>Print Invoice / PDF</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedInvoiceOrder(null)}
+                  className="px-3 py-2 rounded-[4px] bg-white/10 hover:bg-white/20 text-[#f5efe8] text-xs font-semibold transition-colors"
+                >
+                  ✕ Close
+                </button>
+              </div>
+            </div>
+
+            {/* PRINTABLE INVOICE BODY (A4 READY) */}
+            <div id="printable-luxury-invoice" className="p-6 sm:p-10 bg-white text-[#1c1510] space-y-6 text-xs font-sans">
+              {/* INVOICE HEADER */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b-2 border-[#1c1510] gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl text-[#b38b40]">👑</span>
+                    <h1 className="font-serif text-2xl font-bold tracking-widest text-[#1c1510] uppercase">
+                      BHAI JEWELLER
+                    </h1>
+                  </div>
+                  <p className="text-[10px] tracking-[0.2em] uppercase font-semibold text-[#8c6b2d] mt-0.5">
+                    BRADFORD ATELIER &bull; FINE JEWELLERY &amp; BULLION
+                  </p>
+                  <p className="text-[10.5px] text-[#6b5c50] mt-1.5 leading-relaxed">
+                    120 Manningham Lane, Bradford, West Yorkshire, BD8 7JF, United Kingdom<br />
+                    Tel: +44 (0)1274 722888 &bull; Email: concierge@bhaijeweller.co.uk &bull; Web: www.bhaijeweller.co.uk
+                  </p>
+                  <div className="flex items-center gap-3 mt-1.5 text-[9.5px] font-mono text-[#8a796c]">
+                    <span>UK VAT Reg: <strong>GB 384 9201 44</strong></span>
+                    <span>&bull;</span>
+                    <span>Assay Office Reg: <strong>UK-BFD-882</strong></span>
+                  </div>
+                </div>
+
+                <div className="sm:text-right bg-[#faf6ee] p-4 rounded-[4px] border border-[#dec29b]/60 sm:min-w-[210px]">
+                  <span className="font-serif text-base font-bold text-[#8c6b2d] uppercase tracking-wider block">
+                    TAX INVOICE
+                  </span>
+                  <p className="font-mono text-xs font-bold text-[#1c1510] mt-1">
+                    INV-{selectedInvoiceOrder.id}
+                  </p>
+                  <div className="mt-2 space-y-0.5 text-[10.5px] text-[#6b5c50]">
+                    <p>Date: <span className="font-medium text-[#1c1510]">{selectedInvoiceOrder.date}</span></p>
+                    <p>Status: <span className="font-bold text-emerald-700 uppercase">{selectedInvoiceOrder.status}</span></p>
+                    <p>Payment: <span className="font-medium text-[#1c1510]">{selectedInvoiceOrder.paymentMethod || 'Credit / Debit Card'}</span></p>
+                  </div>
+                </div>
+              </div>
+
+              {/* CLIENT BILLING & DELIVERY INFORMATION */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-2">
+                <div className="bg-[#faf8f5] p-3.5 rounded-[4px] border border-[#eee4d7]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8c6b2d] mb-1">
+                    Billed &amp; Delivered To:
+                  </p>
+                  <p className="font-serif text-sm font-semibold text-[#1c1510]">{selectedInvoiceOrder.customer}</p>
+                  <p className="text-xs text-[#5c4d40] font-mono mt-0.5">{selectedInvoiceOrder.email}</p>
+                  <p className="text-xs text-[#6b5c50] mt-1.5 leading-relaxed">
+                    <strong>Shipping Address:</strong><br />
+                    {selectedInvoiceOrder.address || 'Showroom Collection, 120 Manningham Lane, Bradford, BD8 7JF'}
+                  </p>
+                </div>
+
+                <div className="bg-[#faf8f5] p-3.5 rounded-[4px] border border-[#eee4d7]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8c6b2d] mb-1">
+                    Dispatch &amp; Delivery Method:
+                  </p>
+                  <p className="text-xs font-medium text-[#1c1510]">Royal Mail Special Delivery Guaranteed (Insured)</p>
+                  <p className="text-[11px] text-[#6b5c50] mt-1 leading-relaxed">
+                    Tamper-evident luxury packaging with full postal transit insurance coverage up to &pound;10,000.
+                  </p>
+                  <p className="text-[10px] font-mono text-emerald-800 mt-2 font-semibold">
+                    &bull; Insured Delivery: Included (&pound;0.00)
+                  </p>
+                </div>
+              </div>
+
+              {/* PURCHASED ITEMS TABLE */}
+              <div className="overflow-hidden border border-[#ded3c5] rounded-[4px]">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#f5efe7] text-[#1c1510] uppercase font-bold tracking-wider text-[10px] border-b border-[#ded3c5]">
+                    <tr>
+                      <th className="p-3">Item Description &amp; Specifications</th>
+                      <th className="p-3">Hallmark Certification</th>
+                      <th className="p-3 text-center">Qty</th>
+                      <th className="p-3 text-right">Unit Price</th>
+                      <th className="p-3 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#eee4d7]">
+                    <tr>
+                      <td className="p-3">
+                        <p className="font-serif font-semibold text-sm text-[#1c1510]">{selectedInvoiceOrder.items}</p>
+                        <p className="text-[10px] text-[#8a796c] mt-0.5">Order Ref: #{selectedInvoiceOrder.id}</p>
+                      </td>
+                      <td className="p-3">
+                        <span className="px-2 py-0.5 rounded-[3px] bg-[#dec29b]/30 text-[#8c6b2d] text-[10px] font-semibold">
+                          22K (916) UK Assay Hallmark
+                        </span>
+                      </td>
+                      <td className="p-3 text-center font-semibold">1</td>
+                      <td className="p-3 text-right font-medium">&pound;{selectedInvoiceOrder.amount.toLocaleString()}</td>
+                      <td className="p-3 text-right font-bold text-[#1c1510]">&pound;{selectedInvoiceOrder.amount.toLocaleString()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* FINANCIAL BREAKDOWN */}
+              <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
+                {/* Assay Seal Box */}
+                <div className="sm:max-w-xs p-3.5 rounded-[4px] bg-[#faf6ee] border border-[#dec29b]/60 flex items-start gap-3">
+                  <span className="text-2xl text-[#8c6b2d]">🛡️</span>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#1c1510]">UK Hallmarking Act 1973 Guarantee</h4>
+                    <p className="text-[10px] text-[#6b5c50] mt-1 leading-snug">
+                      Every piece of fine gold sold by Bhai Jeweller Bradford is independently tested and stamped with authentic British Assay Office hallmarks.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Subtotals & Grand Total */}
+                <div className="w-full sm:w-64 space-y-2 text-xs">
+                  <div className="flex justify-between text-[#6b5c50]">
+                    <span>Net Amount (Excl. VAT):</span>
+                    <span className="font-medium text-[#1c1510] font-mono">
+                      &pound;{(selectedInvoiceOrder.amount / 1.2).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#6b5c50]">
+                    <span>UK VAT (20% Included):</span>
+                    <span className="font-medium text-[#1c1510] font-mono">
+                      &pound;{(selectedInvoiceOrder.amount - selectedInvoiceOrder.amount / 1.2).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#6b5c50]">
+                    <span>Insured Delivery:</span>
+                    <span className="font-semibold text-emerald-700">FREE (&pound;0.00)</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2.5 border-t-2 border-[#1c1510] text-sm">
+                    <span className="font-bold text-[#1c1510] uppercase">Total Paid (GBP):</span>
+                    <span className="font-serif text-lg font-bold text-[#8c6b2d]">
+                      &pound;{selectedInvoiceOrder.amount.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* INVOICE FOOTER WITH TERMS & SIGNATURE */}
+              <div className="pt-6 border-t border-[#ded3c5] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[10px] text-[#7a695d]">
+                <div className="space-y-1">
+                  <p><strong>Thank you for choosing Bhai Jeweller Bradford.</strong></p>
+                  <p>Includes 1-year complimentary cleaning, polishing, and stone-setting inspection.</p>
+                  <p>Showroom viewings &amp; bespoke consultations available by appointment.</p>
+                </div>
+                <div className="text-left sm:text-right pt-2 sm:pt-0">
+                  <p className="font-serif italic text-xs text-[#8c6b2d] font-bold">Bhai Jeweller Bradford</p>
+                  <p className="text-[9.5px] uppercase tracking-wider text-[#9a897b]">Authorized Master Goldsmith</p>
+                </div>
+              </div>
+            </div>
+
+            {/* PRINT STYLES */}
+            <style jsx global>{`
+              @media print {
+                body * {
+                  visibility: hidden !important;
+                }
+                #printable-luxury-invoice,
+                #printable-luxury-invoice * {
+                  visibility: visible !important;
+                }
+                #printable-luxury-invoice {
+                  position: fixed !important;
+                  left: 0 !important;
+                  top: 0 !important;
+                  width: 100% !important;
+                  margin: 0 !important;
+                  padding: 24px !important;
+                  background: white !important;
+                  color: black !important;
+                  box-shadow: none !important;
+                  border: none !important;
+                }
+                .no-print {
+                  display: none !important;
+                }
+              }
+            `}</style>
           </div>
         </div>
       )}

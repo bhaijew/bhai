@@ -230,7 +230,7 @@ export default function CheckoutPage() {
                           </div>
                         </div>
                         <span className="text-xs font-semibold text-[#1c1510]">
-                          ${(item.price * item.quantity).toLocaleString()}
+                          £{(item.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                     ))
@@ -241,7 +241,7 @@ export default function CheckoutPage() {
                 <div className="space-y-2.5 py-4 border-t border-[#e8ded4] text-xs font-light text-[#6b5c50]">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span className="font-medium text-[#1c1510]">${subtotal.toLocaleString()}</span>
+                    <span className="font-medium text-[#1c1510]">£{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -249,7 +249,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Estimated Tax</span>
-                    <span className="text-[#1c1510]">${tax.toLocaleString()}</span>
+                    <span className="text-[#1c1510]">£{tax.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -257,7 +257,7 @@ export default function CheckoutPage() {
                 <div className="flex justify-between items-center py-4 border-t border-[#e8ded4]">
                   <span className="text-sm font-medium text-[#1c1510]">Total</span>
                   <span className="font-serif text-xl font-semibold text-[#1c1510]">
-                    ${total.toLocaleString()}
+                    £{total.toLocaleString()}
                   </span>
                 </div>
 

@@ -10,6 +10,7 @@ export default function PaymentPage() {
   const { cart, clearCart } = useShop();
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'mobile' | 'bank' | 'cod'>('card');
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [confirmedOrderId, setConfirmedOrderId] = useState('BJ-849201');
   const [cardData, setCardData] = useState({
     number: '',
     name: '',
@@ -23,6 +24,7 @@ export default function PaymentPage() {
 
   const handlePay = (e: React.FormEvent) => {
     e.preventDefault();
+    setConfirmedOrderId(`BJ-${Math.floor(100000 + Math.random() * 900000)}`);
     setOrderPlaced(true);
     clearCart();
   };
@@ -63,7 +65,7 @@ export default function PaymentPage() {
                 Order Confirmed!
               </h2>
               <p className="text-xs sm:text-sm text-[#736355] font-light mt-2 leading-relaxed">
-                Thank you for shopping with <strong>Bhai Jeweller</strong>. Your order <strong>#BJ-{Math.floor(100000 + Math.random() * 900000)}</strong> has been received and is being prepared with master craftsmanship.
+                Thank you for shopping with <strong>Bhai Jeweller</strong>. Your order <strong>#{confirmedOrderId}</strong> has been received and is being prepared with master craftsmanship.
               </p>
               <div className="mt-6 p-4 rounded-[5px] bg-[#faf6ee] text-xs text-[#6b5c50] text-left space-y-1.5">
                 <p>• Estimated Delivery: 2-4 Business Days</p>
@@ -143,7 +145,7 @@ export default function PaymentPage() {
                           {paymentMethod === 'mobile' && <div className="w-2 h-2 rounded-full bg-[#1c1510]" />}
                         </div>
                         <span className="text-xs sm:text-sm font-medium text-[#1c1510]">
-                          JazzCash / Easypaisa / Apple Pay
+                          Apple Pay / Google Pay / Klarna
                         </span>
                       </div>
                       <svg className="w-5 h-5 text-[#8c7a6b]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
@@ -279,7 +281,7 @@ export default function PaymentPage() {
                         type="submit"
                         className="w-full py-3.5 rounded-[5px] bg-[#1c1510] text-[#f5efe8] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all flex items-center justify-center gap-2 shadow-md"
                       >
-                        Pay Now • ${total.toLocaleString()}
+                        Pay Now • £{total.toLocaleString()}
                       </button>
                       <p className="text-[10.5px] text-[#8a796c] text-center mt-2.5 font-light flex items-center justify-center gap-1.5">
                         <svg className="w-3.5 h-3.5 text-[#9e7d56]" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
@@ -321,7 +323,7 @@ export default function PaymentPage() {
                             </div>
                           </div>
                           <span className="text-xs font-semibold text-[#1c1510]">
-                            ${(item.price * item.quantity).toLocaleString()}
+                            £{(item.price * item.quantity).toLocaleString()}
                           </span>
                         </div>
                       ))
@@ -332,7 +334,7 @@ export default function PaymentPage() {
                   <div className="space-y-2.5 py-4 border-t border-[#e8ded4] text-xs font-light text-[#6b5c50]">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span className="font-medium text-[#1c1510]">${subtotal.toLocaleString()}</span>
+                      <span className="font-medium text-[#1c1510]">£{subtotal.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Shipping</span>
@@ -340,7 +342,7 @@ export default function PaymentPage() {
                     </div>
                     <div className="flex justify-between">
                       <span>Estimated Tax</span>
-                      <span className="text-[#1c1510]">${tax.toLocaleString()}</span>
+                      <span className="text-[#1c1510]">£{tax.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -348,7 +350,7 @@ export default function PaymentPage() {
                   <div className="flex justify-between items-center py-4 border-t border-[#e8ded4]">
                     <span className="text-sm font-medium text-[#1c1510]">Total</span>
                     <span className="font-serif text-xl font-semibold text-[#1c1510]">
-                      ${total.toLocaleString()}
+                      £{total.toLocaleString()}
                     </span>
                   </div>
                 </div>

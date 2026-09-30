@@ -121,7 +121,7 @@ export default function WishlistPage() {
 
                       <div className="flex items-center justify-between mt-1">
                         <span className="text-xs sm:text-sm font-semibold text-[#1c1510]">
-                          ${item.price.toLocaleString()}
+                          £{item.price.toLocaleString()}
                         </span>
 
                         {/* Rating Stars */}

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/lib/auth';
+import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
@@ -9,8 +12,12 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // Clean in-memory fallback array (strictly 0 fake enquiries)
 let SERVER_ENQUIRIES_DB: any[] = [];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
     if (supabase) {
       const { data, error } = await supabase
         .from('bespoke_enquiries')
@@ -49,17 +56,37 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    // Rate limit: Max 5 enquiries per 10 minutes per IP to block spam bots
+    const rateCheck = checkRateLimit(`enquiry_${ip}`, 5, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many enquiries submitted. Please wait ${rateCheck.resetSeconds} seconds before sending another message.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
+    const name = sanitizeString(body.name, 100) || 'Valued Client';
+    const email = sanitizeEmail(body.email) || 'client@example.com';
+    const phone = sanitizePhone(body.phone) || '+44 7700 900000';
+    const service = sanitizeString(body.service, 100) || 'Bespoke Jewelry Customization';
+    const budget = sanitizeString(body.budget, 50) || '£2,000 - £5,000';
+    const message = sanitizeString(body.message, 2000);
+
     const newEnquiry = {
-      id: body.id || `ENQ-${Math.floor(100 + Math.random() * 900)}`,
-      name: body.name || 'Client',
-      email: body.email || 'client@example.com',
-      phone: body.phone || '+44 7700 900000',
-      service: body.service || 'Bespoke Jewelry Customization',
-      budget: body.budget || '$2,000 - $5,000',
+      id: body.id ? sanitizeString(body.id, 64) : `ENQ-${Math.floor(100 + Math.random() * 900)}`,
+      name,
+      email,
+      phone,
+      service,
+      budget,
       date: new Date().toISOString().split('T')[0],
-      message: body.message || '',
-      status: body.status || 'New',
+      message,
+      status: 'New',
     };
 
     if (supabase) {
@@ -101,6 +128,11 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const { id, status } = await request.json();
     if (!id || !status) {
       return NextResponse.json(

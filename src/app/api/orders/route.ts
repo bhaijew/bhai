@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getSessionUser, requireAdmin } from '@/lib/auth';
+import { sanitizeString, sanitizeEmail, sanitizePrice } from '@/lib/sanitize';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey =
@@ -12,13 +15,27 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 // Clean in-memory fallback array (strictly 0 fake orders)
 let SERVER_ORDERS_DB: any[] = [];
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const user = await getSessionUser(request);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Authentication required to view orders.' },
+        { status: 401 }
+      );
+    }
+
+    const isAdmin = user.role === 'admin';
+
     if (supabase) {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false });
+      let query = supabase.from('orders').select('*').order('created_at', { ascending: false });
+
+      // Non-admins can strictly only see their own orders!
+      if (!isAdmin) {
+        query = query.eq('customer_email', user.email.toLowerCase());
+      }
+
+      const { data, error } = await query;
 
       if (!error && data) {
         const mappedOrders = data.map((o) => ({
@@ -39,30 +56,57 @@ export async function GET() {
         });
       }
     }
-  } catch (err) {
-    console.error('Supabase Orders fetch error:', err);
-  }
 
-  return NextResponse.json({
-    success: true,
-    count: SERVER_ORDERS_DB.length,
-    data: SERVER_ORDERS_DB,
-  });
+    const filteredDb = isAdmin
+      ? SERVER_ORDERS_DB
+      : SERVER_ORDERS_DB.filter((o) => o.email?.toLowerCase() === user.email.toLowerCase());
+
+    return NextResponse.json({
+      success: true,
+      count: filteredDb.length,
+      data: filteredDb,
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { success: false, error: err.message || 'Failed to fetch orders.' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    // Rate limit: Max 10 order attempts per 10 minutes per IP
+    const rateCheck = checkRateLimit(`order_${ip}`, 10, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Too many order attempts. Please wait ${rateCheck.resetSeconds} seconds before trying again.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
+    const customer = sanitizeString(body.customer, 100) || 'Valued Client';
+    const email = sanitizeEmail(body.email) || 'client@example.com';
+    const items = sanitizeString(body.items, 500) || 'Fine Jewelry Purchase';
+    const amount = sanitizePrice(body.amount);
+    const paymentMethod = sanitizeString(body.paymentMethod, 50) || 'Credit / Debit Card';
+    const address = sanitizeString(body.address, 300) || 'Bradford, UK';
+
     const newOrder = {
-      id: body.id || `BJ-${Math.floor(10000 + Math.random() * 90000)}`,
-      customer: body.customer || 'Guest Client',
-      email: body.email || 'client@example.com',
-      items: body.items || 'Fine Jewelry Purchase',
-      amount: Number(body.amount || 0),
+      id: body.id ? sanitizeString(body.id, 64) : `BJ-${Math.floor(10000 + Math.random() * 90000)}`,
+      customer,
+      email,
+      items,
+      amount,
       date: new Date().toISOString().split('T')[0],
-      paymentMethod: body.paymentMethod || 'Credit Card',
-      status: body.status || 'Processing',
-      address: body.address || 'Standard Delivery Address',
+      paymentMethod,
+      status: 'Processing',
+      address,
     };
 
     if (supabase) {
@@ -104,6 +148,11 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await requireAdmin(request);
+    if (!auth.authorized) {
+      return auth.errorResponse!;
+    }
+
     const { id, status } = await request.json();
     if (!id || !status) {
       return NextResponse.json(
