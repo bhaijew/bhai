@@ -266,8 +266,8 @@ export function Footer() {
           {/* Desktop Newsletter */}
           <div className="col-span-7 flex flex-col justify-center">
             <div className="p-5 rounded-2xl bg-[#140e0b] border border-[#231a14] max-w-md ml-auto w-full">
-              <p className="text-[10px] tracking-[0.25em] uppercase text-[#dec29b] font-medium mb-1">
-                JOIN THE SOCIETY
+              <p className="text-[10px] tracking-[0.25em] text-[#dec29b] font-medium mb-1">
+                Join the society
               </p>
               <h3 className="font-serif text-base text-[#f5efe8] font-normal leading-snug">
                 Receive exclusive previews & private invites
@@ -376,26 +376,9 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Desktop Bottom Bar */}
-        <div className="border-t border-[#18120e] mt-8 pt-5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-[11px] text-[#f0e8e0] font-normal">
-            <Link href="/shop" className="hover:text-[#dec29b] transition-colors">Shop</Link>
-            <span>•</span>
-            <Link href="/about" className="hover:text-[#dec29b] transition-colors">About</Link>
-            <span>•</span>
-            <Link href="/contact" className="hover:text-[#dec29b] transition-colors">Contact</Link>
-            <span>•</span>
-            <Link href="/terms" className="hover:text-[#dec29b] transition-colors">Terms</Link>
-            <span>•</span>
-            <Link href="/privacy" className="hover:text-[#dec29b] transition-colors">Privacy</Link>
-            <span>•</span>
-            <Link href="/refund-policy" className="hover:text-[#dec29b] transition-colors">Refunds</Link>
-            <span>•</span>
-            <Link href="/return-policy" className="hover:text-[#dec29b] transition-colors">Returns</Link>
-            <span>•</span>
-            <Link href="/admin/login" className="hover:text-[#dec29b] text-[#dec29b]/70 hover:text-[#dec29b] transition-colors">Staff Portal</Link>
-          </div>
-          <p className="text-[11px] text-[#d8cdcf] font-normal">
+        {/* Desktop Bottom Bar — copyright + payment only (links live in columns above) */}
+        <div className="border-t border-[#18120e] mt-8 pt-5 flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-[#d8cdcf] font-normal">
             © {new Date().getFullYear()} Bhai Jeweller, Bradford. All rights reserved.
           </p>
           <PaymentIcons />

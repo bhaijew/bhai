@@ -92,10 +92,12 @@ export function TestimonialsSection() {
                 aria-label="Next"
                 className={`flex-shrink-0 text-xl px-1 transition-colors ${pageMobile === totalMobile-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <div className="flex justify-center gap-1.5 mt-5">
+            <div className="flex justify-center gap-1 mt-5">
               {Array.from({ length: totalMobile }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageMobile(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageMobile ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 min-w-6 min-h-6 flex items-center justify-center p-1`}>
+                  <span className={`block rounded-full transition-all duration-300 ${i === pageMobile ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`} />
+                </button>
               ))}
             </div>
           </ScrollReveal>
@@ -115,10 +117,12 @@ export function TestimonialsSection() {
                 aria-label="Next"
                 className={`flex-shrink-0 text-xl px-1 transition-colors ${pageTablet === totalTablet-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <div className="flex justify-center gap-1.5 mt-6">
+            <div className="flex justify-center gap-1 mt-6">
               {Array.from({ length: totalTablet }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageTablet(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageTablet ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 min-w-6 min-h-6 flex items-center justify-center p-1`}>
+                  <span className={`block rounded-full transition-all duration-300 ${i === pageTablet ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`} />
+                </button>
               ))}
             </div>
           </ScrollReveal>
@@ -138,10 +142,12 @@ export function TestimonialsSection() {
                 aria-label="Next"
                 className={`flex-shrink-0 text-xl px-1 transition-colors ${pageDesktop === totalDesktop-1 ? 'text-[#2e2420]' : 'text-[#8a7a6c] hover:text-[#d8bb93]'}`}>›</button>
             </div>
-            <div className="flex justify-center gap-2 mt-7">
+            <div className="flex justify-center gap-1 mt-7">
               {Array.from({ length: totalDesktop }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageDesktop(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 min-w-6 min-h-6 flex items-center justify-center p-1`}>
+                  <span className={`block rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`} />
+                </button>
               ))}
             </div>
           </ScrollReveal>

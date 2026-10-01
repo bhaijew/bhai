@@ -161,51 +161,36 @@ export function HeroSection(props: HeroSectionProps) {
         </div>
       </div>
 
-      {/* ── Right Floating Glassmorphic Featured Showcase Card (Desktop Only) ── */}
-      <div className="hidden lg:block lg:absolute lg:top-[22%] xl:top-[25%] lg:right-10 xl:right-20 z-20 animate-fadeIn opacity-80 hover:opacity-100 transition-opacity duration-300">
+      {/* ── Right Floating Featured Whisper Card (Desktop Only) ── */}
+      {/* Kept subtle so the H1 + Shop CTA remain the clear focal point */}
+      <div className="hidden lg:block lg:absolute lg:top-[22%] xl:top-[25%] lg:right-10 xl:right-20 z-10 animate-fadeIn opacity-65 hover:opacity-90 transition-opacity duration-300">
         <Link
           href={heroData.featuredHref || '/shop'}
-          className="block w-[240px] rounded-[20px] bg-gradient-to-b from-[#1e1612]/80 via-[#18110d]/85 to-[#120d09]/90 backdrop-blur-xl border border-[#3e3025]/70 hover:border-[#dec29b]/50 p-4 shadow-[0_12px_36px_rgba(0,0,0,0.4)] group transition-all duration-500 hover:scale-[1.02]"
+          className="block w-[210px] rounded-2xl bg-[#1e1612]/70 backdrop-blur-lg border border-[#3e3025]/50 hover:border-[#dec29b]/40 p-4 shadow-[0_6px_20px_rgba(0,0,0,0.3)] group transition-all duration-500"
         >
           <div className="flex items-center justify-between">
-            <span className="text-[9.5px] tracking-[0.24em] uppercase text-[#dec29b] font-semibold">
-              FEATURED PIECE
+            <span className="text-[9.5px] tracking-[0.2em] uppercase text-[#dec29b]/80 font-medium">
+              Featured
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-[#dec29b]/15 text-[#dec29b] text-[9px] font-bold border border-[#dec29b]/30">
-              21CT GOLD
+            <span className="px-1.5 py-0.5 rounded-full bg-[#dec29b]/10 text-[#dec29b]/80 text-[9px] font-medium border border-[#dec29b]/20">
+              21ct Gold
             </span>
           </div>
 
-          <h2 className="font-serif text-xl text-[#f9f6f0] mt-2 font-normal tracking-wide group-hover:text-[#dec29b] transition-colors leading-snug truncate">
+          <h2 className="font-serif text-base text-[#f9f6f0]/90 mt-2 font-normal tracking-wide group-hover:text-[#dec29b] transition-colors leading-snug truncate">
             {heroData.featuredTitle}
           </h2>
 
-          <p className="text-xs text-[#a8998a] font-light mt-1 line-clamp-2">
+          <p className="text-xs text-[#a8998a]/80 font-light mt-1 line-clamp-2">
             {heroData.featuredSubtitle}
           </p>
 
-          <div className="mt-3 flex items-center justify-between">
-            <span className="text-xs text-[#dec29b] font-medium group-hover:underline flex items-center gap-1">
-              <span>View Product</span>
-              <span className="text-sm">→</span>
-            </span>
-            <div className="w-7 h-7 rounded-full border border-[#dec29b]/40 flex items-center justify-center text-[#dec29b] group-hover:bg-[#dec29b] group-hover:text-[#1c1510] transition-all shadow-xs">
-              <svg className="w-3.5 h-3.5 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="relative mt-3.5 w-full aspect-[4/3] rounded-2xl overflow-hidden bg-[#241a14] shadow-inner border border-[#35251b]">
-            <Image
-              src={featImg}
-              alt="Featured luxury jewellery piece"
-              fill
-              unoptimized={true}
-              sizes="300px"
-              className="object-cover group-hover:scale-106 transition-transform duration-700 ease-out"
-            />
-          </div>
+          <span className="mt-3 inline-flex items-center gap-1 text-xs text-[#dec29b]/70 group-hover:text-[#dec29b] transition-colors font-light">
+            View Product
+            <svg className="w-3 h-3 stroke-[2] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </span>
         </Link>
       </div>
 

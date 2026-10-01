@@ -104,10 +104,10 @@ function ProductCard({ product }: { product: DisplayProduct }) {
       <button
         type="button"
         onClick={handleCart}
-        className={`mt-2.5 w-full py-1.5 rounded-full text-[11px] font-light tracking-wide transition-all border ${
+        className={`mt-3 w-full py-2.5 rounded-full text-xs font-medium tracking-wide transition-all border-2 ${
           added
             ? 'bg-[#2d7a48] text-white border-[#2d7a48]'
-            : 'border-[#111111] text-[#111111] hover:bg-[#111111] hover:text-[#f5efe8] active:scale-[0.98]'
+            : 'bg-[#111111] border-[#111111] text-[#f5efe8] hover:bg-[#9e7d56] hover:border-[#9e7d56] active:scale-[0.98]'
         }`}
       >
         {added ? '✓ Added' : 'Add to Cart'}

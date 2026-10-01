@@ -43,7 +43,7 @@ export function CTABanner() {
               <div>
                 <Link
                   href="/shop"
-                  className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-[#dec29b] via-[#d8bb93] to-[#cba37b] text-[#17120e] font-medium text-xs sm:text-sm tracking-wide shadow-md hover:brightness-105 active:scale-[0.98] transition-all group whitespace-nowrap"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-[#dec29b] via-[#d8bb93] to-[#cba37b] text-[#17120e] font-medium text-xs sm:text-sm tracking-wide shadow-md hover:brightness-105 active:scale-[0.98] transition-all group whitespace-nowrap"
                 >
                   <span>Shop Now</span>
                   <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
