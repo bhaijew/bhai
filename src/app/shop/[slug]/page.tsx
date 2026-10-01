@@ -138,7 +138,6 @@ export default function ProductDetailPage() {
                   alt={productData.name}
                   fill
                   priority
-                  unoptimized={true}
                   sizes="(max-width: 1024px) 100vw, 600px"
                   className="object-cover transition-all duration-500"
                 />
@@ -201,7 +200,7 @@ export default function ProductDetailPage() {
                         activeImageIndex === idx ? 'border-[#1c1510] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'
                       }`}
                     >
-                      <Image src={img} alt="Thumbnail" fill unoptimized={true} sizes="100px" className="object-cover" />
+                      <Image src={img} alt="Thumbnail" fill loading="lazy" sizes="100px" className="object-cover" />
                     </button>
                   ))}
                 </div>
@@ -407,7 +406,7 @@ export default function ProductDetailPage() {
                       src={item.image || (item.images && item.images[0]) || '/images/shop-prod-2.jpg'}
                       alt={item.name}
                       fill
-                      unoptimized={true}
+                      loading="lazy"
                       sizes="200px"
                       className="object-cover group-hover:scale-105 transition-transform"
                     />

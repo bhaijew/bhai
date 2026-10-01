@@ -50,10 +50,17 @@ export async function GET() {
     console.error('Supabase Hero fetch error:', err);
   }
 
-  return NextResponse.json({
-    success: true,
-    data: SERVER_HERO_CONFIG,
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      data: SERVER_HERO_CONFIG,
+    },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    }
+  );
 }
 
 export async function POST(request: Request) {

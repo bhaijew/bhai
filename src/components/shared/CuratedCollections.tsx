@@ -69,6 +69,7 @@ export function CuratedCollections() {
                     src={item.image}
                     alt={item.alt}
                     fill
+                    loading="lazy"
                     sizes="(max-width: 640px) 25vw, (max-width: 1024px) 25vw, 260px"
                     className="object-cover group-hover:scale-[1.08] transition-transform duration-700 ease-out rounded-full"
                   />

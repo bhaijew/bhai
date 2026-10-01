@@ -377,7 +377,6 @@ export function Header({
                                 src={imgSrc}
                                 alt={p.name}
                                 fill
-                                unoptimized={true}
                                 sizes="140px"
                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                               />

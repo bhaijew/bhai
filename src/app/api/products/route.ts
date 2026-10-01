@@ -44,22 +44,36 @@ export async function GET() {
           seoDescription: p.seo_description,
           focusKeywords: p.focus_keywords || [],
         }));
-        return NextResponse.json({
-          success: true,
-          count: mappedProducts.length,
-          data: mappedProducts,
-        });
+        return NextResponse.json(
+          {
+            success: true,
+            count: mappedProducts.length,
+            data: mappedProducts,
+          },
+          {
+            headers: {
+              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+            },
+          }
+        );
       }
     }
   } catch (err) {
     console.error('Supabase Products fetch error:', err);
   }
 
-  return NextResponse.json({
-    success: true,
-    count: SERVER_PRODUCTS_DB.length,
-    data: SERVER_PRODUCTS_DB,
-  });
+  return NextResponse.json(
+    {
+      success: true,
+      count: SERVER_PRODUCTS_DB.length,
+      data: SERVER_PRODUCTS_DB,
+    },
+    {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    }
+  );
 }
 
 export async function POST(request: Request) {

@@ -33,9 +33,9 @@ export function OurStory() {
                 src="/images/hero-model.jpg"
                 alt="A woman adorned with Bhai Jeweller pieces"
                 fill
+                loading="lazy"
                 sizes="(max-width: 640px) 40vw, (max-width: 1024px) 35vw, 420px"
                 className="object-cover object-[65%_25%]"
-                priority={false}
               />
             </ScrollReveal>
           </div>

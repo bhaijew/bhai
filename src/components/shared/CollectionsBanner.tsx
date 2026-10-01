@@ -14,9 +14,9 @@ export function CollectionsBanner() {
             src="/images/category-bracelets.jpg"
             alt="Fine jewellery crafted for every chapter"
             fill
+            loading="lazy"
             sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover object-[75%_center] sm:object-center"
-            priority={false}
           />
           {/* Gradients ensuring high legibility */}
           <div className="absolute inset-0 bg-[#0d0a07]/55" />

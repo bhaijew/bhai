@@ -32,7 +32,7 @@ export function ScrollReveal({
       },
       {
         threshold,
-        rootMargin: '0px 0px -30px 0px',
+        rootMargin: '0px 0px 60px 0px',
       }
     );
 

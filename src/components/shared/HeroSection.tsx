@@ -73,7 +73,6 @@ export function HeroSection(props: HeroSectionProps) {
           alt="Fine luxury jewellery campaign"
           fill
           priority
-          unoptimized={true}
           sizes="100vw"
           className="object-cover object-[80%_center] sm:object-center transition-all duration-1000 scale-100 animate-fadeIn"
         />

@@ -20,11 +20,13 @@ const serifFont = Cormorant_Garamond({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
+  preload: true,  // LCP font — fetch in parallel with HTML
 });
 
 const sansFont = Plus_Jakarta_Sans({
   variable: '--font-sans',
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],  // only weights actually used
   display: 'swap',
 });
 

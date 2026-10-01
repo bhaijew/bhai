@@ -14,9 +14,9 @@ export function CTABanner() {
             src="/images/category-rings.jpg"
             alt="Own a piece of forever"
             fill
+            loading="lazy"
             sizes="(max-width: 768px) 100vw, 1200px"
             className="object-cover object-center"
-            priority={false}
           />
           <div className="absolute inset-0 bg-[#0e0a07]/40" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#0e0a07]/65 via-[#0e0a07]/35 to-[#0e0a07]/50" />

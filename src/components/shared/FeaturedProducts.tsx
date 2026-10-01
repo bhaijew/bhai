@@ -58,7 +58,7 @@ function ProductCard({ product }: { product: DisplayProduct }) {
             src={product.image}
             alt={product.alt}
             fill
-            unoptimized={true}
+            loading="lazy"
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 220px"
             className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
           />
