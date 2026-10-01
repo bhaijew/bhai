@@ -95,7 +95,7 @@ export function AnnouncementBar() {
         {/* Right: Chevron Nav + Dismiss Button */}
         <div className="flex items-center gap-2 text-[#a8998a] flex-shrink-0">
           {messages.length > 1 && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handlePrev}
@@ -125,7 +125,7 @@ export function AnnouncementBar() {
             type="button"
             onClick={() => setDismissed(true)}
             aria-label="Dismiss announcement"
-            className="w-11 h-11 flex items-center justify-center rounded-full text-[#786757] hover:text-[#dec29b] text-xs transition-colors ml-1"
+            className="w-11 h-11 flex items-center justify-center rounded-full text-[#786757] hover:text-[#dec29b] text-xs transition-colors"
           >
             ✕
           </button>

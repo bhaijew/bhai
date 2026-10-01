@@ -73,7 +73,7 @@ export function ScrollReveal({
         willChange: 'transform, opacity',
       }}
       className={`transition-all ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isVisible ? 'opacity-100 translate-y-0 translate-x-0 scale-100' : getInitialStyle()
+        isVisible ? 'opacity-100 translate-y-0 translate-x-0 scale-100 visible' : `${getInitialStyle()} invisible`
       } ${className}`}
     >
       {children}

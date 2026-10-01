@@ -23,7 +23,7 @@ export function CTABanner() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 w-full px-5 sm:px-10 lg:px-14 py-6 sm:py-8">
+        <div className="relative z-10 w-full px-5 sm:px-10 lg:px-14 py-8 sm:py-12">
           <div className="flex flex-row items-center justify-between gap-4 sm:gap-8">
 
             {/* Left: Headline + Subtext */}

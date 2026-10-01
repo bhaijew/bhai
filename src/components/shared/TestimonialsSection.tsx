@@ -69,7 +69,7 @@ export function TestimonialsSection() {
 
         {/* Header */}
         <ScrollReveal direction="up">
-          <div className="text-center mb-7 sm:mb-10">
+          <div className="text-center mb-4 sm:mb-6">
             <p className="text-[10px] tracking-[0.32em] uppercase text-[#9e8875] font-medium mb-2">KIND WORDS</p>
             <h2 className="font-serif text-[26px] sm:text-[34px] lg:text-[40px] text-[#f0ece6] font-normal tracking-tight">
               What Our Customers Say

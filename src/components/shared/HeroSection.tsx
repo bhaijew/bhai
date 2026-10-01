@@ -122,10 +122,10 @@ export function HeroSection(props: HeroSectionProps) {
             </p>
 
             {/* CTA Action Buttons */}
-            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-4 sm:mb-10">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-6 sm:mb-14">
               <Link
                 href={heroData.primaryCtaHref || '/shop'}
-                className="inline-flex items-center gap-2 sm:gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#dec29b] via-[#ebd7be] to-[#cba37b] text-[#140e0a] font-semibold text-[11px] sm:text-sm tracking-wide shadow-[0_8px_30px_rgba(222,194,155,0.4)] hover:shadow-[0_12px_36px_rgba(222,194,155,0.6)] hover:brightness-105 active:scale-[0.98] transition-all duration-300 group whitespace-nowrap"
+                className="inline-flex items-center gap-2 sm:gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#dec29b] via-[#ebd7be] to-[#cba37b] text-[#140e0a] font-semibold text-[11px] sm:text-sm tracking-wide shadow-[0_4px_16px_rgba(222,194,155,0.3)] hover:shadow-[0_8px_24px_rgba(222,194,155,0.45)] hover:brightness-105 active:scale-[0.98] transition-all duration-300 group whitespace-nowrap"
               >
                 <span>{heroData.primaryCtaText || 'Shop Collection'}</span>
                 <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-1 stroke-[2.2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,9 +135,12 @@ export function HeroSection(props: HeroSectionProps) {
 
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-full border border-[#f9f6f0]/40 hover:border-[#dec29b] text-[#f9f6f0] hover:text-[#dec29b] hover:bg-[#dec29b]/10 text-[11px] sm:text-sm font-light tracking-wide transition-all duration-300 whitespace-nowrap backdrop-blur-xs"
+                className="inline-flex items-center gap-2 sm:gap-2.5 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full border border-[#f9f6f0]/40 hover:border-[#dec29b] text-[#f9f6f0] hover:text-[#dec29b] hover:bg-[#dec29b]/10 text-[11px] sm:text-sm font-light tracking-wide transition-all duration-300 whitespace-nowrap backdrop-blur-xs group"
               >
                 Our Heritage & Craft
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-1 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
               </Link>
             </div>
 
@@ -163,7 +166,7 @@ export function HeroSection(props: HeroSectionProps) {
 
       {/* ── Right Floating Featured Whisper Card (Desktop Only) ── */}
       {/* Kept subtle so the H1 + Shop CTA remain the clear focal point */}
-      <div className="hidden lg:block lg:absolute lg:top-[22%] xl:top-[25%] lg:right-10 xl:right-20 z-10 animate-fadeIn opacity-65 hover:opacity-90 transition-opacity duration-300">
+      <div className="hidden lg:block lg:absolute lg:top-1/2 lg:-translate-y-1/2 xl:top-1/2 xl:-translate-y-1/2 lg:right-16 xl:right-24 z-10 animate-fadeIn opacity-65 hover:opacity-90 transition-opacity duration-300">
         <Link
           href={heroData.featuredHref || '/shop'}
           className="block w-[210px] rounded-2xl bg-[#1e1612]/70 backdrop-blur-lg border border-[#3e3025]/50 hover:border-[#dec29b]/40 p-4 shadow-[0_6px_20px_rgba(0,0,0,0.3)] group transition-all duration-500"

@@ -49,13 +49,13 @@ export function CuratedCollections() {
 
         {/* Section Label */}
         <ScrollReveal direction="up">
-          <p className="text-[10px] tracking-[0.32em] text-[#a09080] font-medium mb-1.5">
+          <p className="text-xs tracking-[0.28em] text-[#a09080] font-medium mb-1.5">
             Shop by category
           </p>
           <h2 className="font-serif text-[24px] sm:text-[34px] lg:text-[40px] text-[#1c1510] font-normal tracking-tight leading-tight">
             Find Your Perfect Piece
           </h2>
-          <div className="w-12 h-[2px] bg-[#c9b49a] mx-auto mt-2.5 mb-8 sm:mb-12" />
+          <div className="w-12 h-[2px] bg-[#c9b49a] mx-auto mt-2.5 mb-5 sm:mb-8" />
         </ScrollReveal>
 
         {/* 4 Category Circles in 1 Single Line (Mobile & Desktop) */}
@@ -75,7 +75,7 @@ export function CuratedCollections() {
                 </div>
 
                 {/* Title with Arrow */}
-                <div className="mt-2.5 sm:mt-4 flex items-center justify-center gap-0.5 sm:gap-1.5">
+                <div className="mt-2.5 sm:mt-4 flex items-center justify-center w-full gap-0.5 sm:gap-1.5">
                   <h3 className="font-serif text-[11px] sm:text-lg lg:text-[19px] text-[#1c1510] group-hover:text-[#9e7d56] transition-colors font-normal leading-tight truncate">
                     {item.name}
                   </h3>

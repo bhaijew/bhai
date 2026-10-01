@@ -204,7 +204,7 @@ export function FeaturedProducts() {
       <div className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8">
 
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-4 sm:mb-7">
+        <div className="flex items-end justify-between mb-4 sm:mb-7">
           <div>
             <p className="text-[10px] sm:text-xs tracking-[0.24em] uppercase text-[#9e8875] font-medium mb-1">
               JUST LANDED
