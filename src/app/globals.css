@@ -166,3 +166,124 @@ body {
 }
 
 
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS  (Issues #1 Type scale · #2 Colour palette)
+   Target: ≤10 type sizes, ≤12 text colours
+   ───────────────────────────────────────────────────────────── */
+:root {
+  /* --- Type scale (9 steps) --------------------------------- */
+  --text-2xs:  0.625rem;   /* 10px  – micro labels / badges    */
+  --text-xs:   0.75rem;    /* 12px  – body copy min            */
+  --text-sm:   0.875rem;   /* 14px  – secondary body           */
+  --text-base: 1rem;       /* 16px  – primary body             */
+  --text-lg:   1.125rem;   /* 18px  – card titles              */
+  --text-xl:   1.25rem;    /* 20px  – section sub-heads        */
+  --text-2xl:  1.5rem;     /* 24px  – section heads (mobile)   */
+  --text-4xl:  2.25rem;    /* 36px  – section heads (desktop)  */
+  --text-hero: 4.5rem;     /* 72px  – hero headline            */
+
+  /* --- Colour palette (10 tokens) -------------------------- */
+  --color-brand-gold:      #dec29b;   /* primary gold              */
+  --color-brand-gold-deep: #c59d6e;   /* deep gold / hover         */
+  --color-brand-gold-pale: #f5efe8;   /* pale gold / near-white    */
+  --color-surface-dark:    #140e0b;   /* darkest background        */
+  --color-surface-mid:     #1c1510;   /* mid-dark surface          */
+  --color-surface-light:   #faf7f2;   /* light / off-white surface */
+  --color-text-primary:    #f0ece6;   /* primary text (dark bg)    */
+  --color-text-secondary:  #c8bdb5;   /* secondary / muted text    */
+  --color-text-tertiary:   #a09080;   /* caption / helper text     */
+  --color-border-subtle:   #2e231b;   /* default subtle border     */
+}
+
+/* ─────────────────────────────────────────────────────────────
+   BUTTON SYSTEM  (Issue #3 — consolidate 11 styles → 4)
+   ───────────────────────────────────────────────────────────── */
+
+/* Primary gold filled CTA */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(to right, var(--color-brand-gold), #ebd7be, var(--color-brand-gold-deep));
+  color: #140e0a;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 30px rgba(222, 194, 155, 0.4);
+  transition: all 0.3s;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 12px 36px rgba(222, 194, 155, 0.6);
+}
+.btn-primary:active { transform: scale(0.98); }
+
+/* Outline ghost (dark bg) */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(249, 246, 240, 0.4);
+  color: #f9f6f0;
+  font-size: var(--text-sm);
+  font-weight: 300;
+  letter-spacing: 0.03em;
+  transition: all 0.3s;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-outline:hover {
+  border-color: var(--color-brand-gold);
+  color: var(--color-brand-gold);
+  background: rgba(222, 194, 155, 0.1);
+}
+
+/* Ghost text-only CTA (light bg) */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 1.25rem;
+  border-radius: 9999px;
+  border: 1px solid #c5ad83;
+  color: #1c1510;
+  font-size: var(--text-xs);
+  font-weight: 300;
+  transition: all 0.2s;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-ghost:hover {
+  border-color: #8f7448;
+  background: rgba(235, 220, 185, 0.3);
+}
+
+/* Small icon / utility pill button — min 44×44 px touch target (WCAG 2.5.5) */
+.btn-icon-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: 9999px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  color: var(--color-text-secondary);
+}
+.btn-icon-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-primary);
+}

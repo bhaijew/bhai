@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useShop, ProductItem } from '@/context/ShopContext';
 
 interface HeaderProps {
@@ -36,6 +36,7 @@ export function Header({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { cartCount, wishlistCount, products } = useShop();
   const router = useRouter();
+  const pathname = usePathname();
 
   // Focus input when search opens
   useEffect(() => {
@@ -227,16 +228,24 @@ export function Header({
 
               {/* Desktop Navigation Links */}
               <nav className="hidden md:flex items-center gap-7 lg:gap-9">
-                {navLinks.slice(0, 6).map((link) => (
+              {navLinks.slice(0, 6).map((link) => {
+                const isActive = pathname === link.href;
+                return (
                   <Link
                     key={link.name}
                     href={link.href}
+                    aria-current={isActive ? 'page' : undefined}
                     className="text-[#e2dad1] hover:text-[#d8bb93] text-sm tracking-wide font-normal transition-colors duration-200 relative group py-1"
                   >
                     {link.name}
-                    <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#d8bb93] transition-all duration-300 group-hover:w-full" />
+                    <span
+                      className={`absolute bottom-0 left-0 h-[1.5px] bg-[#d8bb93] transition-all duration-300 ${
+                        isActive ? 'w-full' : 'w-0 group-hover:w-full'
+                      }`}
+                    />
                   </Link>
-                ))}
+                );
+              })}
               </nav>
 
               {/* Right Utility Icons */}

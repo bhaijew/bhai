@@ -49,8 +49,8 @@ export function CuratedCollections() {
 
         {/* Section Label */}
         <ScrollReveal direction="up">
-          <p className="text-[10px] tracking-[0.32em] uppercase text-[#a09080] font-medium mb-1.5">
-            SHOP BY CATEGORY
+          <p className="text-[10px] tracking-[0.32em] text-[#a09080] font-medium mb-1.5">
+            Shop by category
           </p>
           <h2 className="font-serif text-[24px] sm:text-[34px] lg:text-[40px] text-[#1c1510] font-normal tracking-tight leading-tight">
             Find Your Perfect Piece

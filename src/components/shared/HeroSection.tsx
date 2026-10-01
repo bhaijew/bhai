@@ -162,10 +162,10 @@ export function HeroSection(props: HeroSectionProps) {
       </div>
 
       {/* ── Right Floating Glassmorphic Featured Showcase Card (Desktop Only) ── */}
-      <div className="hidden lg:block lg:absolute lg:top-[22%] xl:top-[25%] lg:right-10 xl:right-20 z-20 animate-fadeIn">
+      <div className="hidden lg:block lg:absolute lg:top-[22%] xl:top-[25%] lg:right-10 xl:right-20 z-20 animate-fadeIn opacity-80 hover:opacity-100 transition-opacity duration-300">
         <Link
           href={heroData.featuredHref || '/shop'}
-          className="block w-72 md:w-[300px] rounded-[24px] bg-gradient-to-b from-[#1e1612]/92 via-[#18110d]/95 to-[#120d09]/98 backdrop-blur-2xl border border-[#3e3025] hover:border-[#dec29b]/70 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] group transition-all duration-500 hover:scale-[1.02]"
+          className="block w-[240px] rounded-[20px] bg-gradient-to-b from-[#1e1612]/80 via-[#18110d]/85 to-[#120d09]/90 backdrop-blur-xl border border-[#3e3025]/70 hover:border-[#dec29b]/50 p-4 shadow-[0_12px_36px_rgba(0,0,0,0.4)] group transition-all duration-500 hover:scale-[1.02]"
         >
           <div className="flex items-center justify-between">
             <span className="text-[9.5px] tracking-[0.24em] uppercase text-[#dec29b] font-semibold">
@@ -180,7 +180,7 @@ export function HeroSection(props: HeroSectionProps) {
             {heroData.featuredTitle}
           </h2>
 
-          <p className="text-[11px] text-[#a8998a] font-light mt-1 line-clamp-2">
+          <p className="text-xs text-[#a8998a] font-light mt-1 line-clamp-2">
             {heroData.featuredSubtitle}
           </p>
 

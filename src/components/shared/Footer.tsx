@@ -310,7 +310,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-[10px] tracking-[0.25em] uppercase text-[#dec29b] font-medium mb-3.5">
+            <h4 className="text-[10px] tracking-[0.25em] text-[#dec29b] font-medium mb-3.5">
               Bradford Showroom
             </h4>
             <div className="text-xs text-[#f0e8e0] font-normal space-y-2.5">

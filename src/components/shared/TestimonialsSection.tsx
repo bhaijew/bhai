@@ -95,7 +95,7 @@ export function TestimonialsSection() {
             <div className="flex justify-center gap-1.5 mt-5">
               {Array.from({ length: totalMobile }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageMobile(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageMobile ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 ${i === pageMobile ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
               ))}
             </div>
           </ScrollReveal>
@@ -118,7 +118,7 @@ export function TestimonialsSection() {
             <div className="flex justify-center gap-1.5 mt-6">
               {Array.from({ length: totalTablet }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageTablet(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageTablet ? 'w-4 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 ${i === pageTablet ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
               ))}
             </div>
           </ScrollReveal>
@@ -141,7 +141,7 @@ export function TestimonialsSection() {
             <div className="flex justify-center gap-2 mt-7">
               {Array.from({ length: totalDesktop }).map((_, i) => (
                 <button key={i} type="button" onClick={() => setPageDesktop(i)} aria-label={`Page ${i+1}`}
-                  className={`rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-1.5 bg-[#d8bb93]' : 'w-1.5 h-1.5 bg-[#3d3028]'}`}/>
+                  className={`rounded-full transition-all duration-300 ${i === pageDesktop ? 'w-5 h-2.5 bg-[#d8bb93]' : 'w-2.5 h-2.5 bg-[#3d3028]'}`}/>
               ))}
             </div>
           </ScrollReveal>

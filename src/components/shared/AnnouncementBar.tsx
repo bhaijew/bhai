@@ -72,7 +72,7 @@ export function AnnouncementBar() {
         {/* Left: Showroom / Trust Badge (Desktop) */}
         <div className="hidden lg:flex items-center gap-2 text-[#a8998a] text-[10.5px]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#d8bb93] animate-ping" />
-          <span className="font-light tracking-widest uppercase text-[#dec29b]">Bradford Showroom</span>
+          <span className="font-light tracking-widest text-[#dec29b]">Bradford Showroom</span>
           <span className="text-[#5e4f42]">•</span>
           <span className="font-light">Open Today</span>
         </div>
@@ -100,7 +100,7 @@ export function AnnouncementBar() {
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous announcement"
-                className="w-5 h-5 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
+                className="w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
               >
                 ‹
               </button>
@@ -113,7 +113,7 @@ export function AnnouncementBar() {
                 type="button"
                 onClick={handleNext}
                 aria-label="Next announcement"
-                className="w-5 h-5 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
+                className="w-11 h-11 rounded-full hover:bg-white/10 flex items-center justify-center text-[#c2b2a3] hover:text-[#f8f5f0] transition-colors"
               >
                 ›
               </button>
@@ -125,7 +125,7 @@ export function AnnouncementBar() {
             type="button"
             onClick={() => setDismissed(true)}
             aria-label="Dismiss announcement"
-            className="text-[#786757] hover:text-[#dec29b] text-xs p-1 transition-colors ml-1"
+            className="w-11 h-11 flex items-center justify-center rounded-full text-[#786757] hover:text-[#dec29b] text-xs transition-colors ml-1"
           >
             ✕
           </button>
