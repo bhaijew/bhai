@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -9,7 +9,8 @@ import ScrollReveal from '@/components/shared/ScrollReveal';
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart } = useShop();
+  const { cart, setCartItems } = useShop();
+  const [discountPercent, setDiscountPercent] = useState(0);
   const [formData, setFormData] = useState({
     fullName: '',
     address: '',
@@ -18,14 +19,53 @@ export default function CheckoutPage() {
     saveAddress: true,
   });
 
+  // Hydrate cart from recovery link if present in URL
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    const cartId = params.get('cartId');
+    const token = params.get('token');
+    const discount = Number(params.get('discount') || 0);
+
+    if (discount > 0 && discount <= 50) {
+      setDiscountPercent(discount);
+    }
+
+    if (cartId && cart.length === 0) {
+      const url = `/api/cart?id=${encodeURIComponent(cartId)}${token ? `&token=${encodeURIComponent(token)}` : ''}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.cart) {
+            if (Array.isArray(data.cart.items) && data.cart.items.length > 0) {
+              setCartItems(data.cart.items);
+            }
+            if (data.cart.offeredDiscountPercent && !discount) {
+              setDiscountPercent(data.cart.offeredDiscountPercent);
+            }
+            if (data.cart.customerName || data.cart.customerPhone) {
+              setFormData((prev) => ({
+                ...prev,
+                fullName: prev.fullName || data.cart.customerName || '',
+                phone: prev.phone || data.cart.customerPhone || '',
+              }));
+            }
+          }
+        })
+        .catch(() => {});
+    }
+  }, [cart.length, setCartItems]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     router.push('/checkout/payment');
   };
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const tax = Math.round(subtotal * 0.1);
-  const total = subtotal + tax;
+  const discountAmount = discountPercent > 0 ? Math.round(subtotal * (discountPercent / 100)) : 0;
+  const taxableSubtotal = Math.max(0, subtotal - discountAmount);
+  const tax = Math.round(taxableSubtotal * 0.1);
+  const total = taxableSubtotal + tax;
 
   return (
     <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pb-20 md:pb-24">
@@ -243,6 +283,12 @@ export default function CheckoutPage() {
                     <span>Subtotal</span>
                     <span className="font-medium text-[#1c1510]">£{subtotal.toLocaleString()}</span>
                   </div>
+                  {discountAmount > 0 && (
+                    <div className="flex justify-between text-[#2d7a48]">
+                      <span>VIP Voice Offer ({discountPercent}%)</span>
+                      <span>-£{discountAmount.toLocaleString()}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span>Shipping</span>
                     <span className="text-[#2d7a48] font-medium">Free</span>

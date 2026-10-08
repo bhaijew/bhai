@@ -124,6 +124,47 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
 CREATE INDEX IF NOT EXISTS idx_login_email ON login_attempts(email_attempted);
 
+-- 9. CARTS & ABANDONED CART RECOVERY TABLE
+CREATE TABLE IF NOT EXISTS carts (
+    id VARCHAR(64) PRIMARY KEY,
+    customer_id VARCHAR(64) REFERENCES users(id) ON DELETE CASCADE,
+    customer_email VARCHAR(255) NOT NULL,
+    customer_phone VARCHAR(50),
+    customer_name VARCHAR(255),
+    items JSONB NOT NULL DEFAULT '[]'::jsonb,
+    subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    currency VARCHAR(10) NOT NULL DEFAULT 'GBP',
+    status VARCHAR(50) NOT NULL DEFAULT 'active',
+    recovery_status VARCHAR(50) NOT NULL DEFAULT 'abandoned',
+    offered_discount_percent INT DEFAULT 0,
+    checkout_url TEXT,
+    last_activity_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_carts_customer_id ON carts(customer_id);
+CREATE INDEX IF NOT EXISTS idx_carts_customer_email ON carts(customer_email);
+CREATE INDEX IF NOT EXISTS idx_carts_status ON carts(status);
+CREATE INDEX IF NOT EXISTS idx_carts_last_activity ON carts(last_activity_at);
+
+-- 10. VAPI AUDIT LOGS TABLE
+CREATE TABLE IF NOT EXISTS vapi_audit_logs (
+    id VARCHAR(64) PRIMARY KEY,
+    tool_name VARCHAR(100) NOT NULL,
+    customer_id VARCHAR(64),
+    cart_id VARCHAR(64),
+    tool_call_id VARCHAR(100),
+    success BOOLEAN NOT NULL,
+    result_summary JSONB,
+    error_message TEXT,
+    ip_address VARCHAR(100),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_vapi_audit_cart ON vapi_audit_logs(cart_id);
+CREATE INDEX IF NOT EXISTS idx_vapi_audit_created ON vapi_audit_logs(created_at);
+
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
@@ -135,6 +176,8 @@ ALTER TABLE hero_section ENABLE ROW LEVEL SECURITY;
 ALTER TABLE announcement_bar ENABLE ROW LEVEL SECURITY;
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE carts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vapi_audit_logs ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if re-running to prevent "policy already exists" error
 DROP POLICY IF EXISTS "Allow Public Products Access" ON products;
@@ -145,6 +188,8 @@ DROP POLICY IF EXISTS "Allow Public Hero Access" ON hero_section;
 DROP POLICY IF EXISTS "Allow Public Announcement Access" ON announcement_bar;
 DROP POLICY IF EXISTS "Allow Public Users Access" ON users;
 DROP POLICY IF EXISTS "Allow Public Login Attempts Access" ON login_attempts;
+DROP POLICY IF EXISTS "Allow Public Carts Access" ON carts;
+DROP POLICY IF EXISTS "Allow Public Vapi Logs Access" ON vapi_audit_logs;
 
 -- Allow public read & write access for API endpoints
 CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true) WITH CHECK (true);
@@ -155,6 +200,8 @@ CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true) WI
 CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Users Access" ON users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Login Attempts Access" ON login_attempts FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Carts Access" ON carts FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Vapi Logs Access" ON vapi_audit_logs FOR ALL USING (true) WITH CHECK (true);
 
 -- Insert initial default config rows if they don't exist yet
 INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, headline_line3, description, primary_cta_text, primary_cta_href, hero_image, featured_title, featured_subtitle, featured_image)
@@ -164,6 +211,7 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO announcement_bar (id, is_enabled, messages)
 VALUES ('main_announcement', true, '["Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK", "Complimentary luxury gift packaging on every order  |  Bespoke service", "Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available"]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
+
 
 
 

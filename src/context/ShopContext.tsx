@@ -54,6 +54,7 @@ interface ShopContextType {
   removeFromCart: (id: string) => void;
   updateCartQuantity: (id: string, delta: number) => void;
   clearCart: () => void;
+  setCartItems: (items: CartItem[]) => void;
   addToWishlist: (item: WishlistItem) => void;
   removeFromWishlist: (id: string) => void;
   toggleWishlist: (item: WishlistItem) => void;
@@ -182,6 +183,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   };
 
   const clearCart = () => setCart([]);
+  const setCartItems = (items: CartItem[]) => setCart(items);
 
   const addToWishlist = (item: WishlistItem) => {
     setWishlist((prev) => {
@@ -260,6 +262,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         removeFromCart,
         updateCartQuantity,
         clearCart,
+        setCartItems,
         addToWishlist,
         removeFromWishlist,
         toggleWishlist,
