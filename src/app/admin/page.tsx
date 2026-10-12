@@ -862,55 +862,55 @@ export default function AdminDashboardPage() {
     },
     {
       id: 'products',
-      label: 'Products Catalog',
+      label: 'Products',
       icon: <ProductsIcon className="w-4 h-4" />,
       count: products.length,
     },
     {
       id: 'add-product',
-      label: 'Add Product Studio',
+      label: 'Add Product',
       icon: <AddProductIcon className="w-4 h-4" />,
       count: null,
     },
     {
       id: 'categories',
-      label: 'Categories Manager',
+      label: 'Categories',
       icon: <CategoriesIcon className="w-4 h-4" />,
       count: categories.length,
     },
     {
       id: 'slides',
-      label: 'Hero & Slider Banners',
+      label: 'Slider & Banners',
       icon: <SlidesIcon className="w-4 h-4" />,
       count: slides.length,
     },
     {
       id: 'orders',
-      label: 'Orders & Sales',
+      label: 'Orders',
       icon: <OrdersIcon className="w-4 h-4" />,
       count: activeOrdersCount,
     },
     {
       id: 'enquiries',
-      label: 'Bespoke Enquiries',
+      label: 'Enquiries',
       icon: <EnquiriesIcon className="w-4 h-4" />,
       count: pendingEnquiriesCount,
     },
     {
       id: 'customers',
-      label: 'Users & Security',
+      label: 'Users',
       icon: <UsersIcon className="w-4 h-4" />,
       count: registeredUsers.length,
     },
     {
       id: 'goldrates',
-      label: 'Gold Rate Manager',
+      label: 'Gold Rates',
       icon: <GoldRatesIcon className="w-4 h-4" />,
       count: null,
     },
     {
       id: 'settings',
-      label: 'Store Settings',
+      label: 'Settings',
       icon: <SettingsIcon className="w-4 h-4" />,
       count: null,
     },
@@ -919,26 +919,26 @@ export default function AdminDashboardPage() {
   // Theme-dependent styles helper - Advance Luxury White Palette
   const isLight = theme === 'light';
 
-  const containerBg = isLight ? 'bg-[#fbfaf8] text-[#17120e]' : 'bg-[#0d0907] text-[#f4efe6]';
-  const sidebarBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5]' : 'bg-[#140e0b] border-[#2a201a]';
-  const sidebarHeaderBorder = isLight ? 'border-[#e8dfd5]' : 'border-[#2a201a]';
-  const sidebarFooterBg = isLight ? 'bg-[#fbf9f6] border-[#e8dfd5]' : 'bg-[#100b08] border-[#2a201a]';
-  const cardBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5] shadow-xs' : 'bg-[#140e0b] border-[#2a201a] shadow-lg';
-  const cardHeaderBorder = isLight ? 'border-[#eee7dc]' : 'border-[#261c16]';
-  const inputBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5] text-[#17120e] focus:border-[#9b7632]' : 'bg-[#1a120e] border-[#3a2c23] text-[#faf7f2] focus:border-[#dec29b]';
-  const tableHeaderBg = isLight ? 'bg-[#f9f7f4] border-[#e8dfd5] text-[#4a3f35]' : 'bg-[#1a120e] border-[#2a201a] text-[#a89b8c]';
-  const tableRowHover = isLight ? 'hover:bg-[#fbf9f6] divide-[#eee7dc]' : 'hover:bg-[#18110d] divide-[#211813]';
-  const titleColor = isLight ? 'text-[#17120e]' : 'text-[#faf7f2]';
-  const accentGold = isLight ? 'text-[#9b7632]' : 'text-[#dec29b]';
-  const subtitleColor = isLight ? 'text-[#5c534a]' : 'text-[#a89b8c]';
-  const badgeBg = isLight ? 'bg-[#f8f5ee] text-[#8a6826] border-[#dfd5c4]' : 'bg-[#211611] text-[#dec29b] border-[#3a2c23]';
-  const primaryBtn = isLight ? 'bg-[#9b7632] hover:bg-[#856327] text-[#ffffff] shadow-xs' : 'bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b]';
+  const containerBg = isLight ? 'bg-[#f8fafc] text-gray-900' : 'bg-[#0f172a] text-slate-100';
+  const sidebarBg = isLight ? 'bg-white border-gray-200' : 'bg-[#1e293b] border-slate-700';
+  const sidebarHeaderBorder = isLight ? 'border-gray-200' : 'border-slate-700';
+  const sidebarFooterBg = isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#0f172a] border-slate-700';
+  const cardBg = isLight ? 'bg-white border border-gray-200 shadow-xs' : 'bg-[#1e293b] border border-slate-700 shadow-lg';
+  const cardHeaderBorder = isLight ? 'border-gray-100' : 'border-slate-700/60';
+  const inputBg = isLight ? 'bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gray-900 focus:ring-1 focus:ring-gray-900' : 'bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-white';
+  const tableHeaderBg = isLight ? 'bg-gray-50 border-gray-200 text-gray-700 font-semibold' : 'bg-slate-800/80 border-slate-700 text-slate-300';
+  const tableRowHover = isLight ? 'hover:bg-gray-50/80 divide-gray-100' : 'hover:bg-slate-800/50 divide-slate-800';
+  const titleColor = isLight ? 'text-gray-900' : 'text-white';
+  const accentGold = isLight ? 'text-gray-900' : 'text-slate-100';
+  const subtitleColor = isLight ? 'text-gray-500' : 'text-slate-400';
+  const badgeBg = isLight ? 'bg-gray-100 text-gray-800 border-gray-200' : 'bg-slate-800 text-slate-200 border-slate-700';
+  const primaryBtn = isLight ? 'bg-gray-900 hover:bg-black text-white shadow-xs' : 'bg-white hover:bg-slate-100 text-slate-900';
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-[#fbfaf8] flex flex-col items-center justify-center text-[#9b7632]">
-        <div className="w-10 h-10 rounded-full border-2 border-[#9b7632] border-t-transparent animate-spin mb-4" />
-        <p className="font-serif text-xs tracking-[0.25em] uppercase text-[#9b7632] font-semibold">Verifying Bradford Admin Terminal...</p>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-gray-900">
+        <div className="w-10 h-10 rounded-full border-2 border-gray-900 border-t-transparent animate-spin mb-4" />
+        <p className="font-sans text-xs tracking-[0.2em] uppercase text-gray-700 font-semibold">Verifying Bradford Admin Terminal...</p>
       </div>
     );
   }
@@ -950,14 +950,14 @@ export default function AdminDashboardPage() {
   return (
     <div
       suppressHydrationWarning
-      className={`min-h-screen h-screen w-full overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-[#c5a059] selection:text-[#ffffff] transition-colors duration-200`}
+      className={`min-h-screen h-screen w-full overflow-hidden ${containerBg} flex flex-col md:flex-row font-sans selection:bg-gray-900 selection:text-white transition-colors duration-200 text-[13px]`}
     >
       {/* MOBILE HEADER BAR */}
       <header className={`md:hidden flex items-center justify-between px-4 py-3 ${sidebarBg} border-b sticky top-0 z-40`}>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setMobileDrawerOpen(true)}
-            className={`p-2 ${accentGold} hover:bg-[#f8f5ee] dark:hover:bg-[#1f1612] rounded-[5px] transition-colors`}
+            className={`p-2 ${accentGold} hover:bg-gray-50 dark:hover:bg-[#1f1612] rounded-[5px] transition-colors`}
             aria-label="Open Admin Menu"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -965,7 +965,7 @@ export default function AdminDashboardPage() {
             </svg>
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-[4px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+            <div className="w-7 h-7 rounded-[4px] bg-gray-900 text-white flex items-center justify-center shadow-xs">
               <CrownIcon className="w-3.5 h-3.5" />
             </div>
             <div className="flex flex-col">
@@ -981,11 +981,11 @@ export default function AdminDashboardPage() {
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             className={`px-2.5 py-1.5 rounded-[5px] text-xs font-medium border transition-colors flex items-center gap-1.5 ${
               isLight
-                ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5]'
-                : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                ? 'bg-gray-50 text-[#17120e] border-gray-200'
+                : 'bg-slate-800 text-slate-200 border-slate-700'
             }`}
           >
-            {isLight ? <MoonIcon className="w-3.5 h-3.5 text-[#9b7632]" /> : <SunIcon className="w-3.5 h-3.5 text-[#dec29b]" />}
+            {isLight ? <MoonIcon className="w-3.5 h-3.5 text-gray-700" /> : <SunIcon className="w-3.5 h-3.5 text-amber-500" />}
             <span>{isLight ? 'Dark' : 'Light'}</span>
           </button>
 
@@ -993,7 +993,7 @@ export default function AdminDashboardPage() {
             href="/"
             target="_blank"
             className={`text-xs px-2.5 py-1.5 ${
-              isLight ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+              isLight ? 'bg-gray-50 text-gray-800 border-gray-200' : 'bg-[#1e293b] text-slate-200 border-slate-700'
             } border rounded-[5px] transition-colors flex items-center space-x-1`}
           >
             <StoreIcon className="w-3.5 h-3.5" />
@@ -1009,10 +1009,10 @@ export default function AdminDashboardPage() {
             className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
-          <aside className={`relative w-72 max-w-[80vw] ${sidebarBg} border-r flex flex-col h-full z-10 shadow-2xl`}>
-            <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
+          <aside className={`relative w-60 max-w-[80vw] ${sidebarBg} border-r flex flex-col h-full z-10 shadow-2xl`}>
+            <div className={`p-3.5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+                <div className="w-8 h-8 rounded-[5px] bg-gray-900 text-white flex items-center justify-center shadow-xs">
                   <CrownIcon className="w-4 h-4" />
                 </div>
                 <div>
@@ -1038,10 +1038,10 @@ export default function AdminDashboardPage() {
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[5px] text-sm font-medium transition-all ${
                     activeTab === item.id
                       ? isLight
-                        ? 'bg-[#f8f5ee] text-[#9b7632] border-l-2 border-[#9b7632] font-bold shadow-xs'
-                        : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                        ? 'bg-gray-100 text-gray-900 border-l-2 border-gray-900 font-bold shadow-xs'
+                        : 'bg-slate-800 text-white border-l-2 border-white shadow-md'
                       : isLight
-                      ? 'text-[#4a3f35] hover:bg-[#f8f5ee]'
+                      ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
                   }`}
                 >
@@ -1057,12 +1057,12 @@ export default function AdminDashboardPage() {
                 </button>
               ))}
             </nav>
-            <div className={`p-4 ${sidebarFooterBg} border-t flex flex-col gap-2`}>
+            <div className={`p-3 ${sidebarFooterBg} border-t flex flex-col gap-2`}>
               <Link
                 href="/"
                 target="_blank"
                 className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
-                  isLight ? 'bg-[#ffffff] text-[#9b7632] border border-[#ded3c5] hover:bg-[#f8f5ee]' : 'bg-[#1f1612] text-[#dec29b] border border-[#3a2c23] hover:bg-[#2c201a]'
+                  isLight ? 'bg-white text-gray-800 border border-gray-200 hover:bg-gray-50' : 'bg-[#1e293b] text-slate-200 border border-slate-700 hover:bg-slate-700'
                 } rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all shadow-2xs`}
               >
                 <StoreIcon className="w-3.5 h-3.5" />
@@ -1085,14 +1085,14 @@ export default function AdminDashboardPage() {
       {/* DESKTOP SIDEBAR SLIDER DRAWER (STATIONARY / FIXED) */}
       <aside
         className={`hidden md:flex flex-col ${sidebarBg} border-r transition-all duration-300 relative z-30 h-full overflow-y-auto flex-shrink-0 sticky top-0 ${
-          sidebarOpen ? 'w-64' : 'w-20'
+          sidebarOpen ? 'w-56' : 'w-16'
         }`}
       >
         {/* SIDEBAR HEADER */}
-        <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
+        <div className={`p-3.5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
           {sidebarOpen ? (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+              <div className="w-8 h-8 rounded-[5px] bg-gray-900 text-white flex items-center justify-center shadow-xs">
                 <CrownIcon className="w-4 h-4" />
               </div>
               <div>
@@ -1101,7 +1101,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="mx-auto w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+            <div className="mx-auto w-8 h-8 rounded-[5px] bg-gray-900 text-white flex items-center justify-center shadow-xs">
               <CrownIcon className="w-4 h-4" />
             </div>
           )}
@@ -1122,19 +1122,19 @@ export default function AdminDashboardPage() {
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
             className={`w-full flex items-center ${
               sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
-            } py-2.5 rounded-[5px] text-xs font-semibold border transition-all ${
+            } py-1.5 px-2.5 rounded-[4px] text-[11px] font-semibold border transition-all ${
               isLight
-                ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5] hover:bg-[#ede5d8]'
-                : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                ? 'bg-gray-50 text-[#17120e] border-gray-200 hover:bg-gray-100'
+                : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
             }`}
             title="Toggle Admin Theme"
           >
             <div className="flex items-center space-x-2">
-              {isLight ? <MoonIcon className="w-4 h-4 text-[#9b7632]" /> : <SunIcon className="w-4 h-4 text-[#dec29b]" />}
+              {isLight ? <MoonIcon className="w-4 h-4 text-gray-700" /> : <SunIcon className="w-4 h-4 text-amber-500" />}
               {sidebarOpen && <span>{isLight ? 'Light Theme (Default)' : 'Dark Theme'}</span>}
             </div>
             {sidebarOpen && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#9b7632] text-white">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-gray-900 text-white">
                 Toggle
               </span>
             )}
@@ -1149,13 +1149,13 @@ export default function AdminDashboardPage() {
               onClick={() => setActiveTab(item.id as any)}
               className={`w-full flex items-center ${
                 sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
-              } py-3 rounded-[5px] text-sm font-medium transition-all ${
+              } py-2 rounded-[4px] text-xs font-medium transition-all ${
                 activeTab === item.id
                   ? isLight
-                    ? 'bg-[#f8f5ee] text-[#9b7632] border-l-2 border-[#9b7632] font-bold shadow-xs'
-                    : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
+                    ? 'bg-gray-100 text-gray-900 border-l-2 border-gray-900 font-bold shadow-xs'
+                    : 'bg-slate-800 text-white border-l-2 border-white shadow-md'
                   : isLight
-                  ? 'text-[#4a3f35] hover:bg-[#f8f5ee]'
+                  ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
               }`}
               title={!sidebarOpen ? item.label : undefined}
@@ -1174,11 +1174,11 @@ export default function AdminDashboardPage() {
         </nav>
 
         {/* ADMIN PROFILE FOOTER */}
-        <div className={`p-4 ${sidebarFooterBg} border-t flex flex-col space-y-3`}>
+        <div className={`p-3 ${sidebarFooterBg} border-t flex flex-col space-y-3`}>
           {sidebarOpen ? (
             <>
               <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-[5px] ${isLight ? 'bg-[#9b7632] text-white' : 'bg-[#dec29b] text-[#140e0b]'} font-serif font-bold flex items-center justify-center text-sm shadow-2xs`}>
+                <div className={`w-8 h-8 rounded-[5px] ${isLight ? 'bg-gray-900 text-white' : 'bg-slate-700 text-white'} font-serif font-bold flex items-center justify-center text-sm shadow-2xs`}>
                   AD
                 </div>
                 <div className="flex flex-col overflow-hidden">
@@ -1192,8 +1192,8 @@ export default function AdminDashboardPage() {
                   target="_blank"
                   className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
                     isLight
-                      ? 'bg-[#ffffff] text-[#9b7632] border-[#ded3c5] hover:bg-[#f8f5ee]'
-                      : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                      ? 'bg-[#ffffff] text-gray-900 border-gray-200 hover:bg-gray-50'
+                      : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
                   } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all shadow-2xs`}
                 >
                   <StoreIcon className="w-3.5 h-3.5" />
@@ -1234,15 +1234,15 @@ export default function AdminDashboardPage() {
       </aside>
 
       {/* MAIN CONTENT AREA (INDEPENDENT VERTICAL SCROLL) */}
-      <main className="flex-1 h-full overflow-y-auto p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+      <main className="flex-1 h-full overflow-y-auto p-3 sm:p-4 lg:p-5 w-full">
         {/* TOP STATUS BAR */}
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b ${cardHeaderBorder} gap-4`}>
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 mb-4 border-b ${cardHeaderBorder} gap-3`}>
           <div>
             <span className={`text-xs uppercase tracking-widest ${accentGold} font-semibold flex items-center gap-1.5`}>
               <CrownIcon className="w-3.5 h-3.5" />
               Luxury Fine Jewellery Administration
             </span>
-            <h1 className={`font-serif text-2xl sm:text-3xl ${titleColor} font-semibold tracking-wide capitalize mt-0.5`}>
+            <h1 className={`font-serif text-lg sm:text-xl ${titleColor} font-bold tracking-wide capitalize mt-0.5`}>
               {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? 'Add New Product Studio' : activeTab}
             </h1>
           </div>
@@ -1252,11 +1252,11 @@ export default function AdminDashboardPage() {
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
               className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold border flex items-center space-x-1.5 transition-all shadow-xs ${
                 isLight
-                  ? 'bg-[#ffffff] text-[#17120e] border-[#ded3c5] hover:bg-[#f8f5ee]'
-                  : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                  ? 'bg-[#ffffff] text-[#17120e] border-gray-200 hover:bg-gray-50'
+                  : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
               }`}
             >
-              {isLight ? <MoonIcon className="w-3.5 h-3.5 text-[#9b7632]" /> : <SunIcon className="w-3.5 h-3.5 text-[#dec29b]" />}
+              {isLight ? <MoonIcon className="w-3.5 h-3.5 text-gray-700" /> : <SunIcon className="w-3.5 h-3.5 text-amber-500" />}
               <span>{isLight ? 'Light Theme' : 'Dark Theme'}</span>
             </button>
 
@@ -1278,16 +1278,16 @@ export default function AdminDashboardPage() {
 
         {/* TAB 1: DASHBOARD OVERVIEW */}
         {activeTab === 'dashboard' && (
-          <ScrollReveal direction="up" delay={100} className="space-y-8">
+          <ScrollReveal direction="up" delay={100} className="space-y-4">
             {/* KPI METRICS CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`${cardBg} p-5 rounded-[5px]`}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className={`${cardBg} p-3.5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Total Revenue</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>£{totalRevenue.toLocaleString()}</p>
+                    <p className={`text-xl sm:text-2xl font-serif ${accentGold} font-bold mt-1.5`}>£{totalRevenue.toLocaleString()}</p>
                   </div>
-                  <div className="p-2.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                  <div className="p-2 rounded-[4px] bg-gray-100 border border-gray-200 text-gray-900">
                     <ArrowTrendingUpIcon className="w-5 h-5" />
                   </div>
                 </div>
@@ -1296,13 +1296,13 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className={`${cardBg} p-5 rounded-[5px]`}>
+              <div className={`${cardBg} p-3.5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live Catalog Items</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>{totalProductsCount}</p>
+                    <p className={`text-xl sm:text-2xl font-serif ${titleColor} font-bold mt-1.5`}>{totalProductsCount}</p>
                   </div>
-                  <div className="p-2.5 rounded-[5px] bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-sky-600">
+                  <div className="p-2 rounded-[4px] bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-sky-600">
                     <DiamondIcon className="w-5 h-5" />
                   </div>
                 </div>
@@ -1311,13 +1311,13 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className={`${cardBg} p-5 rounded-[5px]`}>
+              <div className={`${cardBg} p-3.5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Bespoke Requests</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>{pendingEnquiriesCount}</p>
+                    <p className={`text-xl sm:text-2xl font-serif ${accentGold} font-bold mt-1.5`}>{pendingEnquiriesCount}</p>
                   </div>
-                  <div className="p-2.5 rounded-[5px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-600">
+                  <div className="p-2 rounded-[4px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-600">
                     <SparklesIcon className="w-5 h-5" />
                   </div>
                 </div>
@@ -1326,13 +1326,13 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              <div className={`${cardBg} p-5 rounded-[5px]`}>
+              <div className={`${cardBg} p-3.5 rounded-[5px]`}>
                 <div className="flex justify-between items-start">
                   <div>
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live 24K Gold Rate</p>
-                    <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>Rs. {gold24kRate}</p>
+                    <p className={`text-xl sm:text-2xl font-serif ${titleColor} font-bold mt-1.5`}>Rs. {gold24kRate}</p>
                   </div>
-                  <div className="p-2.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                  <div className="p-2 rounded-[4px] bg-gray-100 border border-gray-200 text-gray-900">
                     <GoldRatesIcon className="w-5 h-5" />
                   </div>
                 </div>
@@ -1343,9 +1343,9 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* QUICK ACTIONS & RECENT ORDERS */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
               {/* Recent Orders List */}
-              <div className={`lg:col-span-2 ${cardBg} rounded-[5px] p-5`}>
+              <div className={`lg:col-span-2 ${cardBg} rounded-[5px] p-3.5`}>
                 <div className={`flex items-center justify-between mb-4 border-b ${cardHeaderBorder} pb-3`}>
                   <h3 className={`font-serif text-lg ${accentGold} font-semibold flex items-center gap-2`}>
                     <OrdersIcon className="w-4 h-4" />
@@ -1386,7 +1386,7 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedInvoiceOrder(o)}
-                              className="px-2.5 py-1 rounded-[4px] border border-[#ded3c5] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5 shadow-2xs"
+                              className="px-2.5 py-1 rounded-[4px] border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5 shadow-2xs"
                             >
                               <PrinterIcon className="w-3 h-3" />
                               <span>Invoice</span>
@@ -1420,7 +1420,7 @@ export default function AdminDashboardPage() {
                   </button>
                   <div className="space-y-3 pt-2">
                     {slides.slice(0, 2).map(slide => (
-                      <div key={slide.id} className={`p-3 ${isLight ? 'bg-[#fbf9f6] border-[#e8dfd5]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
+                      <div key={slide.id} className={`p-3 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
                         <div className="truncate pr-2">
                           <p className={`text-xs font-semibold ${titleColor} truncate`}>{slide.title}</p>
                           <p className={`text-[10px] ${subtitleColor} uppercase`}>{slide.status}</p>
@@ -1432,7 +1432,7 @@ export default function AdminDashboardPage() {
                 <button
                   onClick={() => setActiveTab('slides')}
                   className={`mt-4 w-full py-2 ${
-                    isLight ? 'bg-[#f8f5ee] text-[#9b7632] border-[#ded3c5] hover:bg-[#ede5d8]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                    isLight ? 'bg-gray-50 text-gray-800 border-gray-200 hover:bg-gray-100' : 'bg-[#1e293b] text-slate-200 border-slate-700 hover:bg-slate-700'
                   } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5`}
                 >
                   <SlidesIcon className="w-3.5 h-3.5" />
@@ -1449,11 +1449,11 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             {/* FEATURE 4: INVENTORY HEALTH KPI CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-gray-900`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Catalog Items</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className={`text-2xl font-serif font-bold ${titleColor}`}>{products.length}</span>
-                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                  <div className="p-1.5 rounded-[5px] bg-gray-100 border border-gray-200 text-gray-900">
                     <DiamondIcon className="w-4 h-4" />
                   </div>
                 </div>
@@ -1529,7 +1529,7 @@ export default function AdminDashboardPage() {
               {/* Search & Stock Filter Pills */}
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative w-full sm:w-64">
-                  <SearchIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#9b7632]" />
+                  <SearchIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     type="text"
                     placeholder="Search by title, SKU..."
@@ -1539,7 +1539,7 @@ export default function AdminDashboardPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-1.5 bg-[#f8f5ee] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-[#1a120e] p-1 rounded-[5px] border border-gray-200 dark:border-[#3a2c23]">
                   <button
                     type="button"
                     onClick={() => setStockFilter('all')}
@@ -1595,7 +1595,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={handleExportInventoryCSV}
-                  className="px-3.5 py-2 rounded-[5px] border border-[#ded3c5] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs"
+                  className="px-3.5 py-2 rounded-[5px] border border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs"
                   title="Download inventory report as CSV spreadsheet"
                 >
                   <ExportIcon className="w-3.5 h-3.5" />
@@ -1618,15 +1618,15 @@ export default function AdminDashboardPage() {
                 <table className="w-full text-left text-xs">
                   <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold`}>
                     <tr>
-                      <th className="p-4">Product Info</th>
-                      <th className="p-4">SKU</th>
-                      <th className="p-4">Category</th>
-                      <th className="p-4">Metal Spec</th>
-                      <th className="p-4">Price</th>
-                      <th className="p-4">Stock Health</th>
-                      <th className="p-4">Quick Restock</th>
-                      <th className="p-4">Images</th>
-                      <th className="p-4 text-right">Actions</th>
+                      <th className="py-2.5 px-3">Product Info</th>
+                      <th className="py-2.5 px-3">SKU</th>
+                      <th className="py-2.5 px-3">Category</th>
+                      <th className="py-2.5 px-3">Metal Spec</th>
+                      <th className="py-2.5 px-3">Price</th>
+                      <th className="py-2.5 px-3">Stock Health</th>
+                      <th className="py-2.5 px-3">Quick Restock</th>
+                      <th className="py-2.5 px-3">Images</th>
+                      <th className="py-2.5 px-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className={`divide-y ${tableRowHover}`}>
@@ -1639,8 +1639,8 @@ export default function AdminDashboardPage() {
                     ) : (
                       filteredProducts.map((p) => (
                         <tr key={p.id} className="transition-colors">
-                          <td className="p-4 flex items-center space-x-3">
-                            <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#211611] flex-shrink-0 border border-[#ded3c5] dark:border-[#3a2c23]">
+                          <td className="py-2 px-3 flex items-center space-x-2.5">
+                            <div className="relative w-8 h-8 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#211611] flex-shrink-0 border border-gray-200 dark:border-[#3a2c23]">
                               <Image src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'} alt={p.name} fill className="object-cover" />
                             </div>
                             <div>
@@ -1648,16 +1648,16 @@ export default function AdminDashboardPage() {
                               <p className={`text-[10px] ${subtitleColor}`}>{p.id}</p>
                             </div>
                           </td>
-                          <td className={`p-4 font-mono ${subtitleColor}`}>{p.sku}</td>
-                          <td className="p-4">
-                            <span className={`px-2 py-0.5 border rounded-[5px] text-[10px] ${badgeBg}`}>
+                          <td className={`py-2 px-3 font-mono ${subtitleColor}`}>{p.sku}</td>
+                          <td className="py-2 px-3">
+                            <span className={`px-1.5 py-0.5 border rounded-[4px] text-[10px] ${badgeBg}`}>
                               {p.category}
                             </span>
                           </td>
-                          <td className={`p-4 ${subtitleColor}`}>{p.metal}</td>
-                          <td className={`p-4 font-semibold ${accentGold}`}>£{p.price.toLocaleString()}</td>
-                          <td className="p-4">
-                            <span className={`px-2.5 py-1 rounded-[5px] text-[10px] font-bold inline-flex items-center gap-1 ${
+                          <td className={`py-2 px-3 ${subtitleColor}`}>{p.metal}</td>
+                          <td className={`py-2 px-3 font-semibold ${accentGold}`}>£{p.price.toLocaleString()}</td>
+                          <td className="py-2 px-3">
+                            <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold inline-flex items-center gap-1 ${
                               p.stock > 5 ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
                               p.stock > 0 ? 'bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800' :
                               'bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800'
@@ -1673,12 +1673,12 @@ export default function AdminDashboardPage() {
                             </span>
                           </td>
                           {/* FEATURE 4: QUICK RESTOCK STEPPER */}
-                          <td className="p-4">
+                          <td className="py-2 px-3">
                             <div className="flex items-center gap-1">
                               <button
                                 type="button"
                                 onClick={() => handleQuickRestock(p.id, p.name, p.stock, 1)}
-                                className="px-2 py-1 rounded-[4px] bg-[#f8f5ee] dark:bg-[#211611] hover:bg-[#ede5d8] dark:hover:bg-[#2d1e17] text-[#17120e] dark:text-[#dec29b] border border-[#ded3c5] dark:border-[#3a2c23] text-[10px] font-bold transition-all"
+                                className="px-2 py-1 rounded-[4px] bg-gray-50 dark:bg-[#211611] hover:bg-gray-100 dark:hover:bg-[#2d1e17] text-[#17120e] dark:text-slate-200 border border-gray-200 dark:border-[#3a2c23] text-[10px] font-bold transition-all"
                                 title="Add 1 piece to stock"
                               >
                                 +1
@@ -1686,14 +1686,14 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => handleQuickRestock(p.id, p.name, p.stock, 5)}
-                                className="px-2 py-1 rounded-[4px] bg-[#9b7632]/15 hover:bg-[#9b7632]/30 text-[#9b7632] dark:text-[#dec29b] border border-[#9b7632]/40 text-[10px] font-bold transition-all"
+                                className="px-2 py-1 rounded-[4px] bg-gray-900/15 hover:bg-gray-900/30 text-gray-900 dark:text-slate-200 border border-gray-300 text-[10px] font-bold transition-all"
                                 title="Add 5 pieces (Standard batch restock)"
                               >
                                 +5
                               </button>
                             </div>
                           </td>
-                          <td className="p-4 text-[#9b7632]">
+                          <td className="p-4 text-gray-900">
                             <span className="font-semibold">{p.images?.length || 1} imgs</span>
                           </td>
                           <td className="p-4 text-right">
@@ -1701,7 +1701,7 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => setEditingAdminProduct(p)}
-                                className="px-2.5 py-1 bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#ded3c5] flex items-center gap-1 shadow-2xs"
+                                className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 rounded-[5px] text-[10px] font-bold transition-colors border border-gray-200 flex items-center gap-1 shadow-2xs"
                                 title="Edit product"
                               >
                                 <EditIcon className="w-3 h-3" />
@@ -1746,7 +1746,7 @@ export default function AdminDashboardPage() {
               {/* Header Action Bar */}
               <div className={`${cardBg} p-5 rounded-[5px] flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632] flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-[5px] bg-gray-100 border border-gray-200 text-gray-900 flex items-center justify-center">
                     <AddProductIcon className="w-5 h-5" />
                   </div>
                   <div>
@@ -1759,7 +1759,7 @@ export default function AdminDashboardPage() {
                     type="button"
                     onClick={() => setActiveTab('products')}
                     className={`px-4 py-2 border rounded-[5px] text-xs font-medium transition-colors ${
-                      isLight ? 'bg-[#f8f5ee] text-[#4a3f35] border-[#ded3c5]' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
+                      isLight ? 'bg-gray-50 text-[#4a3f35] border-gray-200' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
                     }`}
                   >
                     Cancel &amp; Return
@@ -1823,7 +1823,7 @@ export default function AdminDashboardPage() {
                             <label className={`block text-xs font-semibold ${subtitleColor}`}>
                               Metal Purity &amp; Spec *
                             </label>
-                            <span className="text-[10px] text-[#9b7632] font-mono flex items-center gap-1">
+                            <span className="text-[10px] text-gray-900 font-mono flex items-center gap-1">
                               <EditIcon className="w-3 h-3" />
                               Type custom
                             </span>
@@ -1854,8 +1854,8 @@ export default function AdminDashboardPage() {
                                 key={preset}
                                 type="button"
                                 onClick={() => setAddForm({ ...addForm, metal: preset })}
-                                className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-[#9b7632]/30 hover:border-[#9b7632] transition-all ${
-                                  addForm.metal === preset ? 'bg-[#9b7632]/15 text-[#9b7632] font-bold' : subtitleColor
+                                className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-gray-300 hover:border-gray-900 transition-all ${
+                                  addForm.metal === preset ? 'bg-gray-900/15 text-gray-900 font-bold' : subtitleColor
                                 }`}
                               >
                                 {preset}
@@ -1976,8 +1976,8 @@ export default function AdminDashboardPage() {
 
                     <div className="space-y-4">
                       {/* Device File Upload Box */}
-                      <div className={`p-5 ${isLight ? 'bg-[#fbf9f6] border-[#ded3c5]' : 'bg-[#1a120e] border-[#3a2c23]'} border-2 border-dashed rounded-[5px] text-center space-y-2`}>
-                        <ImageIcon className="w-8 h-8 text-[#9b7632] mx-auto" />
+                      <div className={`p-5 ${isLight ? 'bg-gray-50 border-gray-200' : 'bg-[#1a120e] border-[#3a2c23]'} border-2 border-dashed rounded-[5px] text-center space-y-2`}>
+                        <ImageIcon className="w-8 h-8 text-gray-900 mx-auto" />
                         <h4 className={`text-xs font-bold ${titleColor}`}>Upload Photo Files from Device (PC or Mobile)</h4>
                         <p className={`text-[10px] ${subtitleColor}`}>Select device image files (JPG, PNG, WEBP)</p>
                         
@@ -2045,7 +2045,7 @@ export default function AdminDashboardPage() {
                           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                             {/* Primary */}
                             {addForm.primaryImage && (
-                              <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#9b7632] group bg-[#f8f5ee]">
+                              <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-gray-900 group bg-gray-50">
                                 <Image src={addForm.primaryImage} alt="Primary Cover" fill className="object-cover" />
                                 <button
                                   type="button"
@@ -2055,7 +2055,7 @@ export default function AdminDashboardPage() {
                                 >
                                   <XIcon className="w-3 h-3" />
                                 </button>
-                                <span className="absolute bottom-0 left-0 right-0 bg-[#9b7632] text-white text-[9px] text-center font-bold uppercase py-0.5">
+                                <span className="absolute bottom-0 left-0 right-0 bg-gray-900 text-white text-[9px] text-center font-bold uppercase py-0.5">
                                   COVER PHOTO
                                 </span>
                               </div>
@@ -2063,7 +2063,7 @@ export default function AdminDashboardPage() {
 
                             {/* Additional Images */}
                             {addForm.additionalImages.map((imgUrl, idx) => (
-                              <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#ded3c5] dark:border-[#3a2c23] group bg-[#f8f5ee]">
+                              <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-gray-200 dark:border-[#3a2c23] group bg-gray-50">
                                 <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
                                 <button
                                   type="button"
@@ -2097,7 +2097,7 @@ export default function AdminDashboardPage() {
                       <button
                         type="button"
                         onClick={generateAutoSeo}
-                        className={`px-3 py-1.5 bg-[#9b7632] hover:bg-[#856327] text-white text-xs font-bold rounded-[5px] shadow-xs transition-all flex items-center gap-1.5`}
+                        className={`px-3 py-1.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-[5px] shadow-xs transition-all flex items-center gap-1.5`}
                       >
                         <SparklesIcon className="w-3.5 h-3.5" />
                         <span>Auto-Generate SEO</span>
@@ -2162,13 +2162,13 @@ export default function AdminDashboardPage() {
                 <div className="space-y-6">
                   <div className={`${cardBg} p-6 rounded-[5px] space-y-4 sticky top-6`}>
                     <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2 flex items-center gap-2`}>
-                      <EyeIcon className="w-4 h-4 text-[#9b7632]" />
+                      <EyeIcon className="w-4 h-4 text-gray-900" />
                       <span>Real-Time Storefront Preview</span>
                     </h3>
 
                     {/* Store Card Preview */}
                     <div className="bg-[#FAF7F2] border border-[#E5DCD3] rounded-[5px] overflow-hidden shadow-sm text-[#1c1510] max-w-sm mx-auto">
-                      <div className="relative w-full h-56 bg-[#f8f5ee] dark:bg-[#1a120e] flex flex-col items-center justify-center text-center">
+                      <div className="relative w-full h-56 bg-gray-50 dark:bg-[#1a120e] flex flex-col items-center justify-center text-center">
                         {addForm.primaryImage ? (
                           <Image
                             src={addForm.primaryImage}
@@ -2178,12 +2178,12 @@ export default function AdminDashboardPage() {
                           />
                         ) : (
                           <div className="p-4 space-y-1">
-                            <ImageIcon className="w-8 h-8 text-[#9b7632]/50 mx-auto" />
-                            <p className="text-xs font-bold text-[#8c6b2d]">No Image Selected Yet</p>
+                            <ImageIcon className="w-8 h-8 text-gray-900/50 mx-auto" />
+                            <p className="text-xs font-bold text-gray-700">No Image Selected Yet</p>
                             <p className="text-[10px] text-[#8c7d6c]">Upload a photo or enter URL above to preview here</p>
                           </div>
                         )}
-                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-[#140e0b] text-[#dec29b] text-[9px] font-semibold uppercase rounded-[5px]">
+                        <span className="absolute top-2 left-2 px-2 py-0.5 bg-gray-900 text-gray-900 text-[9px] font-semibold uppercase rounded-[5px]">
                           {addForm.category}
                         </span>
                         {addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price) && (
@@ -2204,7 +2204,7 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div className="flex items-center space-x-2">
-                          <span className="text-base font-serif font-bold text-[#b38b40]">
+                          <span className="text-base font-serif font-bold text-gray-900">
                             ${addForm.price ? Number(addForm.price).toLocaleString() : '1,280'}
                           </span>
                           {addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price) && (
@@ -2249,11 +2249,11 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             {/* KPI STAT CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-gray-900`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Categories</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className={`text-2xl font-serif font-bold ${titleColor}`}>{categories.length}</span>
-                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                  <div className="p-1.5 rounded-[5px] bg-gray-100 border border-gray-200 text-gray-900">
                     <CategoriesIcon className="w-4 h-4" />
                   </div>
                 </div>
@@ -2284,14 +2284,14 @@ export default function AdminDashboardPage() {
                 <p className={`text-[10px] ${subtitleColor} mt-1`}>Total products distributed</p>
               </div>
 
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-gray-900`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Database Sync</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     Supabase Live
                   </span>
-                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                  <div className="p-1.5 rounded-[5px] bg-gray-100 border border-gray-200 text-gray-900">
                     <BoltIcon className="w-4 h-4" />
                   </div>
                 </div>
@@ -2317,7 +2317,7 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* LEFT: ADD / EDIT CATEGORY FORM */}
               <div className="lg:col-span-5 space-y-4">
-                <div className={`${cardBg} p-6 rounded-[5px] space-y-4 shadow-xs border border-[#ded3c5] dark:border-[#3a2c23]`}>
+                <div className={`${cardBg} p-6 rounded-[5px] space-y-4 shadow-xs border border-gray-200 dark:border-[#3a2c23]`}>
                   <div className="flex items-center justify-between border-b border-current border-opacity-10 pb-3">
                     <div>
                       <h3 className={`font-serif text-base font-bold ${accentGold} flex items-center gap-2`}>
@@ -2434,7 +2434,7 @@ export default function AdminDashboardPage() {
                             type="button"
                             onClick={() => setCategoryForm({ ...categoryForm, image: p.url })}
                             className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-current border-opacity-20 hover:border-opacity-60 transition-all ${
-                              categoryForm.image === p.url ? 'bg-[#9b7632]/20 font-bold text-[#9b7632]' : subtitleColor
+                              categoryForm.image === p.url ? 'bg-gray-900/20 font-bold text-gray-900' : subtitleColor
                             }`}
                           >
                             {p.label}
@@ -2458,8 +2458,8 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Live Preview Card */}
-                    <div className="p-3 rounded-[5px] bg-[#f8f5ee] dark:bg-[#1a120c] border border-[#ded3c5] dark:border-[#3a2c23] flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#281b13] flex-shrink-0 border border-[#ded3c5]">
+                    <div className="p-3 rounded-[5px] bg-gray-50 dark:bg-[#1a120c] border border-gray-200 dark:border-[#3a2c23] flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#281b13] flex-shrink-0 border border-gray-200">
                         <Image
                           src={categoryForm.image || '/images/category-rings.jpg'}
                           alt="Preview"
@@ -2501,7 +2501,7 @@ export default function AdminDashboardPage() {
 
               {/* RIGHT: REAL-TIME CATEGORIES LIST & PRODUCT COUNTS */}
               <div className="lg:col-span-7 space-y-4">
-                <div className={`${cardBg} rounded-[5px] overflow-hidden border border-[#ded3c5] dark:border-[#3a2c23]`}>
+                <div className={`${cardBg} rounded-[5px] overflow-hidden border border-gray-200 dark:border-[#3a2c23]`}>
                   <div className="p-4 border-b border-current border-opacity-10 flex items-center justify-between">
                     <div>
                       <h3 className={`font-serif text-base font-bold ${titleColor}`}>
@@ -2514,7 +2514,7 @@ export default function AdminDashboardPage() {
                     <Link
                       href="/categories"
                       target="_blank"
-                      className="px-3 py-1.5 rounded-[4px] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[11px] font-semibold border border-[#ded3c5] transition-colors flex items-center gap-1.5 shadow-2xs"
+                      className="px-3 py-1.5 rounded-[4px] bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 text-[11px] font-semibold border border-gray-200 transition-colors flex items-center gap-1.5 shadow-2xs"
                     >
                       <span>View Storefront</span>
                       <ExternalLinkIcon className="w-3 h-3" />
@@ -2541,7 +2541,7 @@ export default function AdminDashboardPage() {
                           return (
                             <tr key={cat.id || cat.slug} className="transition-colors">
                               <td className="p-3.5 flex items-center gap-3">
-                                <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#251a13] flex-shrink-0 border border-[#ded3c5] dark:border-[#3a2c23]">
+                                <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#251a13] flex-shrink-0 border border-gray-200 dark:border-[#3a2c23]">
                                   <Image
                                     src={cat.image || '/images/category-rings.jpg'}
                                     alt={cat.name}
@@ -2565,7 +2565,7 @@ export default function AdminDashboardPage() {
                                 <Link
                                   href={`/shop?category=${encodeURIComponent(cat.name)}`}
                                   target="_blank"
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[4px] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[11px] font-semibold border border-[#ded3c5] transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[4px] bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 text-[11px] font-semibold border border-gray-200 transition-colors"
                                   title="View items in this category"
                                 >
                                   <span>{productCount}</span>
@@ -2592,7 +2592,7 @@ export default function AdminDashboardPage() {
                                         display_order: cat.display_order || 1,
                                       });
                                     }}
-                                    className="px-2.5 py-1 bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#ded3c5] flex items-center gap-1 shadow-2xs"
+                                    className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 rounded-[5px] text-[10px] font-bold transition-colors border border-gray-200 flex items-center gap-1 shadow-2xs"
                                   >
                                     <EditIcon className="w-3 h-3" />
                                     <span>Edit</span>
@@ -2622,13 +2622,13 @@ export default function AdminDashboardPage() {
         {/* TAB 3: ADMIN ENVIRONMENT SLIDER & BANNER MANAGER */}
         {activeTab === 'slides' && (
 
-          <ScrollReveal direction="up" delay={100} className="space-y-8">
+          <ScrollReveal direction="up" delay={100} className="space-y-4">
             {/* REAL-TIME HERO SECTION EDITOR */}
-            <div className={`${cardBg} rounded-[5px] p-6 space-y-6`}>
+            <div className={`${cardBg} rounded-[5px] p-4 space-y-4`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-current border-opacity-15 pb-4">
                 <div>
                   <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
-                    <BoltIcon className="w-5 h-5 text-[#9b7632]" />
+                    <BoltIcon className="w-5 h-5 text-gray-900" />
                     <span>Main Storefront Hero Section Editor</span>
                   </h2>
                   <p className={`text-xs ${subtitleColor}`}>Edit headline, subtext, button links, background campaign image, and featured card live on the main website homepage.</p>
@@ -2703,7 +2703,7 @@ export default function AdminDashboardPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Button Text</label>
+                        <label className={`block font-semibold ${subtitleColor} mb-1`}>Button Link Name (Keep Short, e.g. Shop Now)</label>
                         <input
                           type="text"
                           value={heroForm.primaryCtaText}
@@ -2730,7 +2730,7 @@ export default function AdminDashboardPage() {
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleHeroImageUpload(e, 'heroImage')}
-                          className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#9b7632] file:text-white cursor-pointer"
+                          className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-gray-900 file:text-white cursor-pointer"
                         />
                         <span className={`text-[10px] ${subtitleColor}`}>or URL:</span>
                         <input
@@ -2774,7 +2774,7 @@ export default function AdminDashboardPage() {
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleHeroImageUpload(e, 'featuredImage')}
-                            className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#9b7632] file:text-white cursor-pointer"
+                            className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-gray-900 file:text-white cursor-pointer"
                           />
                           <input
                             type="text"
@@ -2800,15 +2800,15 @@ export default function AdminDashboardPage() {
                           <Image src={heroForm.heroImage} alt="Hero Preview" fill className="object-cover opacity-50 z-0" />
                         )}
                         <div className="relative z-10 space-y-2">
-                          <p className="text-[10px] tracking-[0.25em] text-[#dec29b] uppercase font-medium">{heroForm.brandPretitle || 'BHAI JEWELLER'}</p>
+                          <p className="text-[10px] tracking-[0.25em] text-gray-400 uppercase font-medium">{heroForm.brandPretitle || 'BHAI JEWELLER'}</p>
                           <h3 className="font-serif text-2xl font-normal leading-tight">
                             {heroForm.headlineLine1}{' '}
-                            <span className="italic text-[#dec29b] font-light">{heroForm.headlineLine2}</span>
+                            <span className="italic text-gray-100 font-light">{heroForm.headlineLine2}</span>
                             {heroForm.headlineLine3 && <span> {heroForm.headlineLine3}</span>}
                           </h3>
                           <p className="text-xs text-[#cfc6bc] line-clamp-3 font-light">{heroForm.description}</p>
                           <div className="pt-2">
-                            <span className="px-4 py-2 rounded-full bg-[#dec29b] text-[#140e0b] font-bold text-xs inline-flex items-center gap-1">
+                            <span className="px-4 py-2 rounded-full bg-white text-gray-900 font-bold text-xs inline-flex items-center gap-1">
                               <span>{heroForm.primaryCtaText || 'Shop Collection'}</span>
                               <ChevronRightIcon className="w-3.5 h-3.5" />
                             </span>
@@ -2823,7 +2823,7 @@ export default function AdminDashboardPage() {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-[9px] text-[#dec29b] font-bold uppercase tracking-wider">FEATURED</p>
+                            <p className="text-[9px] text-gray-300 font-bold uppercase tracking-wider">FEATURED</p>
                             <p className="text-xs font-serif font-bold text-white truncate">{heroForm.featuredTitle || 'Diamond Elegance'}</p>
                             <p className="text-[10px] text-gray-300 truncate">{heroForm.featuredSubtitle}</p>
                           </div>
@@ -2858,12 +2858,12 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Slide Banners Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {slides.map((slide) => (
                 <div key={slide.id} className={`${cardBg} rounded-[5px] overflow-hidden flex flex-col justify-between`}>
                   <div>
                     {/* Slide Image Preview */}
-                    <div className="relative w-full h-44 bg-[#e8dfd1] dark:bg-[#1a120e] border-b border-[#e8dfd1] dark:border-[#2a201a]">
+                    <div className="relative w-full h-36 bg-[#e8dfd1] dark:bg-[#1a120e] border-b border-[#e8dfd1] dark:border-[#2a201a]">
                       <Image src={slide.image} alt={slide.title} fill className="object-cover opacity-90" />
                       <div className="absolute top-2 right-2">
                         <span className={`px-2.5 py-1 rounded-[5px] text-[10px] font-semibold uppercase tracking-wider ${
@@ -2872,22 +2872,30 @@ export default function AdminDashboardPage() {
                           {slide.status}
                         </span>
                       </div>
-                      <div className={`absolute bottom-2 left-2 ${isLight ? 'bg-white/90 text-[#8c6b2d] border-[#e8dfd1]' : 'bg-[#140e0b]/90 text-[#dec29b] border-[#3a2c23]'} px-2 py-0.5 rounded-[5px] text-[10px] font-mono border`}>
+                      <div className={`absolute bottom-2 left-2 ${isLight ? 'bg-white/95 text-gray-800 border-gray-200 font-semibold' : 'bg-slate-900/90 text-slate-200 border-slate-700'} px-2 py-0.5 rounded-[5px] text-[10px] font-mono border`}>
                         Order #{slide.order}
                       </div>
                     </div>
                     {/* Slide Content */}
-                    <div className="p-4 space-y-2">
+                    <div className="p-3 space-y-1.5">
                       <h3 className={`font-serif font-bold ${titleColor} text-sm leading-snug`}>{slide.title}</h3>
                       <p className={`text-xs ${subtitleColor} line-clamp-2`}>{slide.subtitle}</p>
-                      <div className={`pt-2 text-[10px] ${accentGold} flex items-center space-x-2`}>
-                        <span className={`px-2 py-0.5 border rounded-[5px] ${badgeBg}`}>CTA: {slide.ctaText}</span>
-                        <span className={`truncate ${subtitleColor}`}>→ {slide.ctaLink}</span>
+                      <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 border-t border-gray-100 text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Link Name:</span>
+                          <span className="px-2 py-0.5 bg-gray-100 text-gray-900 border border-gray-200 rounded text-[11px] font-semibold max-w-[120px] truncate" title={slide.ctaText}>
+                            {slide.ctaText || 'Link'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-[11px] text-gray-500 font-mono truncate max-w-[160px]" title={slide.ctaLink}>
+                          <span>URL:</span>
+                          <span className="truncate font-medium text-gray-700">{slide.ctaLink || '/'}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                   {/* Actions */}
-                  <div className={`p-4 border-t ${cardHeaderBorder} ${isLight ? 'bg-[#fdfbf7]' : 'bg-[#100b08]'} flex items-center justify-between gap-2`}>
+                  <div className={`p-2.5 border-t ${cardHeaderBorder} ${isLight ? 'bg-white' : 'bg-[#100b08]'} flex items-center justify-between gap-2`}>
                     <button
                       onClick={() => toggleSlideStatus(slide.id)}
                       className={`flex-1 py-1.5 rounded-[5px] text-xs font-semibold transition-colors border ${
@@ -2923,8 +2931,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setOrderStatusFilter(st)}
                     className={`px-3 py-1.5 rounded-[5px] text-xs font-medium transition-all ${
                       orderStatusFilter === st
-                        ? isLight ? 'bg-[#b38b40] text-white font-bold' : 'bg-[#dec29b] text-[#140e0b] font-bold'
-                        : isLight ? 'bg-[#f4efe6] text-[#5c4d40] border border-[#dcd3c5]' : 'bg-[#1a120e] text-[#c2b4a3] border border-[#3a2c23]'
+                        ? isLight ? 'bg-gray-900 text-white font-bold' : 'bg-gray-900 text-white text-[#140e0b] font-bold'
+                        : isLight ? 'bg-gray-100 text-[#5c4d40] border border-gray-200' : 'bg-[#1a120e] text-[#c2b4a3] border border-[#3a2c23]'
                     }`}
                   >
                     {st}
@@ -2935,7 +2943,7 @@ export default function AdminDashboardPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredOrders.map((order) => (
-                <div key={order.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-[#b38b40]`}>
+                <div key={order.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-gray-400`}>
                   {/* Order Box Header */}
                   <div className="flex items-center justify-between border-b pb-2.5 border-opacity-30 border-current">
                     <span className={`font-mono text-xs font-bold ${accentGold}`}>{order.id}</span>
@@ -2977,7 +2985,7 @@ export default function AdminDashboardPage() {
                       <button
                         onClick={() => handleUpdateOrderStatus(order.id, 'Processing')}
                         className={`flex-1 py-1 px-1.5 border rounded-[5px] text-[9px] font-semibold text-center transition-colors ${
-                          isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                          isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-slate-800 text-slate-200 border-slate-700'
                         }`}
                       >
                         Processing
@@ -3007,8 +3015,8 @@ export default function AdminDashboardPage() {
                     onClick={() => setSelectedInvoiceOrder(order)}
                     className={`w-full py-1.5 px-2 rounded-[5px] text-[10px] font-semibold flex items-center justify-center gap-1.5 border transition-all ${
                       isLight
-                        ? 'bg-[#fdfbf7] text-[#8c6b2d] border-[#dec29b] hover:bg-[#f7f2e8]'
-                        : 'bg-[#1f1612] text-[#dec29b] border-[#4a392b] hover:bg-[#2b1f17]'
+                        ? 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'
+                        : 'bg-[#1f1612] text-gray-900 border-slate-700 hover:bg-slate-700'
                     }`}
                   >
                     <PrinterIcon className="w-3.5 h-3.5" />
@@ -3025,7 +3033,7 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {enquiries.map((enq) => (
-                <div key={enq.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-[#b38b40]`}>
+                <div key={enq.id} className={`${cardBg} rounded-[5px] p-4 flex flex-col justify-between space-y-3 transition-all hover:border-gray-400`}>
                   {/* Enquiry Header */}
                   <div className="flex items-center justify-between border-b pb-2 border-opacity-30 border-current">
                     <span className={`font-mono text-xs font-bold ${accentGold}`}>{enq.id}</span>
@@ -3076,7 +3084,7 @@ export default function AdminDashboardPage() {
                       <a
                         href={`mailto:${enq.email}`}
                         className={`flex-1 py-1 border rounded-[5px] text-[9px] font-semibold text-center transition-colors truncate ${
-                          isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+                          isLight ? 'bg-gray-100 text-gray-700 border-gray-200' : 'bg-slate-800 text-slate-200 border-slate-700'
                         }`}
                       >
                         Email
@@ -3118,12 +3126,12 @@ export default function AdminDashboardPage() {
                 <h2 className={`font-serif text-lg font-bold ${accentGold} flex items-center gap-2`}>
                   {userTabMode === 'users' ? (
                     <>
-                      <UsersIcon className="w-5 h-5 text-[#9b7632]" />
+                      <UsersIcon className="w-5 h-5 text-gray-900" />
                       <span>Registered User Accounts</span>
                     </>
                   ) : (
                     <>
-                      <ShieldCheckIcon className="w-5 h-5 text-[#9b7632]" />
+                      <ShieldCheckIcon className="w-5 h-5 text-gray-900" />
                       <span>Live IP Security &amp; Login Audit Logs</span>
                     </>
                   )}
@@ -3141,9 +3149,9 @@ export default function AdminDashboardPage() {
                   onClick={() => setUserTabMode('users')}
                   className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border flex items-center gap-1.5 ${
                     userTabMode === 'users'
-                      ? 'bg-[#9b7632] text-white border-[#9b7632] shadow-sm font-bold'
+                      ? 'bg-gray-900 text-white border-gray-900 shadow-sm font-bold'
                       : isLight
-                      ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
+                      ? 'bg-gray-100 text-[#5c4d40] border-gray-200'
                       : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
                   }`}
                 >
@@ -3155,9 +3163,9 @@ export default function AdminDashboardPage() {
                   onClick={() => setUserTabMode('security')}
                   className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border flex items-center gap-1.5 ${
                     userTabMode === 'security'
-                      ? 'bg-[#9b7632] text-white border-[#9b7632] shadow-sm font-bold'
+                      ? 'bg-gray-900 text-white border-gray-900 shadow-sm font-bold'
                       : isLight
-                      ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
+                      ? 'bg-gray-100 text-[#5c4d40] border-gray-200'
                       : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
                   }`}
                 >
@@ -3195,10 +3203,10 @@ export default function AdminDashboardPage() {
                         className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold capitalize transition-all whitespace-nowrap border ${
                           userStatusFilter === st
                             ? isLight
-                              ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-xs'
-                              : 'bg-[#dec29b] text-[#140e0b] border-[#dec29b] shadow-xs'
+                              ? 'bg-gray-900 text-white border-gray-900 shadow-xs'
+                              : 'bg-gray-900 text-white text-[#140e0b] border-gray-200 shadow-xs'
                             : isLight
-                            ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5] hover:bg-[#ebdcb9]/40'
+                            ? 'bg-gray-100 text-[#5c4d40] border-gray-200 hover:bg-[#ebdcb9]/40'
                             : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23] hover:bg-[#261a14]'
                         }`}
                       >
@@ -3324,7 +3332,7 @@ export default function AdminDashboardPage() {
                                       }`}
                                     >
                                       {u.role === 'admin' ? (
-                                        <span className="inline-flex items-center gap-1"><CrownIcon className="w-3 h-3 text-[#9b7632]" /> Admin</span>
+                                        <span className="inline-flex items-center gap-1"><CrownIcon className="w-3 h-3 text-gray-900" /> Admin</span>
                                       ) : (
                                         <span className="inline-flex items-center gap-1"><UsersIcon className="w-3 h-3" /> Client</span>
                                       )}
@@ -3402,7 +3410,7 @@ export default function AdminDashboardPage() {
                                             type="button"
                                             disabled={isLoading}
                                             onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'activate')}
-                                            className="px-2 py-1 rounded-[4px] bg-[#9b7632] text-white font-semibold text-[10.5px] hover:bg-[#856327] transition-all shadow-2xs flex items-center gap-1"
+                                            className="px-2 py-1 rounded-[4px] bg-gray-900 text-white font-semibold text-[10.5px] hover:bg-black transition-all shadow-2xs flex items-center gap-1"
                                           >
                                             <CheckCircleIcon className="w-3 h-3" />
                                             <span>{isLoading ? '...' : 'Activate'}</span>
@@ -3513,7 +3521,7 @@ export default function AdminDashboardPage() {
                     />
 
                     {/* Category Filter Pills */}
-                    <div className="flex items-center gap-1 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                    <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#1a120e] p-1 rounded-[5px] border border-gray-200 dark:border-[#3a2c23]">
                       {(['ALL', 'AUTH', 'SECURITY', 'ORDER', 'INVENTORY'] as const).map((cat) => (
                         <button
                           key={cat}
@@ -3531,7 +3539,7 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Severity Filter Pills */}
-                    <div className="flex items-center gap-1 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                    <div className="flex items-center gap-1 bg-gray-100 dark:bg-[#1a120e] p-1 rounded-[5px] border border-gray-200 dark:border-[#3a2c23]">
                       {(['ALL', 'INFO', 'WARNING', 'CRITICAL'] as const).map((sev) => (
                         <button
                           key={sev}
@@ -3558,7 +3566,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={handleExportAuditCSV}
-                      className="px-3.5 py-2 rounded-[5px] border border-[#ded3c5] bg-[#ffffff] hover:bg-[#fbfaf8] text-[#9b7632] dark:border-[#3a2c23] dark:bg-[#1a120e] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                      className="px-3.5 py-2 rounded-[5px] border border-gray-200 bg-[#ffffff] hover:bg-[#fbfaf8] text-gray-900 dark:border-[#3a2c23] dark:bg-[#1a120e] dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                       title="Download complete security audit log as CSV"
                     >
                       <ExportIcon className="w-3.5 h-3.5" />
@@ -3605,22 +3613,22 @@ export default function AdminDashboardPage() {
                                 <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold border inline-flex items-center gap-1 ${badgeBg}`}>
                                   {log.category === 'AUTH' ? (
                                     <>
-                                      <LockIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <LockIcon className="w-3 h-3 text-gray-900" />
                                       <span>AUTH</span>
                                     </>
                                   ) : log.category === 'SECURITY' ? (
                                     <>
-                                      <ShieldCheckIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <ShieldCheckIcon className="w-3 h-3 text-gray-900" />
                                       <span>SECURITY</span>
                                     </>
                                   ) : log.category === 'ORDER' ? (
                                     <>
-                                      <OrdersIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <OrdersIcon className="w-3 h-3 text-gray-900" />
                                       <span>ORDER</span>
                                     </>
                                   ) : (
                                     <>
-                                      <DiamondIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <DiamondIcon className="w-3 h-3 text-gray-900" />
                                       <span>INVENTORY</span>
                                     </>
                                   )}
@@ -3662,7 +3670,7 @@ export default function AdminDashboardPage() {
             <div className={`${cardBg} rounded-[5px] p-6 max-w-2xl mx-auto space-y-6`}>
               <div>
                 <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
-                  <GoldRatesIcon className="w-5 h-5 text-[#9b7632]" />
+                  <GoldRatesIcon className="w-5 h-5 text-gray-900" />
                   <span>Live Gold Bullion Pricing Engine</span>
                 </h2>
                 <p className={`text-xs ${subtitleColor} mt-1`}>
@@ -3697,7 +3705,7 @@ export default function AdminDashboardPage() {
 
                 <div className={`p-4 ${isLight ? 'bg-[#f7f3eb] border-[#e8dfd3]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] text-xs ${subtitleColor}`}>
                   <p className={`font-semibold ${accentGold} mb-1 flex items-center gap-1.5`}>
-                    <SparklesIcon className="w-4 h-4 text-[#9b7632]" />
+                    <SparklesIcon className="w-4 h-4 text-gray-900" />
                     <span>Automated Pricing Formula:</span>
                   </p>
                   <p>Catalog price = (Gold Weight × 22K Rate) + Artisan Making Charges + Diamond Carat Value.</p>
@@ -3723,7 +3731,7 @@ export default function AdminDashboardPage() {
               <div className="flex items-center justify-between border-b border-current border-opacity-15 pb-3">
                 <div>
                   <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
-                    <StoreIcon className="w-5 h-5 text-[#9b7632]" />
+                    <StoreIcon className="w-5 h-5 text-gray-900" />
                     <span>Real-Time Top Announcement Bar Manager</span>
                   </h2>
                   <p className={`text-xs ${subtitleColor}`}>Edit promotional top-bar text slides &amp; toggle visibility on main site live.</p>
@@ -3802,7 +3810,7 @@ export default function AdminDashboardPage() {
             {/* STORE CONFIGURATION */}
             <div className={`${cardBg} rounded-[5px] p-6 max-w-3xl mx-auto space-y-6`}>
               <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
-                <SettingsIcon className="w-5 h-5 text-[#9b7632]" />
+                <SettingsIcon className="w-5 h-5 text-gray-900" />
                 <span>Storewide Configuration</span>
               </h2>
 
@@ -3837,7 +3845,7 @@ export default function AdminDashboardPage() {
           <div className={`${cardBg} rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4`}>
             <div className={`flex justify-between items-center border-b ${cardHeaderBorder} pb-3`}>
               <h3 className={`font-serif text-lg ${accentGold} font-bold flex items-center gap-2`}>
-                <SlidesIcon className="w-5 h-5 text-[#9b7632]" />
+                <SlidesIcon className="w-5 h-5 text-gray-900" />
                 <span>Add Hero Slide Banner</span>
               </h3>
               <button onClick={() => setIsAddSlideOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>
@@ -3868,7 +3876,7 @@ export default function AdminDashboardPage() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className={`block ${subtitleColor} mb-1`}>CTA Button Text</label>
+                  <label className={`block ${subtitleColor} mb-1`}>Link Name / Button Text (Short)</label>
                   <input
                     type="text"
                     value={newSlide.ctaText}
@@ -3899,7 +3907,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setIsAddSlideOpen(false)}
-                  className={`px-4 py-2 ${isLight ? 'bg-[#f4efe6] text-[#5c4d40]' : 'bg-[#1f1612] text-[#c2b4a3]'} border border-opacity-50 rounded-[5px]`}
+                  className={`px-4 py-2 ${isLight ? 'bg-gray-100 text-[#5c4d40]' : 'bg-[#1f1612] text-[#c2b4a3]'} border border-opacity-50 rounded-[5px]`}
                 >
                   Cancel
                 </button>
@@ -3919,16 +3927,16 @@ export default function AdminDashboardPage() {
       {/* FEATURE 2: PROFESSIONAL LUXURY PRINTABLE TAX INVOICE MODAL */}
       {selectedInvoiceOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-3xl bg-white text-[#1c1510] rounded-[6px] shadow-2xl overflow-hidden my-auto border border-[#dec29b]">
+          <div className="relative w-full max-w-3xl bg-white text-[#1c1510] rounded-[6px] shadow-2xl overflow-hidden my-auto border border-gray-200">
             {/* NO-PRINT ACTION BAR */}
-            <div className="no-print bg-[#1c1510] text-[#f5efe8] px-5 py-3.5 flex items-center justify-between border-b border-[#dec29b]/40">
+            <div className="no-print bg-[#1c1510] text-[#f5efe8] px-5 py-3.5 flex items-center justify-between border-b border-gray-200">
               <div className="flex items-center gap-2">
-                <PrinterIcon className="w-5 h-5 text-[#dec29b]" />
+                <PrinterIcon className="w-5 h-5 text-gray-900" />
                 <div>
                   <h3 className="text-xs sm:text-sm font-semibold tracking-wide">
                     Official Tax Invoice &amp; Authenticity Receipt
                   </h3>
-                  <p className="text-[10px] text-[#dec29b] font-mono">Reference: INV-{selectedInvoiceOrder.id}</p>
+                  <p className="text-[10px] text-gray-500 font-mono">Reference: INV-{selectedInvoiceOrder.id}</p>
                 </div>
               </div>
 
@@ -3936,7 +3944,7 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-4 py-2 rounded-[4px] bg-[#9b7632] hover:bg-[#856327] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                  className="px-4 py-2 rounded-[4px] bg-gray-900 hover:bg-black text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                 >
                   <PrinterIcon className="w-4 h-4" />
                   <span>Print Invoice / PDF</span>
@@ -3958,12 +3966,12 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b-2 border-[#1c1510] gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <CrownIcon className="w-6 h-6 text-[#9b7632]" />
+                    <CrownIcon className="w-6 h-6 text-gray-900" />
                     <h1 className="font-serif text-2xl font-bold tracking-widest text-[#1c1510] uppercase">
                       BHAI JEWELLER
                     </h1>
                   </div>
-                  <p className="text-[10px] tracking-[0.2em] uppercase font-semibold text-[#8c6b2d] mt-0.5">
+                  <p className="text-[10px] tracking-[0.2em] uppercase font-semibold text-gray-700 mt-0.5">
                     BRADFORD ATELIER &bull; FINE JEWELLERY &amp; BULLION
                   </p>
                   <p className="text-[10.5px] text-[#6b5c50] mt-1.5 leading-relaxed">
@@ -3977,8 +3985,8 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                <div className="sm:text-right bg-[#faf6ee] p-4 rounded-[4px] border border-[#dec29b]/60 sm:min-w-[210px]">
-                  <span className="font-serif text-base font-bold text-[#8c6b2d] uppercase tracking-wider block">
+                <div className="sm:text-right bg-gray-50 p-4 rounded-[4px] border border-gray-200/60 sm:min-w-[210px]">
+                  <span className="font-serif text-base font-bold text-gray-900 uppercase tracking-wider block">
                     TAX INVOICE
                   </span>
                   <p className="font-mono text-xs font-bold text-[#1c1510] mt-1">
@@ -3995,7 +4003,7 @@ export default function AdminDashboardPage() {
               {/* CLIENT BILLING & DELIVERY INFORMATION */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 py-2">
                 <div className="bg-[#faf8f5] p-3.5 rounded-[4px] border border-[#eee4d7]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8c6b2d] mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">
                     Billed &amp; Delivered To:
                   </p>
                   <p className="font-serif text-sm font-semibold text-[#1c1510]">{selectedInvoiceOrder.customer}</p>
@@ -4007,7 +4015,7 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="bg-[#faf8f5] p-3.5 rounded-[4px] border border-[#eee4d7]">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#8c6b2d] mb-1">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-700 mb-1">
                     Dispatch &amp; Delivery Method:
                   </p>
                   <p className="text-xs font-medium text-[#1c1510]">Royal Mail Special Delivery Guaranteed (Insured)</p>
@@ -4021,9 +4029,9 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* PURCHASED ITEMS TABLE */}
-              <div className="overflow-hidden border border-[#ded3c5] rounded-[4px]">
+              <div className="overflow-hidden border border-gray-200 rounded-[4px]">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-[#f5efe7] text-[#1c1510] uppercase font-bold tracking-wider text-[10px] border-b border-[#ded3c5]">
+                  <thead className="bg-[#f5efe7] text-[#1c1510] uppercase font-bold tracking-wider text-[10px] border-b border-gray-200">
                     <tr>
                       <th className="p-3">Item Description &amp; Specifications</th>
                       <th className="p-3">Hallmark Certification</th>
@@ -4039,7 +4047,7 @@ export default function AdminDashboardPage() {
                         <p className="text-[10px] text-[#8a796c] mt-0.5">Order Ref: #{selectedInvoiceOrder.id}</p>
                       </td>
                       <td className="p-3">
-                        <span className="px-2 py-0.5 rounded-[3px] bg-[#dec29b]/30 text-[#8c6b2d] text-[10px] font-semibold">
+                        <span className="px-2 py-0.5 rounded-[3px] bg-gray-900 text-white/30 text-gray-700 text-[10px] font-semibold">
                           22K (916) UK Assay Hallmark
                         </span>
                       </td>
@@ -4054,8 +4062,8 @@ export default function AdminDashboardPage() {
               {/* FINANCIAL BREAKDOWN */}
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
                 {/* Assay Seal Box */}
-                <div className="sm:max-w-xs p-3.5 rounded-[4px] bg-[#faf6ee] border border-[#dec29b]/60 flex items-start gap-3">
-                  <ShieldCheckIcon className="w-7 h-7 text-[#9b7632] flex-shrink-0" />
+                <div className="sm:max-w-xs p-3.5 rounded-[4px] bg-gray-50 border border-gray-200/60 flex items-start gap-3">
+                  <ShieldCheckIcon className="w-7 h-7 text-gray-900 flex-shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-[#1c1510]">UK Hallmarking Act 1973 Guarantee</h4>
                     <p className="text-[10px] text-[#6b5c50] mt-1 leading-snug">
@@ -4084,7 +4092,7 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="flex justify-between items-center pt-2.5 border-t-2 border-[#1c1510] text-sm">
                     <span className="font-bold text-[#1c1510] uppercase">Total Paid (GBP):</span>
-                    <span className="font-serif text-lg font-bold text-[#8c6b2d]">
+                    <span className="font-serif text-lg font-bold text-gray-900">
                       &pound;{selectedInvoiceOrder.amount.toLocaleString()}
                     </span>
                   </div>
@@ -4092,14 +4100,14 @@ export default function AdminDashboardPage() {
               </div>
 
               {/* INVOICE FOOTER WITH TERMS & SIGNATURE */}
-              <div className="pt-6 border-t border-[#ded3c5] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[10px] text-[#7a695d]">
+              <div className="pt-6 border-t border-gray-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[10px] text-[#7a695d]">
                 <div className="space-y-1">
                   <p><strong>Thank you for choosing Bhai Jeweller Bradford.</strong></p>
                   <p>Includes 1-year complimentary cleaning, polishing, and stone-setting inspection.</p>
                   <p>Showroom viewings &amp; bespoke consultations available by appointment.</p>
                 </div>
                 <div className="text-left sm:text-right pt-2 sm:pt-0">
-                  <p className="font-serif italic text-xs text-[#8c6b2d] font-bold">Bhai Jeweller Bradford</p>
+                  <p className="font-serif italic text-xs text-gray-900 font-bold">Bhai Jeweller Bradford</p>
                   <p className="text-[9.5px] uppercase tracking-wider text-[#9a897b]">Authorized Master Goldsmith</p>
                 </div>
               </div>

@@ -97,16 +97,16 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fadeIn">
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#ffffff] text-[#1a130e] border border-[#e8dfd5] rounded-[10px] shadow-2xl p-6 sm:p-8"
+        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#ffffff] text-[#1a130e] border border-gray-200 rounded-[10px] shadow-2xl p-6 sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Gold Accent Bar */}
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-[#b38b40] to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gray-900" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-[#f0e8dc] pb-4 mb-6">
+        <div className="flex items-center justify-between border-b border-gray-200 pb-4 mb-6">
           <div className="flex items-center gap-3">
-            <span className="p-2 rounded-lg bg-[#faf6ef] text-[#9b7632] border border-[#ebdcc7]">
+            <span className="p-2 rounded-lg bg-gray-100 text-gray-900 border border-gray-200">
               <EditIcon className="w-5 h-5" />
             </span>
             <div>
@@ -121,7 +121,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
           <button
             type="button"
             onClick={onClose}
-            className="text-[#8c7a6b] hover:text-[#1a130e] p-1.5 rounded-md hover:bg-[#faf6ef] transition-colors"
+            className="text-[#8c7a6b] hover:text-[#1a130e] p-1.5 rounded-md hover:bg-gray-100 transition-colors"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -152,7 +152,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
               required
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40] focus:ring-1 focus:ring-[#b38b40]/30 transition-all"
+              className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:ring-1 focus:ring-gray-900/20 transition-all"
             />
           </div>
 
@@ -165,7 +165,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
               <select
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40] focus:ring-1 focus:ring-[#b38b40]/30 transition-all"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:ring-1 focus:ring-gray-900/20 transition-all"
               >
                 {categories.map((c) => (
                   <option key={c.id || c.slug} value={c.name}>
@@ -180,7 +180,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 <label className="block text-[11px] font-semibold text-[#544537] uppercase tracking-wider">
                   Metal Purity & Spec *
                 </label>
-                <span className="text-[10px] text-[#9b7632] font-mono">Custom text allowed</span>
+                <span className="text-[10px] text-gray-900 font-mono">Custom text allowed</span>
               </div>
               <input
                 type="text"
@@ -189,7 +189,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 placeholder="e.g. 21ct Gold, 22k Pure Gold, 24k Bullion..."
                 value={formData.metal || ''}
                 onChange={(e) => setFormData({ ...formData, metal: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40] focus:ring-1 focus:ring-[#b38b40]/30 transition-all"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900 focus:ring-1 focus:ring-gray-900/20 transition-all"
               />
               <datalist id="modal-gold-purity-presets">
                 <option value="22k Pure Gold" />
@@ -210,8 +210,8 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                     onClick={() => setFormData({ ...formData, metal: preset })}
                     className={`px-2 py-0.5 rounded text-[10px] border transition-all ${
                       formData.metal === preset
-                        ? 'bg-[#b38b40] text-white border-[#b38b40] font-semibold'
-                        : 'bg-[#faf6ef] text-[#786450] border-[#e8ded0] hover:border-[#b38b40]'
+                        ? 'bg-gray-900 text-white border-gray-900 font-semibold'
+                        : 'bg-gray-100 text-gray-700 border-gray-200 hover:border-gray-900'
                     }`}
                   >
                     {preset}
@@ -234,7 +234,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 step="0.01"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs font-semibold outline-none focus:bg-white focus:border-[#b38b40]"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs font-semibold outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>
 
@@ -248,7 +248,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 step="0.01"
                 value={formData.originalPrice || formData.price}
                 onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>
 
@@ -262,7 +262,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 min="0"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>
           </div>
@@ -277,7 +277,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 type="text"
                 value={formData.sku || ''}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] font-mono text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] font-mono text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>
 
@@ -290,7 +290,7 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 step="0.1"
                 value={formData.weightGrams || 5}
                 onChange={(e) => setFormData({ ...formData, weightGrams: Number(e.target.value) })}
-                className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+                className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>
           </div>
@@ -306,9 +306,9 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
                 value={formData.image || ''}
                 onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                 placeholder="/images/detail-ring-hero.jpg"
-                className="flex-1 px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+                className="flex-1 px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
-              <div className="relative w-11 h-11 rounded-md overflow-hidden border border-[#dcd3c5] bg-[#faf6ef] flex-shrink-0">
+              <div className="relative w-11 h-11 rounded-md overflow-hidden border border-gray-300 bg-gray-100 flex-shrink-0">
                 <Image
                   src={formData.image || '/images/detail-ring-hero.jpg'}
                   alt="Preview"
@@ -328,12 +328,12 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
               rows={3}
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-md bg-[#faf8f5] border border-[#dcd3c5] text-[#1a130e] text-xs outline-none focus:bg-white focus:border-[#b38b40]"
+              className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-between pt-4 border-t border-[#f0e8dc]">
+          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
             <button
               type="button"
               disabled={deleting || saving}
@@ -348,14 +348,14 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-md bg-[#faf6ef] border border-[#dcd3c5] text-[#6b5847] hover:text-[#1a130e] hover:bg-[#f2ece2] text-xs transition-colors"
+                className="px-4 py-2.5 rounded-md bg-gray-100 border border-gray-300 text-[#6b5847] hover:text-[#1a130e] hover:bg-gray-200 text-xs transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={saving || deleting}
-                className="px-5 py-2.5 rounded-md bg-gradient-to-r from-[#9b7632] via-[#b38b40] to-[#cca655] text-white font-bold text-xs uppercase tracking-wider hover:brightness-105 active:scale-[0.99] transition-all disabled:opacity-50 shadow-md shadow-[#9b7632]/20 flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-md bg-gray-900 hover:bg-black text-white font-bold text-xs uppercase tracking-wider hover:brightness-105 active:scale-[0.99] transition-all disabled:opacity-50 shadow-md shadow-gray-900/20 flex items-center gap-1.5"
               >
                 {saving ? (
                   <>
