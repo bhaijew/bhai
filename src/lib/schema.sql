@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS products (
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_products_name_unique ON products (LOWER(TRIM(name)));
 
 -- 2. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS orders (
@@ -239,9 +240,41 @@ INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, he
 VALUES ('main_hero', 'BHAI JEWELLER', 'Jewellery, made', 'unforgettable', '', 'Timeless pieces for modern souls. Discover fine jewellery designed to celebrate your most precious moments.', 'Shop Collection', '/shop', '/images/hero-img.jpg', 'Diamond Elegance', 'Classic pieces, endless beauty.', '/images/featured-ring.jpg')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO announcement_bar (id, is_enabled, messages)
-VALUES ('main_announcement', true, '["Free worldwide shipping on all orders over $150  |  Handcrafted with passion in the UK", "Complimentary luxury gift packaging on every order  |  Bespoke service", "Fine jewellery showroom in Bradford, West Yorkshire  |  Private viewings available"]'::jsonb)
+-- Insert initial default products
+INSERT INTO products (id, name, category, price, original_price, stock, metal, status, is_featured, image, images, sku, description, slug, weight_grams, seo_title, seo_description, focus_keywords)
+VALUES 
+    ('solara-ring', 'Solara Diamond Ring', 'Rings', 1280, 1650, 14, '18k Yellow Gold', 'In Stock', true, '/images/detail-ring-hero.jpg', '["/images/detail-ring-hero.jpg", "/images/shop-prod-1.jpg", "/images/category-rings.jpg"]'::jsonb, 'BJ-RNG-001', 'Exquisite 18k yellow gold solitaire ring handcrafted with precision cut brilliant diamonds.', 'solara-diamond-ring', 5.2, 'Solara Diamond Ring | 18k Gold Solitaire | Bhai Jeweller', 'Shop Solara Diamond Ring handcrafted in 18k Yellow Gold. Certified brilliant diamonds.', '["diamond ring", "18k yellow gold ring", "bhai jeweller ring", "solitaire ring"]'::jsonb),
+    ('lumiere-necklace', 'Lumiere Gold Necklace', 'Necklaces', 980, 1200, 8, '22k Gold', 'In Stock', true, '/images/shop-prod-2.jpg', '["/images/shop-prod-2.jpg", "/images/category-necklaces.jpg"]'::jsonb, 'BJ-NCK-002', 'Timeless 22k pure gold necklace with intricate artisan filigree craftsmanship.', 'lumiere-gold-necklace', 14.8, 'Lumiere 22k Gold Necklace | Fine Jewelry | Bhai Jeweller', 'Buy handcrafted 22k gold necklace. Pure gold heritage craftsmanship.', '["gold necklace", "22k gold necklace", "bhai jeweller necklace"]'::jsonb),
+    ('valera-earrings', 'Valera Diamond Drop Earrings', 'Earrings', 760, 950, 5, '18k White Gold', 'Low Stock', false, '/images/shop-prod-3.jpg', '["/images/shop-prod-3.jpg", "/images/category-earrings.jpg"]'::jsonb, 'BJ-ERG-003', 'Elegant 18k white gold drop earrings encrusted with pavé set diamonds.', 'valera-diamond-drop-earrings', 6.4, 'Valera Diamond Drop Earrings 18k White Gold | Bhai Jeweller', 'Shop Valera Diamond Drop Earrings in 18k White Gold.', '["diamond earrings", "white gold earrings", "drop earrings"]'::jsonb),
+    ('royal-bangle', 'Royal Heritage Bangle', 'Bracelets', 1850, 2100, 3, '22k Gold', 'Low Stock', true, '/images/shop-prod-4.jpg', '["/images/shop-prod-4.jpg", "/images/category-bracelets.jpg"]'::jsonb, 'BJ-BRC-004', 'Heritage 22k pure gold handcrafted royal bangle set.', 'royal-heritage-bangle', 28.5, 'Royal Heritage 22k Gold Bangle | Bhai Jeweller', 'Authentic 22k gold royal heritage bangle.', '["22k gold bangle", "gold bracelet", "royal bangle"]'::jsonb),
+    ('aurelia-solitaire', 'Aurelia Solitaire Pendant', 'Necklaces', 1420, 1700, 12, '18k Rose Gold', 'In Stock', false, '/images/shop-prod-5.jpg', '["/images/shop-prod-5.jpg", "/images/category-necklaces.jpg"]'::jsonb, 'BJ-NCK-005', 'Stunning 18k Rose Gold solitaire diamond pendant with chain.', 'aurelia-solitaire-pendant', 8.1, 'Aurelia Solitaire Pendant 18k Rose Gold | Bhai Jeweller', 'Shop Aurelia Solitaire Pendant in 18k Rose Gold.', '["rose gold pendant", "solitaire pendant", "diamond pendant"]'::jsonb)
 ON CONFLICT (id) DO NOTHING;
+
+-- Enable Realtime publication for tables so Supabase broadcasts live changes
+DO $$
+BEGIN
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE products;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE categories;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE bespoke_enquiries;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE hero_slides;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
+END $$;
+
 
 
 

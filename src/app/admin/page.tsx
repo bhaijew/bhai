@@ -529,13 +529,18 @@ export default function AdminDashboardPage() {
     e.preventDefault();
     if (!addForm.name || !addForm.price) return;
 
+    const trimmedName = addForm.name.trim();
+    const existingProduct = products.find(
+      (p) => p.name.trim().toLowerCase() === trimmedName.toLowerCase()
+    );
+
     const allImagesList = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean);
-    const generatedSlug = addForm.slug || addForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const autoSku = addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const generatedSlug = existingProduct?.slug || addForm.slug || addForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const autoSku = existingProduct?.sku || addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
     const newProductObject: ProductItem = {
-      id: `prod-${Date.now()}`,
-      name: addForm.name,
+      id: existingProduct?.id || `prod-${Date.now()}`,
+      name: trimmedName,
       category: addForm.category,
       price: Number(addForm.price),
       originalPrice: Number(addForm.originalPrice || addForm.price),

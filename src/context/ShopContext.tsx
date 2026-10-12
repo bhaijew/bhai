@@ -510,9 +510,33 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   // Product CRUD
   const addProduct = async (newProd: ProductItem): Promise<boolean> => {
-    // 1. Instant optimistic state and localStorage write
+    const trimmedName = newProd.name.trim().toLowerCase();
+
+    // Check if product with this ID or SAME NAME already exists
+    const existingMatch = products.find(
+      (p) => p.id === newProd.id || p.name.trim().toLowerCase() === trimmedName
+    );
+
+    const resolvedProd: ProductItem = existingMatch
+      ? {
+          ...newProd,
+          id: existingMatch.id,
+          slug: existingMatch.slug || newProd.slug,
+          sku: existingMatch.sku || newProd.sku,
+        }
+      : newProd;
+
+    // 1. Instant optimistic state and localStorage write (ensures exactly 1 product per name)
     setProducts((prev) => {
-      const updated = [newProd, ...prev.filter((p) => p.id !== newProd.id)];
+      const idx = prev.findIndex(
+        (p) => p.id === resolvedProd.id || p.name.trim().toLowerCase() === trimmedName
+      );
+      let updated: ProductItem[];
+      if (idx >= 0) {
+        updated = prev.map((p, i) => (i === idx ? resolvedProd : p));
+      } else {
+        updated = [resolvedProd, ...prev.filter((p) => p.name.trim().toLowerCase() !== trimmedName)];
+      }
       try {
         localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {}
@@ -523,26 +547,39 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     // 2. Direct Supabase write
     if (supabase) {
       try {
+        // Query to check if matching name exists in DB to reuse its ID and avoid unique constraint error
+        let dbTargetId = resolvedProd.id;
+        const { data: dbMatch } = await supabase
+          .from('products')
+          .select('id, slug, sku')
+          .ilike('name', newProd.name.trim())
+          .maybeSingle();
+
+        if (dbMatch) {
+          dbTargetId = dbMatch.id;
+        }
+
         const { error } = await supabase.from('products').upsert({
-          id: newProd.id,
-          name: newProd.name,
-          category: newProd.category,
-          price: newProd.price,
-          original_price: newProd.originalPrice,
-          stock: newProd.stock,
-          metal: newProd.metal,
-          status: newProd.status,
-          is_featured: newProd.isFeatured,
-          image: newProd.image,
-          images: newProd.images,
-          sku: newProd.sku,
-          description: newProd.description,
-          slug: newProd.slug,
-          weight_grams: newProd.weightGrams,
-          seo_title: newProd.seoTitle,
-          seo_description: newProd.seoDescription,
-          focus_keywords: newProd.focusKeywords,
-        });
+          id: dbTargetId,
+          name: resolvedProd.name,
+          category: resolvedProd.category,
+          price: resolvedProd.price,
+          original_price: resolvedProd.originalPrice,
+          stock: resolvedProd.stock,
+          metal: resolvedProd.metal,
+          status: resolvedProd.status,
+          is_featured: resolvedProd.isFeatured,
+          image: resolvedProd.image,
+          images: resolvedProd.images,
+          sku: dbMatch?.sku || resolvedProd.sku,
+          description: resolvedProd.description,
+          slug: dbMatch?.slug || resolvedProd.slug,
+          weight_grams: resolvedProd.weightGrams,
+          seo_title: resolvedProd.seoTitle,
+          seo_description: resolvedProd.seoDescription,
+          focus_keywords: resolvedProd.focusKeywords,
+        }, { onConflict: 'id' });
+
         if (!error) ok = true;
       } catch (e) {
         console.warn('Direct Supabase upsert notice:', e);
@@ -557,7 +594,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'x-admin-key': 'BhaiAdmin@Bradford2026!',
         },
-        body: JSON.stringify(newProd),
+        body: JSON.stringify(resolvedProd),
       });
       const data = await res.json();
       if (data.success) ok = true;
