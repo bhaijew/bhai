@@ -172,24 +172,49 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
             </div>
 
             <div>
-              <label className="block text-[11px] font-mono uppercase tracking-wider text-[#dec29b] mb-1">
-                Metal Spec *
-              </label>
-              <select
-                value={formData.metal || '18k Yellow Gold'}
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-[#dec29b]">
+                  Metal Purity & Spec *
+                </label>
+                <span className="text-[10px] text-[#dec29b] font-mono">✍️ Type custom</span>
+              </div>
+              <input
+                type="text"
+                list="modal-gold-purity-presets"
+                required
+                placeholder="e.g. 21ct Gold, 22k Pure Gold, 24k Bullion..."
+                value={formData.metal || ''}
                 onChange={(e) => setFormData({ ...formData, metal: e.target.value })}
                 className="w-full px-3.5 py-2.5 rounded-[5px] bg-[#0f0b08] border border-[#3d2b1f] text-[#f5efe8] font-mono text-xs outline-none focus:border-[#dec29b]"
-              >
-                <option value="18k Yellow Gold">18k Yellow Gold</option>
-                <option value="22k Pure Gold">22k Pure Gold</option>
-                <option value="18k Rose Gold">18k Rose Gold</option>
-                <option value="18k White Gold">18k White Gold</option>
-                <option value="24k Gold Bullion">24k Gold Bullion</option>
-                <option value="Platinum 950">Platinum 950</option>
-                <option value="Sterling Silver 925">Sterling Silver 925</option>
-              </select>
+              />
+              <datalist id="modal-gold-purity-presets">
+                <option value="22k Pure Gold" />
+                <option value="21ct Gold" />
+                <option value="24k Pure Gold Bullion" />
+                <option value="18k Yellow Gold" />
+                <option value="18k White Gold" />
+                <option value="18k Rose Gold" />
+                <option value="14k Solid Gold" />
+                <option value="Platinum 950" />
+                <option value="Sterling Silver 925" />
+              </datalist>
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {['22k Pure Gold', '21ct Gold', '18k Yellow Gold', '18k White Gold', '24k Bullion', 'Platinum 950'].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, metal: preset })}
+                    className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-[#dec29b]/30 hover:border-[#dec29b] transition-all ${
+                      formData.metal === preset ? 'bg-[#dec29b]/30 text-[#8c6b2d] font-bold' : 'text-[#a8998c]'
+                    }`}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
+
 
           {/* Pricing & Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

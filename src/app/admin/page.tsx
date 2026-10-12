@@ -1758,23 +1758,49 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div>
-                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                            Metal Purity & Material *
-                          </label>
-                          <select
+                          <div className="flex items-center justify-between mb-1">
+                            <label className={`block text-xs font-semibold ${subtitleColor}`}>
+                              Metal Purity & Spec *
+                            </label>
+                            <span className="text-[10px] text-[#dec29b] font-mono">✍️ Type custom</span>
+                          </div>
+                          <input
+                            type="text"
+                            list="admin-gold-purity-presets"
+                            required
+                            placeholder="e.g. 21ct Gold, 22k Pure Gold, 24k Bullion..."
                             value={addForm.metal}
                             onChange={(e) => setAddForm({ ...addForm, metal: e.target.value })}
                             className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
-                          >
-                            <option value="18k Yellow Gold">18k Yellow Gold</option>
-                            <option value="22k Pure Gold">22k Pure Gold</option>
-                            <option value="18k Rose Gold">18k Rose Gold</option>
-                            <option value="18k White Gold">18k White Gold</option>
-                            <option value="24k Gold Bullion">24k Gold Bullion</option>
-                            <option value="Platinum 950">Platinum 950</option>
-                          </select>
+                          />
+                          <datalist id="admin-gold-purity-presets">
+                            <option value="22k Pure Gold" />
+                            <option value="21ct Gold" />
+                            <option value="24k Pure Gold Bullion" />
+                            <option value="18k Yellow Gold" />
+                            <option value="18k White Gold" />
+                            <option value="18k Rose Gold" />
+                            <option value="14k Solid Gold" />
+                            <option value="Platinum 950" />
+                            <option value="Sterling Silver 925" />
+                          </datalist>
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {['22k Pure Gold', '21ct Gold', '18k Yellow Gold', '18k White Gold', '24k Bullion', 'Platinum 950'].map((preset) => (
+                              <button
+                                key={preset}
+                                type="button"
+                                onClick={() => setAddForm({ ...addForm, metal: preset })}
+                                className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-[#dec29b]/30 hover:border-[#dec29b] transition-all ${
+                                  addForm.metal === preset ? 'bg-[#dec29b]/30 text-[#8c6b2d] font-bold' : subtitleColor
+                                }`}
+                              >
+                                {preset}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
+
 
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
