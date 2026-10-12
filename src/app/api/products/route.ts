@@ -2,9 +2,17 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 
-// In-memory fallback array
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+// In-memory fallback array for non-blocking local operation
 let SERVER_PRODUCTS_DB: any[] = [];
 
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
 
 export async function GET() {
   try {
@@ -14,7 +22,7 @@ export async function GET() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (!error && data) {
+      if (!error && Array.isArray(data)) {
         const mappedProducts = data.map((p) => ({
           id: p.id,
           name: p.name,
@@ -30,22 +38,23 @@ export async function GET() {
           sku: p.sku,
           description: p.description,
           slug: p.slug,
-          weightGrams: Number(p.weight_grams),
+          weightGrams: Number(p.weight_grams || 0),
           seoTitle: p.seo_title,
           seoDescription: p.seo_description,
           focusKeywords: p.focus_keywords || [],
         }));
+
+        // Keep fallback synchronized with database
+        SERVER_PRODUCTS_DB = [...mappedProducts];
+
         return NextResponse.json(
           {
             success: true,
+            source: 'supabase',
             count: mappedProducts.length,
             data: mappedProducts,
           },
-          {
-            headers: {
-              'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-            },
-          }
+          { headers: NO_CACHE_HEADERS }
         );
       }
     }
@@ -56,14 +65,11 @@ export async function GET() {
   return NextResponse.json(
     {
       success: true,
+      source: 'memory_fallback',
       count: SERVER_PRODUCTS_DB.length,
       data: SERVER_PRODUCTS_DB,
     },
-    {
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-      },
-    }
+    { headers: NO_CACHE_HEADERS }
   );
 }
 
@@ -76,10 +82,10 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    if (!body.name || !body.price) {
+    if (!body.name || body.price === undefined || body.price === null) {
       return NextResponse.json(
         { success: false, error: 'Product name and price are required.' },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -89,19 +95,19 @@ export async function POST(request: Request) {
       category: body.category || 'Rings',
       price: Number(body.price),
       originalPrice: Number(body.originalPrice || body.price),
-      stock: Number(body.stock || 10),
+      stock: Number(body.stock || 0),
       metal: body.metal || '18k Yellow Gold',
-      status: Number(body.stock) > 0 ? 'In Stock' : 'Out of Stock',
+      status: Number(body.stock) > 0 ? (Number(body.stock) <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock',
       isFeatured: body.isFeatured ?? true,
-      image: body.image || '',
-      images: body.images || [],
+      image: body.image || '/images/detail-ring-hero.jpg',
+      images: Array.isArray(body.images) && body.images.length > 0 ? body.images : [body.image || '/images/detail-ring-hero.jpg'],
       sku: body.sku || `BJ-${Date.now()}`,
       description: body.description || '',
-      slug: body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      slug: (body.slug || body.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `prod-${Date.now()}`),
       weightGrams: Number(body.weightGrams || 5.0),
       seoTitle: body.seoTitle || `${body.name} | Bhai Jeweller`,
-      seoDescription: body.seoDescription || `Shop ${body.name} online. Fine jewelry.`,
-      focusKeywords: body.focusKeywords || [body.name.toLowerCase()],
+      seoDescription: body.seoDescription || `Buy ${body.name} online from Bhai Jeweller Bradford.`,
+      focusKeywords: Array.isArray(body.focusKeywords) ? body.focusKeywords : [body.name.toLowerCase()],
       createdAt: new Date().toISOString(),
     };
 
@@ -128,11 +134,15 @@ export async function POST(request: Request) {
       });
 
       if (error) {
-        console.error('Supabase Products insert error:', error);
+        console.error('Supabase Products upsert error:', error);
+        return NextResponse.json(
+          { success: false, error: `Database error: ${error.message}` },
+          { status: 500, headers: NO_CACHE_HEADERS }
+        );
       }
     }
 
-    // Also keep local fallback in sync
+    // Keep local fallback in sync
     const existingIndex = SERVER_PRODUCTS_DB.findIndex((p) => p.id === newProduct.id);
     if (existingIndex >= 0) {
       SERVER_PRODUCTS_DB[existingIndex] = newProduct;
@@ -140,15 +150,19 @@ export async function POST(request: Request) {
       SERVER_PRODUCTS_DB.unshift(newProduct);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Product saved successfully to database.',
-      data: newProduct,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: 'Product saved and synced successfully to database.',
+        data: newProduct,
+      },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (error: any) {
+    console.error('Products POST error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to save product.' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
@@ -166,7 +180,7 @@ export async function DELETE(request: Request) {
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'Product ID is required.' },
-        { status: 400 }
+        { status: 400, headers: NO_CACHE_HEADERS }
       );
     }
 
@@ -174,23 +188,29 @@ export async function DELETE(request: Request) {
       const { error } = await supabase.from('products').delete().eq('id', id);
       if (error) {
         console.error('Supabase Products delete error:', error);
+        return NextResponse.json(
+          { success: false, error: `Database error: ${error.message}` },
+          { status: 500, headers: NO_CACHE_HEADERS }
+        );
       }
     }
 
     SERVER_PRODUCTS_DB = SERVER_PRODUCTS_DB.filter((p) => p.id !== id);
 
-    return NextResponse.json({
-      success: true,
-      message: `Product ${id} deleted successfully.`,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        message: `Product ${id} permanently deleted from database.`,
+      },
+      { headers: NO_CACHE_HEADERS }
+    );
   } catch (error: any) {
+    console.error('Products DELETE error:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete product.' },
-      { status: 500 }
+      { status: 500, headers: NO_CACHE_HEADERS }
     );
   }
 }
 
 export const PUT = POST;
-
-

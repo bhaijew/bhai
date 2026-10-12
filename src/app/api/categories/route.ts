@@ -73,6 +73,15 @@ const DEFAULT_CATEGORIES: CategoryData[] = [
 
 let SERVER_CATEGORIES_DB: CategoryData[] = [...DEFAULT_CATEGORIES];
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
 export async function GET() {
   try {
     if (supabase) {
@@ -89,11 +98,7 @@ export async function GET() {
             count: data.length,
             data,
           },
-          {
-            headers: {
-              'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
-            },
-          }
+          { headers: NO_CACHE_HEADERS }
         );
       }
     }
@@ -108,11 +113,7 @@ export async function GET() {
       count: SERVER_CATEGORIES_DB.length,
       data: SERVER_CATEGORIES_DB,
     },
-    {
-      headers: {
-        'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
-      },
-    }
+    { headers: NO_CACHE_HEADERS }
   );
 }
 

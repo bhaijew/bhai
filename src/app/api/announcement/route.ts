@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 import { requireAdmin } from '@/lib/auth';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const NO_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
 
 let SERVER_ANNOUNCEMENT_CONFIG = {
   isEnabled: true,
@@ -41,11 +45,7 @@ export async function GET() {
       success: true,
       data: SERVER_ANNOUNCEMENT_CONFIG,
     },
-    {
-      headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
-      },
-    }
+    { headers: NO_CACHE_HEADERS }
   );
 }
 

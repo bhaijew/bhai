@@ -525,7 +525,7 @@ export default function AdminDashboardPage() {
   };
 
   // Submit Full Page Add Product Form
-  const handleFullProductSubmit = (e: React.FormEvent) => {
+  const handleFullProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!addForm.name || !addForm.price) return;
 
@@ -554,15 +554,8 @@ export default function AdminDashboardPage() {
       focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [addForm.name.toLowerCase()]
     };
 
-    // 1. Save to persistent StoreContext (saves to localStorage & updates site live!)
-    addProduct(newProductObject);
-
-    // 2. Save to real-time SQL Database API Endpoint
-    fetch('/api/products', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newProductObject),
-    }).catch(err => console.error('SQL Database API Sync error:', err));
+    // Save to real-time SQL Database and persistent StoreContext
+    await addProduct(newProductObject);
 
     setSaveSuccessMsg(true);
     setTimeout(() => {
@@ -1709,9 +1702,9 @@ export default function AdminDashboardPage() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => {
+                                onClick={async () => {
                                   if (window.confirm(`Delete product "${p.name}"?\nThis will remove it from the catalog in real time.`)) {
-                                    removeStoreProduct(p.id);
+                                    await removeStoreProduct(p.id);
                                   }
                                 }}
                                 className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] font-semibold transition-colors border border-red-200 dark:border-red-900 flex items-center gap-1 shadow-2xs"
