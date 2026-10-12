@@ -6,6 +6,47 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import { useShop, ProductItem, CategoryItem } from '@/context/ShopContext';
 import { ProductEditModal } from '@/components/shared/ProductEditModal';
+import {
+  DashboardIcon,
+  ProductsIcon,
+  AddProductIcon,
+  CategoriesIcon,
+  SlidesIcon,
+  OrdersIcon,
+  EnquiriesIcon,
+  UsersIcon,
+  GoldRatesIcon,
+  SettingsIcon,
+  EditIcon,
+  TrashIcon,
+  SearchIcon,
+  FilterIcon,
+  ExportIcon,
+  CheckIcon,
+  CheckCircleIcon,
+  AlertTriangleIcon,
+  AlertCircleIcon,
+  XIcon,
+  ExternalLinkIcon,
+  DiamondIcon,
+  CrownIcon,
+  PrinterIcon,
+  ShieldCheckIcon,
+  SparklesIcon,
+  BoltIcon,
+  LayersIcon,
+  EyeIcon,
+  StoreIcon,
+  ChevronRightIcon,
+  PlusIcon,
+  RefreshIcon,
+  TagIcon,
+  ImageIcon,
+  LockIcon,
+  ArrowTrendingUpIcon,
+  SunIcon,
+  MoonIcon,
+} from '@/components/admin/AdminIcons';
 
 // Initial Data States (Strictly 0 fake data by default - syncs live with Supabase Real-Time Database)
 const INITIAL_SLIDES: any[] = [];
@@ -579,7 +620,7 @@ export default function AdminDashboardPage() {
         });
 
         if (ok) {
-          setCatSaveSuccess(`✓ Category "${categoryForm.name}" updated live!`);
+          setCatSaveSuccess(`Category "${categoryForm.name}" updated live!`);
           setEditingCategory(null);
           setCategoryForm({
             name: '',
@@ -603,7 +644,7 @@ export default function AdminDashboardPage() {
         });
 
         if (ok) {
-          setCatSaveSuccess(`✓ Category "${categoryForm.name}" added and synced live!`);
+          setCatSaveSuccess(`Category "${categoryForm.name}" added and synced live!`);
           setCategoryForm({
             name: '',
             slug: '',
@@ -630,14 +671,14 @@ export default function AdminDashboardPage() {
 
     const warningMsg =
       productCount > 0
-        ? `⚠️ Notice: ${productCount} active catalog items belong to "${cat.name}".\nAre you sure you want to delete this category from the database?`
+        ? `Notice: ${productCount} active catalog items belong to "${cat.name}".\nAre you sure you want to delete this category from the database?`
         : `Are you sure you want to delete "${cat.name}"?\nThis removes it from the live store and database.`;
 
     if (!window.confirm(warningMsg)) return;
 
     const ok = await deleteCategory(cat.id);
     if (ok) {
-      setCatSaveSuccess(`✓ Category "${cat.name}" deleted.`);
+      setCatSaveSuccess(`Category "${cat.name}" deleted.`);
       setTimeout(() => setCatSaveSuccess(''), 3000);
     }
   };
@@ -816,130 +857,88 @@ export default function AdminDashboardPage() {
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
-        </svg>
-      ),
+      icon: <DashboardIcon className="w-4 h-4" />,
       count: null,
     },
     {
       id: 'products',
       label: 'Products Catalog',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
-        </svg>
-      ),
+      icon: <ProductsIcon className="w-4 h-4" />,
       count: products.length,
     },
     {
       id: 'add-product',
       label: 'Add Product Studio',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      ),
+      icon: <AddProductIcon className="w-4 h-4" />,
       count: null,
     },
     {
       id: 'categories',
       label: 'Categories Manager',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l4.636-2.732c.828-.487 1.002-1.568.303-2.268L11.16 3.659A2.25 2.25 0 009.568 3z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-        </svg>
-      ),
+      icon: <CategoriesIcon className="w-4 h-4" />,
       count: categories.length,
     },
-
     {
       id: 'slides',
       label: 'Hero & Slider Banners',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-        </svg>
-      ),
+      icon: <SlidesIcon className="w-4 h-4" />,
       count: slides.length,
     },
     {
       id: 'orders',
       label: 'Orders & Sales',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119.993z" />
-        </svg>
-      ),
+      icon: <OrdersIcon className="w-4 h-4" />,
       count: activeOrdersCount,
     },
     {
       id: 'enquiries',
       label: 'Bespoke Enquiries',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l2.846-.813a3.75 3.75 0 00.912-.454l9.708-9.708a2.25 2.25 0 000-3.182l-1.591-1.591a2.25 2.25 0 00-3.182 0l-9.708 9.708a3.75 3.75 0 00-.454.912z" />
-        </svg>
-      ),
+      icon: <EnquiriesIcon className="w-4 h-4" />,
       count: pendingEnquiriesCount,
     },
     {
       id: 'customers',
       label: 'Users & Security',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-        </svg>
-      ),
+      icon: <UsersIcon className="w-4 h-4" />,
       count: registeredUsers.length,
     },
     {
       id: 'goldrates',
       label: 'Gold Rate Manager',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-6h6m6 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
+      icon: <GoldRatesIcon className="w-4 h-4" />,
       count: null,
     },
     {
       id: 'settings',
       label: 'Store Settings',
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 12h11.25" />
-        </svg>
-      ),
+      icon: <SettingsIcon className="w-4 h-4" />,
       count: null,
     },
   ];
 
-  // Theme-dependent styles helper
+  // Theme-dependent styles helper - Advance Luxury White Palette
   const isLight = theme === 'light';
 
-  const containerBg = isLight ? 'bg-[#faf8f5] text-[#1c1510]' : 'bg-[#0d0907] text-[#f4efe6]';
-  const sidebarBg = isLight ? 'bg-[#ffffff] border-[#e8dfd3]' : 'bg-[#140e0b] border-[#2a201a]';
-  const sidebarHeaderBorder = isLight ? 'border-[#e8dfd3]' : 'border-[#2a201a]';
-  const sidebarFooterBg = isLight ? 'bg-[#f7f3eb] border-[#e8dfd3]' : 'bg-[#100b08] border-[#2a201a]';
-  const cardBg = isLight ? 'bg-[#ffffff] border-[#e8dfd3] shadow-sm' : 'bg-[#140e0b] border-[#2a201a] shadow-lg';
+  const containerBg = isLight ? 'bg-[#fbfaf8] text-[#17120e]' : 'bg-[#0d0907] text-[#f4efe6]';
+  const sidebarBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5]' : 'bg-[#140e0b] border-[#2a201a]';
+  const sidebarHeaderBorder = isLight ? 'border-[#e8dfd5]' : 'border-[#2a201a]';
+  const sidebarFooterBg = isLight ? 'bg-[#fbf9f6] border-[#e8dfd5]' : 'bg-[#100b08] border-[#2a201a]';
+  const cardBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5] shadow-xs' : 'bg-[#140e0b] border-[#2a201a] shadow-lg';
   const cardHeaderBorder = isLight ? 'border-[#eee7dc]' : 'border-[#261c16]';
-  const inputBg = isLight ? 'bg-[#ffffff] border-[#dcd3c5] text-[#1c1510] focus:border-[#b38b40]' : 'bg-[#1a120e] border-[#3a2c23] text-[#faf7f2] focus:border-[#dec29b]';
-  const tableHeaderBg = isLight ? 'bg-[#f7f3eb] border-[#e8dfd3] text-[#5c4d40]' : 'bg-[#1a120e] border-[#2a201a] text-[#a89b8c]';
-  const tableRowHover = isLight ? 'hover:bg-[#fcfaf7] divide-[#eee7dc]' : 'hover:bg-[#18110d] divide-[#211813]';
-  const titleColor = isLight ? 'text-[#1c1510]' : 'text-[#faf7f2]';
-  const accentGold = isLight ? 'text-[#a37d38]' : 'text-[#dec29b]';
-  const subtitleColor = isLight ? 'text-[#6e5d4f]' : 'text-[#a89b8c]';
-  const badgeBg = isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dfd5c4]' : 'bg-[#211611] text-[#dec29b] border-[#3a2c23]';
-  const primaryBtn = isLight ? 'bg-[#b38b40] hover:bg-[#99752b] text-[#ffffff]' : 'bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b]';
+  const inputBg = isLight ? 'bg-[#ffffff] border-[#e8dfd5] text-[#17120e] focus:border-[#9b7632]' : 'bg-[#1a120e] border-[#3a2c23] text-[#faf7f2] focus:border-[#dec29b]';
+  const tableHeaderBg = isLight ? 'bg-[#f9f7f4] border-[#e8dfd5] text-[#4a3f35]' : 'bg-[#1a120e] border-[#2a201a] text-[#a89b8c]';
+  const tableRowHover = isLight ? 'hover:bg-[#fbf9f6] divide-[#eee7dc]' : 'hover:bg-[#18110d] divide-[#211813]';
+  const titleColor = isLight ? 'text-[#17120e]' : 'text-[#faf7f2]';
+  const accentGold = isLight ? 'text-[#9b7632]' : 'text-[#dec29b]';
+  const subtitleColor = isLight ? 'text-[#5c534a]' : 'text-[#a89b8c]';
+  const badgeBg = isLight ? 'bg-[#f8f5ee] text-[#8a6826] border-[#dfd5c4]' : 'bg-[#211611] text-[#dec29b] border-[#3a2c23]';
+  const primaryBtn = isLight ? 'bg-[#9b7632] hover:bg-[#856327] text-[#ffffff] shadow-xs' : 'bg-[#dec29b] hover:bg-[#c5a059] text-[#140e0b]';
 
   if (authChecking) {
     return (
-      <div className="min-h-screen bg-[#140e0b] flex flex-col items-center justify-center text-[#dec29b]">
-        <div className="w-10 h-10 rounded-full border-2 border-[#dec29b] border-t-transparent animate-spin mb-4" />
-        <p className="font-serif text-xs tracking-[0.25em] uppercase text-[#dec29b]">Verifying Admin Credentials...</p>
+      <div className="min-h-screen bg-[#fbfaf8] flex flex-col items-center justify-center text-[#9b7632]">
+        <div className="w-10 h-10 rounded-full border-2 border-[#9b7632] border-t-transparent animate-spin mb-4" />
+        <p className="font-serif text-xs tracking-[0.25em] uppercase text-[#9b7632] font-semibold">Verifying Bradford Admin Terminal...</p>
       </div>
     );
   }
@@ -958,16 +957,21 @@ export default function AdminDashboardPage() {
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setMobileDrawerOpen(true)}
-            className={`p-2 ${accentGold} hover:bg-[#f4efe6] dark:hover:bg-[#1f1612] rounded-[5px] transition-colors`}
+            className={`p-2 ${accentGold} hover:bg-[#f8f5ee] dark:hover:bg-[#1f1612] rounded-[5px] transition-colors`}
             aria-label="Open Admin Menu"
           >
             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <div className="flex flex-col">
-            <span className={`font-serif tracking-wider text-sm ${accentGold} uppercase font-bold`}>BHAI JEWELLER</span>
-            <span className={`text-[10px] ${subtitleColor} tracking-widest uppercase`}>Admin Portal</span>
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-[4px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+              <CrownIcon className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex flex-col">
+              <span className={`font-serif tracking-wider text-sm ${accentGold} uppercase font-bold`}>BHAI JEWELLER</span>
+              <span className={`text-[9.5px] ${subtitleColor} tracking-widest uppercase`}>Bradford Terminal</span>
+            </div>
           </div>
         </div>
 
@@ -975,25 +979,25 @@ export default function AdminDashboardPage() {
           {/* THEME TOGGLE BUTTON MOBILE */}
           <button
             onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-            className={`px-2.5 py-1.5 rounded-[5px] text-xs font-medium border transition-colors ${
+            className={`px-2.5 py-1.5 rounded-[5px] text-xs font-medium border transition-colors flex items-center gap-1.5 ${
               isLight
-                ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5]'
+                ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5]'
                 : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
             }`}
           >
-            {isLight ? '🌙 Dark' : '☀️ Light'}
+            {isLight ? <MoonIcon className="w-3.5 h-3.5 text-[#9b7632]" /> : <SunIcon className="w-3.5 h-3.5 text-[#dec29b]" />}
+            <span>{isLight ? 'Dark' : 'Light'}</span>
           </button>
 
           <Link
             href="/"
-            className={`text-xs px-3 py-1.5 ${
-              isLight ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
+            target="_blank"
+            className={`text-xs px-2.5 py-1.5 ${
+              isLight ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23]'
             } border rounded-[5px] transition-colors flex items-center space-x-1`}
           >
+            <StoreIcon className="w-3.5 h-3.5" />
             <span>Site</span>
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
           </Link>
         </div>
       </header>
@@ -1002,20 +1006,25 @@ export default function AdminDashboardPage() {
       {mobileDrawerOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
           <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
           />
           <aside className={`relative w-72 max-w-[80vw] ${sidebarBg} border-r flex flex-col h-full z-10 shadow-2xl`}>
             <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
-              <div>
-                <h1 className={`font-serif text-lg font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
-                <p className={`text-xs ${subtitleColor} tracking-widest uppercase mt-0.5`}>Admin Environment</p>
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+                  <CrownIcon className="w-4 h-4" />
+                </div>
+                <div>
+                  <h1 className={`font-serif text-base font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
+                  <p className={`text-[10px] ${subtitleColor} tracking-widest uppercase`}>Bradford Atelier</p>
+                </div>
               </div>
               <button
                 onClick={() => setMobileDrawerOpen(false)}
                 className={`${subtitleColor} hover:${accentGold} p-1 rounded-[5px]`}
               >
-                ✕
+                <XIcon className="w-4 h-4" />
               </button>
             </div>
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -1029,10 +1038,10 @@ export default function AdminDashboardPage() {
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[5px] text-sm font-medium transition-all ${
                     activeTab === item.id
                       ? isLight
-                        ? 'bg-[#f4efe6] text-[#8c6b2d] border-l-2 border-[#b38b40] font-bold shadow-sm'
+                        ? 'bg-[#f8f5ee] text-[#9b7632] border-l-2 border-[#9b7632] font-bold shadow-xs'
                         : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
                       : isLight
-                      ? 'text-[#4a3b2c] hover:bg-[#f7f4ee]'
+                      ? 'text-[#4a3f35] hover:bg-[#f8f5ee]'
                       : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
                   }`}
                 >
@@ -1051,24 +1060,22 @@ export default function AdminDashboardPage() {
             <div className={`p-4 ${sidebarFooterBg} border-t flex flex-col gap-2`}>
               <Link
                 href="/"
+                target="_blank"
                 className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
-                  isLight ? 'bg-[#b38b40] text-white hover:bg-[#99752b]' : 'bg-[#1f1612] text-[#dec29b] border border-[#3a2c23] hover:bg-[#2c201a]'
-                } rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
+                  isLight ? 'bg-[#ffffff] text-[#9b7632] border border-[#ded3c5] hover:bg-[#f8f5ee]' : 'bg-[#1f1612] text-[#dec29b] border border-[#3a2c23] hover:bg-[#2c201a]'
+                } rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all shadow-2xs`}
               >
+                <StoreIcon className="w-3.5 h-3.5" />
                 <span>Storefront Main Site</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+                <ExternalLinkIcon className="w-3 h-3 ml-0.5" />
               </Link>
               <button
                 type="button"
                 onClick={handleAdminLogout}
-                className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-100 hover:bg-red-200 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+                className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
               >
+                <LockIcon className="w-3.5 h-3.5" />
                 <span>Lock &amp; Sign Out</span>
-                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
               </button>
             </div>
           </aside>
@@ -1084,19 +1091,26 @@ export default function AdminDashboardPage() {
         {/* SIDEBAR HEADER */}
         <div className={`p-5 ${sidebarHeaderBorder} border-b flex items-center justify-between`}>
           {sidebarOpen ? (
-            <div>
-              <h1 className={`font-serif text-lg font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
-              <p className={`text-[10px] ${subtitleColor} tracking-widest uppercase mt-0.5`}>Admin Management System</p>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+                <CrownIcon className="w-4 h-4" />
+              </div>
+              <div>
+                <h1 className={`font-serif text-sm font-bold tracking-wider ${accentGold}`}>BHAI JEWELLER</h1>
+                <p className={`text-[10px] ${subtitleColor} tracking-widest uppercase`}>Bradford HQ Terminal</p>
+              </div>
             </div>
           ) : (
-            <div className={`mx-auto font-serif text-lg font-bold ${accentGold}`}>BJ</div>
+            <div className="mx-auto w-8 h-8 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/30 flex items-center justify-center text-[#9b7632]">
+              <CrownIcon className="w-4 h-4" />
+            </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className={`p-1.5 rounded-[5px] ${subtitleColor} hover:${accentGold} transition-colors`}
             title={sidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={sidebarOpen ? "M11 19l-7-7 7-7m8 14l-7-7 7-7" : "M13 5l7 7-7 7M5 5l7 7-7 7"} />
             </svg>
           </button>
@@ -1110,17 +1124,17 @@ export default function AdminDashboardPage() {
               sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
             } py-2.5 rounded-[5px] text-xs font-semibold border transition-all ${
               isLight
-                ? 'bg-[#f4efe6] text-[#1c1510] border-[#dcd3c5] hover:bg-[#e8e1d3]'
+                ? 'bg-[#f8f5ee] text-[#17120e] border-[#ded3c5] hover:bg-[#ede5d8]'
                 : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
             }`}
             title="Toggle Admin Theme"
           >
             <div className="flex items-center space-x-2">
-              <span className="text-base">{isLight ? '☀️' : '🌙'}</span>
+              {isLight ? <MoonIcon className="w-4 h-4 text-[#9b7632]" /> : <SunIcon className="w-4 h-4 text-[#dec29b]" />}
               {sidebarOpen && <span>{isLight ? 'Light Theme (Default)' : 'Dark Theme'}</span>}
             </div>
             {sidebarOpen && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#b38b40] text-white">
+              <span className="text-[10px] px-1.5 py-0.5 rounded-[5px] bg-[#9b7632] text-white">
                 Toggle
               </span>
             )}
@@ -1138,10 +1152,10 @@ export default function AdminDashboardPage() {
               } py-3 rounded-[5px] text-sm font-medium transition-all ${
                 activeTab === item.id
                   ? isLight
-                    ? 'bg-[#f4efe6] text-[#8c6b2d] border-l-2 border-[#b38b40] font-bold shadow-sm'
+                    ? 'bg-[#f8f5ee] text-[#9b7632] border-l-2 border-[#9b7632] font-bold shadow-xs'
                     : 'bg-[#261b15] text-[#dec29b] border-l-2 border-[#dec29b] shadow-md'
                   : isLight
-                  ? 'text-[#4a3b2c] hover:bg-[#f7f4ee]'
+                  ? 'text-[#4a3f35] hover:bg-[#f8f5ee]'
                   : 'text-[#c2b4a3] hover:bg-[#1a120e] hover:text-[#faf7f2]'
               }`}
               title={!sidebarOpen ? item.label : undefined}
@@ -1164,37 +1178,35 @@ export default function AdminDashboardPage() {
           {sidebarOpen ? (
             <>
               <div className="flex items-center space-x-3">
-                <div className={`w-8 h-8 rounded-[5px] ${isLight ? 'bg-[#b38b40] text-white' : 'bg-[#dec29b] text-[#140e0b]'} font-serif font-bold flex items-center justify-center text-sm`}>
+                <div className={`w-8 h-8 rounded-[5px] ${isLight ? 'bg-[#9b7632] text-white' : 'bg-[#dec29b] text-[#140e0b]'} font-serif font-bold flex items-center justify-center text-sm shadow-2xs`}>
                   AD
                 </div>
                 <div className="flex flex-col overflow-hidden">
-                  <span className={`text-xs font-semibold ${titleColor} truncate`}>Master Admin</span>
-                  <span className={`text-[10px] ${subtitleColor} truncate`}>admin@bhaijeweller.com</span>
+                  <span className={`text-xs font-semibold ${titleColor} truncate`}>Bradford Admin</span>
+                  <span className={`text-[10px] ${subtitleColor} truncate`}>admin@bhaijeweller.co.uk</span>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
                 <Link
                   href="/"
+                  target="_blank"
                   className={`w-full flex items-center justify-center space-x-2 py-2 px-3 ${
                     isLight
-                      ? 'bg-[#ffffff] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#f4efe6]'
+                      ? 'bg-[#ffffff] text-[#9b7632] border-[#ded3c5] hover:bg-[#f8f5ee]'
                       : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
-                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all`}
+                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all shadow-2xs`}
                 >
+                  <StoreIcon className="w-3.5 h-3.5" />
                   <span>Main Storefront</span>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+                  <ExternalLinkIcon className="w-3 h-3 ml-0.5" />
                 </Link>
                 <button
                   type="button"
                   onClick={handleAdminLogout}
-                  className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-100 hover:bg-red-200 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-300 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
+                  className="w-full flex items-center justify-center space-x-2 py-2 px-3 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-900 rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-all"
                 >
+                  <LockIcon className="w-3.5 h-3.5" />
                   <span>Lock &amp; Sign Out</span>
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
                 </button>
               </div>
             </>
@@ -1202,22 +1214,19 @@ export default function AdminDashboardPage() {
             <div className="flex flex-col items-center gap-2">
               <Link
                 href="/"
+                target="_blank"
                 className={`w-full flex justify-center py-2 ${accentGold} hover:bg-opacity-10 rounded-[5px]`}
                 title="Storefront Site"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
+                <StoreIcon className="w-4 h-4" />
               </Link>
               <button
                 type="button"
                 onClick={handleAdminLogout}
-                className="w-full flex justify-center py-2 text-red-500 hover:bg-red-500/10 rounded-[5px]"
+                className="w-full flex justify-center py-2 text-red-600 hover:bg-red-500/10 rounded-[5px]"
                 title="Sign Out of Admin Terminal"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+                <LockIcon className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -1229,34 +1238,39 @@ export default function AdminDashboardPage() {
         {/* TOP STATUS BAR */}
         <div className={`flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b ${cardHeaderBorder} gap-4`}>
           <div>
-            <span className={`text-xs uppercase tracking-widest ${accentGold} font-semibold`}>Luxury Management Suite</span>
+            <span className={`text-xs uppercase tracking-widest ${accentGold} font-semibold flex items-center gap-1.5`}>
+              <CrownIcon className="w-3.5 h-3.5" />
+              Luxury Fine Jewellery Administration
+            </span>
             <h1 className={`font-serif text-2xl sm:text-3xl ${titleColor} font-semibold tracking-wide capitalize mt-0.5`}>
-              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? 'Add New Product (Full Page)' : activeTab}
+              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? 'Add New Product Studio' : activeTab}
             </h1>
           </div>
           <div className="flex items-center space-x-3">
             {/* THEME SWITCH BUTTON TOP BAR */}
             <button
               onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-              className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold border flex items-center space-x-1.5 transition-all shadow-sm ${
+              className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold border flex items-center space-x-1.5 transition-all shadow-xs ${
                 isLight
-                  ? 'bg-[#ffffff] text-[#1c1510] border-[#dcd3c5] hover:bg-[#f4efe6]'
+                  ? 'bg-[#ffffff] text-[#17120e] border-[#ded3c5] hover:bg-[#f8f5ee]'
                   : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
               }`}
             >
-              <span>{isLight ? '☀️ Light Mode' : '🌙 Dark Mode'}</span>
+              {isLight ? <MoonIcon className="w-3.5 h-3.5 text-[#9b7632]" /> : <SunIcon className="w-3.5 h-3.5 text-[#dec29b]" />}
+              <span>{isLight ? 'Light Theme' : 'Dark Theme'}</span>
             </button>
 
-            <span className={`inline-flex items-center px-3 py-1.5 rounded-[5px] text-xs border ${badgeBg}`}>
+            <span className={`inline-flex items-center px-3 py-1.5 rounded-[5px] text-xs border ${badgeBg} font-medium`}>
               <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-              Operational
+              Supabase Live
             </span>
             {activeTab !== 'add-product' && (
               <button
                 onClick={() => setActiveTab('add-product')}
-                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center space-x-1`}
+                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-xs flex items-center space-x-1.5`}
               >
-                <span>+ Add Product Page</span>
+                <PlusIcon className="w-3.5 h-3.5" />
+                <span>Add Product</span>
               </button>
             )}
           </div>
@@ -1273,7 +1287,9 @@ export default function AdminDashboardPage() {
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Total Revenue</p>
                     <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>£{totalRevenue.toLocaleString()}</p>
                   </div>
-                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>💰</span>
+                  <div className="p-2.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                    <ArrowTrendingUpIcon className="w-5 h-5" />
+                  </div>
                 </div>
                 <div className="mt-4 flex items-center text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                   <span>↑ +18.4% from last month</span>
@@ -1286,7 +1302,9 @@ export default function AdminDashboardPage() {
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live Catalog Items</p>
                     <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>{totalProductsCount}</p>
                   </div>
-                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>💎</span>
+                  <div className="p-2.5 rounded-[5px] bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-900 text-sky-600">
+                    <DiamondIcon className="w-5 h-5" />
+                  </div>
                 </div>
                 <div className={`mt-4 flex items-center text-xs ${subtitleColor}`}>
                   <span>Synced in real-time with Storefront</span>
@@ -1299,7 +1317,9 @@ export default function AdminDashboardPage() {
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Bespoke Requests</p>
                     <p className={`text-2xl sm:text-3xl font-serif ${accentGold} font-bold mt-2`}>{pendingEnquiriesCount}</p>
                   </div>
-                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>✨</span>
+                  <div className="p-2.5 rounded-[5px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 text-amber-600">
+                    <SparklesIcon className="w-5 h-5" />
+                  </div>
                 </div>
                 <div className="mt-4 flex items-center text-xs text-amber-600 dark:text-amber-400 font-medium">
                   <span>Requires artisan consultation</span>
@@ -1312,7 +1332,9 @@ export default function AdminDashboardPage() {
                     <p className={`text-xs ${subtitleColor} uppercase tracking-wider font-semibold`}>Live 24K Gold Rate</p>
                     <p className={`text-2xl sm:text-3xl font-serif ${titleColor} font-bold mt-2`}>Rs. {gold24kRate}</p>
                   </div>
-                  <span className={`p-2 ${isLight ? 'bg-[#f4efe6]' : 'bg-[#211611]'} rounded-[5px] text-lg`}>🪙</span>
+                  <div className="p-2.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                    <GoldRatesIcon className="w-5 h-5" />
+                  </div>
                 </div>
                 <div className={`mt-4 flex items-center text-xs ${accentGold}`}>
                   <span>PKR / Gram • Auto-sync on</span>
@@ -1325,9 +1347,13 @@ export default function AdminDashboardPage() {
               {/* Recent Orders List */}
               <div className={`lg:col-span-2 ${cardBg} rounded-[5px] p-5`}>
                 <div className={`flex items-center justify-between mb-4 border-b ${cardHeaderBorder} pb-3`}>
-                  <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Recent Store Orders</h3>
-                  <button onClick={() => setActiveTab('orders')} className={`text-xs ${accentGold} hover:underline`}>
-                    View All Orders →
+                  <h3 className={`font-serif text-lg ${accentGold} font-semibold flex items-center gap-2`}>
+                    <OrdersIcon className="w-4 h-4" />
+                    Recent Store Orders
+                  </h3>
+                  <button onClick={() => setActiveTab('orders')} className={`text-xs ${accentGold} hover:underline flex items-center gap-1`}>
+                    <span>View All Orders</span>
+                    <ChevronRightIcon className="w-3 h-3" />
                   </button>
                 </div>
                 <div className="overflow-x-auto">
@@ -1360,9 +1386,10 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               onClick={() => setSelectedInvoiceOrder(o)}
-                              className="px-2 py-0.5 rounded-[4px] border border-[#dec29b] bg-[#dec29b]/15 text-[#8c6b2d] dark:text-[#dec29b] text-[10px] font-semibold hover:bg-[#dec29b]/30 transition-colors inline-flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-[4px] border border-[#ded3c5] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[10px] font-semibold transition-colors inline-flex items-center gap-1.5 shadow-2xs"
                             >
-                              <span>🧾 Invoice</span>
+                              <PrinterIcon className="w-3 h-3" />
+                              <span>Invoice</span>
                             </button>
                           </td>
                         </tr>
@@ -1376,20 +1403,24 @@ export default function AdminDashboardPage() {
               <div className={`${cardBg} rounded-[5px] p-5 flex flex-col justify-between`}>
                 <div>
                   <div className={`flex items-center justify-between mb-3 border-b ${cardHeaderBorder} pb-3`}>
-                    <h3 className={`font-serif text-lg ${accentGold} font-semibold`}>Quick Inventory Action</h3>
+                    <h3 className={`font-serif text-lg ${accentGold} font-semibold flex items-center gap-2`}>
+                      <BoltIcon className="w-4 h-4" />
+                      Quick Inventory Action
+                    </h3>
                   </div>
                   <p className={`text-xs ${subtitleColor} mb-4`}>
                     Create a new product with multiple images and auto-generated SEO metadata.
                   </p>
                   <button
                     onClick={() => setActiveTab('add-product')}
-                    className={`w-full py-3 ${primaryBtn} rounded-[5px] text-xs font-bold uppercase tracking-wider shadow-md transition-all mb-4`}
+                    className={`w-full py-3 ${primaryBtn} rounded-[5px] text-xs font-bold uppercase tracking-wider shadow-xs transition-all mb-4 flex items-center justify-center gap-1.5`}
                   >
-                    + Open Full Add Product Page
+                    <PlusIcon className="w-4 h-4" />
+                    <span>Open Add Product Studio</span>
                   </button>
                   <div className="space-y-3 pt-2">
                     {slides.slice(0, 2).map(slide => (
-                      <div key={slide.id} className={`p-3 ${isLight ? 'bg-[#f9f6f0] border-[#e8dfd1]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
+                      <div key={slide.id} className={`p-3 ${isLight ? 'bg-[#fbf9f6] border-[#e8dfd5]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] flex items-center justify-between`}>
                         <div className="truncate pr-2">
                           <p className={`text-xs font-semibold ${titleColor} truncate`}>{slide.title}</p>
                           <p className={`text-[10px] ${subtitleColor} uppercase`}>{slide.status}</p>
@@ -1401,10 +1432,12 @@ export default function AdminDashboardPage() {
                 <button
                   onClick={() => setActiveTab('slides')}
                   className={`mt-4 w-full py-2 ${
-                    isLight ? 'bg-[#f4efe6] text-[#8c6b2d] border-[#dcd3c5] hover:bg-[#e8e1d3]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
-                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors`}
+                    isLight ? 'bg-[#f8f5ee] text-[#9b7632] border-[#ded3c5] hover:bg-[#ede5d8]' : 'bg-[#1f1612] text-[#dec29b] border-[#3a2c23] hover:bg-[#2c201a]'
+                  } border rounded-[5px] text-xs font-semibold uppercase tracking-wider transition-colors flex items-center justify-center gap-1.5`}
                 >
-                  Manage Slider Banners →
+                  <SlidesIcon className="w-3.5 h-3.5" />
+                  <span>Manage Slider Banners</span>
+                  <ChevronRightIcon className="w-3 h-3" />
                 </button>
               </div>
             </div>
@@ -1416,11 +1449,13 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             {/* FEATURE 4: INVENTORY HEALTH KPI CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#b38b40]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Catalog Items</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className={`text-2xl font-serif font-bold ${titleColor}`}>{products.length}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">💎</span>
+                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                    <DiamondIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className={`text-[10px] ${subtitleColor} mt-1`}>Active product listings</p>
               </div>
@@ -1429,7 +1464,9 @@ export default function AdminDashboardPage() {
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Healthy Stock (&gt; 5)</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">{healthyStockCount}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">✓</span>
+                  <div className="p-1.5 rounded-[5px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-600">
+                    <CheckCircleIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Optimal retail inventory</p>
               </div>
@@ -1438,7 +1475,9 @@ export default function AdminDashboardPage() {
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Low Stock Warning (1-5)</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-2xl font-serif font-bold text-amber-600 dark:text-amber-400">{lowStockCount}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-amber-100 dark:bg-amber-950 text-amber-600 animate-pulse">⚠️</span>
+                  <div className="p-1.5 rounded-[5px] bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-600">
+                    <AlertTriangleIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">Replenishment recommended</p>
               </div>
@@ -1447,7 +1486,9 @@ export default function AdminDashboardPage() {
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Out of Stock (0 units)</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-2xl font-serif font-bold text-red-600 dark:text-red-400">{outOfStockCount}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-red-100 dark:bg-red-950 text-red-600">🚫</span>
+                  <div className="p-1.5 rounded-[5px] bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 text-red-600">
+                    <AlertCircleIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className="text-[10px] text-red-600 dark:text-red-400 mt-1">Unavailable on storefront</p>
               </div>
@@ -1457,7 +1498,7 @@ export default function AdminDashboardPage() {
             {(lowStockCount > 0 || outOfStockCount > 0) && (
               <div className="p-3.5 rounded-[5px] bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping flex-shrink-0" />
+                  <AlertTriangleIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
                   <p className="text-amber-900 dark:text-amber-200 font-medium">
                     <strong>Inventory Alert:</strong> {lowStockCount} items running low on stock and {outOfStockCount} items are out of stock. Immediate artisan restock required.
                   </p>
@@ -1465,16 +1506,18 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setStockFilter('low')}
-                    className="px-2.5 py-1 rounded-[4px] bg-amber-600 text-white text-[10px] font-semibold hover:bg-amber-700 transition-colors shadow-2xs"
+                    className="px-2.5 py-1 rounded-[4px] bg-amber-600 text-white text-[10px] font-semibold hover:bg-amber-700 transition-colors shadow-2xs flex items-center gap-1"
                   >
-                    View Low Stock ({lowStockCount})
+                    <AlertTriangleIcon className="w-3 h-3" />
+                    <span>View Low Stock ({lowStockCount})</span>
                   </button>
                   {outOfStockCount > 0 && (
                     <button
                       onClick={() => setStockFilter('out')}
-                      className="px-2.5 py-1 rounded-[4px] bg-red-600 text-white text-[10px] font-semibold hover:bg-red-700 transition-colors shadow-2xs"
+                      className="px-2.5 py-1 rounded-[4px] bg-red-600 text-white text-[10px] font-semibold hover:bg-red-700 transition-colors shadow-2xs flex items-center gap-1"
                     >
-                      View Out of Stock ({outOfStockCount})
+                      <AlertCircleIcon className="w-3 h-3" />
+                      <span>View Out of Stock ({outOfStockCount})</span>
                     </button>
                   )}
                 </div>
@@ -1485,21 +1528,24 @@ export default function AdminDashboardPage() {
             <div className={`flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
               {/* Search & Stock Filter Pills */}
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="text"
-                  placeholder="Search products by name or SKU..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none w-full sm:w-56 ${inputBg}`}
-                />
+                <div className="relative w-full sm:w-64">
+                  <SearchIcon className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#9b7632]" />
+                  <input
+                    type="text"
+                    placeholder="Search by title, SKU..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`text-xs pl-8.5 pr-3 py-2 rounded-[5px] focus:outline-none w-full ${inputBg}`}
+                  />
+                </div>
 
-                <div className="flex items-center gap-1.5 bg-[#f4efe6] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
+                <div className="flex items-center gap-1.5 bg-[#f8f5ee] dark:bg-[#1a120e] p-1 rounded-[5px] border border-[#ded3c5] dark:border-[#3a2c23]">
                   <button
                     type="button"
                     onClick={() => setStockFilter('all')}
                     className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
                       stockFilter === 'all'
-                        ? 'bg-[#1c1510] text-[#f5efe8] font-bold shadow-2xs'
+                        ? 'bg-[#17120e] text-[#fbfaf8] font-bold shadow-2xs'
                         : `${subtitleColor} hover:${titleColor}`
                     }`}
                   >
@@ -1508,24 +1554,26 @@ export default function AdminDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setStockFilter('low')}
-                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
+                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all flex items-center gap-1 ${
                       stockFilter === 'low'
                         ? 'bg-amber-600 text-white font-bold shadow-2xs'
                         : 'text-amber-700 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950'
                     }`}
                   >
-                    ⚠️ Low ({lowStockCount})
+                    <AlertTriangleIcon className="w-3 h-3" />
+                    <span>Low ({lowStockCount})</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setStockFilter('out')}
-                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all ${
+                    className={`px-2.5 py-1 rounded-[4px] text-[10.5px] font-medium transition-all flex items-center gap-1 ${
                       stockFilter === 'out'
                         ? 'bg-red-600 text-white font-bold shadow-2xs'
                         : 'text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950'
                     }`}
                   >
-                    🚫 Out ({outOfStockCount})
+                    <AlertCircleIcon className="w-3 h-3" />
+                    <span>Out ({outOfStockCount})</span>
                   </button>
                 </div>
               </div>
@@ -1543,25 +1591,23 @@ export default function AdminDashboardPage() {
                   ))}
                 </select>
 
-
                 {/* FEATURE 4: EXPORT INVENTORY CSV BUTTON */}
                 <button
                   type="button"
                   onClick={handleExportInventoryCSV}
-                  className="px-3.5 py-2 rounded-[5px] border border-[#dec29b] bg-[#dec29b]/20 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                  className="px-3.5 py-2 rounded-[5px] border border-[#ded3c5] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs"
                   title="Download inventory report as CSV spreadsheet"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
+                  <ExportIcon className="w-3.5 h-3.5" />
                   <span>Export CSV</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('add-product')}
-                  className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md`}
+                  className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-xs flex items-center gap-1.5`}
                 >
-                  + Add Product Page
+                  <PlusIcon className="w-3.5 h-3.5" />
+                  <span>Add Product</span>
                 </button>
               </div>
             </div>
@@ -1594,7 +1640,7 @@ export default function AdminDashboardPage() {
                       filteredProducts.map((p) => (
                         <tr key={p.id} className="transition-colors">
                           <td className="p-4 flex items-center space-x-3">
-                            <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8dfd1] dark:bg-[#211611] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
+                            <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#211611] flex-shrink-0 border border-[#ded3c5] dark:border-[#3a2c23]">
                               <Image src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'} alt={p.name} fill className="object-cover" />
                             </div>
                             <div>
@@ -1612,11 +1658,18 @@ export default function AdminDashboardPage() {
                           <td className={`p-4 font-semibold ${accentGold}`}>£{p.price.toLocaleString()}</td>
                           <td className="p-4">
                             <span className={`px-2.5 py-1 rounded-[5px] text-[10px] font-bold inline-flex items-center gap-1 ${
-                              p.stock > 5 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
-                              p.stock > 0 ? 'bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800 animate-pulse' :
-                              'bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800'
+                              p.stock > 5 ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800' :
+                              p.stock > 0 ? 'bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800' :
+                              'bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-300 border border-red-300 dark:border-red-800'
                             }`}>
-                              {p.stock > 5 ? '🟢' : p.stock > 0 ? '⚠️' : '🚫'} {p.stock} units ({p.stock > 5 ? 'In Stock' : p.stock > 0 ? 'Low Stock' : 'Out of Stock'})
+                              {p.stock > 5 ? (
+                                <CheckCircleIcon className="w-3 h-3 text-emerald-600" />
+                              ) : p.stock > 0 ? (
+                                <AlertTriangleIcon className="w-3 h-3 text-amber-600 animate-pulse" />
+                              ) : (
+                                <AlertCircleIcon className="w-3 h-3 text-red-600" />
+                              )}
+                              <span>{p.stock} units ({p.stock > 5 ? 'In Stock' : p.stock > 0 ? 'Low Stock' : 'Out of Stock'})</span>
                             </span>
                           </td>
                           {/* FEATURE 4: QUICK RESTOCK STEPPER */}
@@ -1625,7 +1678,7 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => handleQuickRestock(p.id, p.name, p.stock, 1)}
-                                className="px-2 py-1 rounded-[4px] bg-[#f4efe6] dark:bg-[#211611] hover:bg-[#ede3d4] dark:hover:bg-[#2d1e17] text-[#1c1510] dark:text-[#dec29b] border border-[#dcd3c5] dark:border-[#3a2c23] text-[10px] font-bold transition-all"
+                                className="px-2 py-1 rounded-[4px] bg-[#f8f5ee] dark:bg-[#211611] hover:bg-[#ede5d8] dark:hover:bg-[#2d1e17] text-[#17120e] dark:text-[#dec29b] border border-[#ded3c5] dark:border-[#3a2c23] text-[10px] font-bold transition-all"
                                 title="Add 1 piece to stock"
                               >
                                 +1
@@ -1633,14 +1686,14 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => handleQuickRestock(p.id, p.name, p.stock, 5)}
-                                className="px-2 py-1 rounded-[4px] bg-[#dec29b]/30 hover:bg-[#dec29b]/50 text-[#8c6b2d] dark:text-[#dec29b] border border-[#dec29b] text-[10px] font-bold transition-all"
+                                className="px-2 py-1 rounded-[4px] bg-[#9b7632]/15 hover:bg-[#9b7632]/30 text-[#9b7632] dark:text-[#dec29b] border border-[#9b7632]/40 text-[10px] font-bold transition-all"
                                 title="Add 5 pieces (Standard batch restock)"
                               >
                                 +5
                               </button>
                             </div>
                           </td>
-                          <td className="p-4 text-[#8c6b2d]">
+                          <td className="p-4 text-[#9b7632]">
                             <span className="font-semibold">{p.images?.length || 1} imgs</span>
                           </td>
                           <td className="p-4 text-right">
@@ -1648,10 +1701,10 @@ export default function AdminDashboardPage() {
                               <button
                                 type="button"
                                 onClick={() => setEditingAdminProduct(p)}
-                                className="px-2.5 py-1 bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#dec29b]/50 flex items-center gap-1 shadow-2xs"
+                                className="px-2.5 py-1 bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#ded3c5] flex items-center gap-1 shadow-2xs"
                                 title="Edit product"
                               >
-                                <span>✏️</span>
+                                <EditIcon className="w-3 h-3" />
                                 <span>Edit</span>
                               </button>
                               <button
@@ -1661,13 +1714,14 @@ export default function AdminDashboardPage() {
                                     removeStoreProduct(p.id);
                                   }
                                 }}
-                                className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
+                                className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] font-semibold transition-colors border border-red-200 dark:border-red-900 flex items-center gap-1 shadow-2xs"
+                                title="Delete product"
                               >
-                                Delete
+                                <TrashIcon className="w-3 h-3" />
+                                <span>Delete</span>
                               </button>
                             </div>
                           </td>
-
                         </tr>
                       ))
                     )}
@@ -1682,33 +1736,40 @@ export default function AdminDashboardPage() {
         {activeTab === 'add-product' && (
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             {saveSuccessMsg && (
-              <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-[5px] text-sm font-semibold flex items-center space-x-2 animate-bounce">
-                <span>✅ Product saved to real-time database! Synced live with Storefront catalog. Redirecting...</span>
+              <div className="p-4 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-[5px] text-xs font-semibold flex items-center gap-2.5 shadow-xs">
+                <CheckCircleIcon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <span>Product saved to real-time database! Synced live with Storefront catalog.</span>
               </div>
             )}
 
             <form onSubmit={handleFullProductSubmit} className="space-y-8">
               {/* Header Action Bar */}
               <div className={`${cardBg} p-5 rounded-[5px] flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
-                <div>
-                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Full Product Creation Studio</h2>
-                  <p className={`text-xs ${subtitleColor}`}>Fill product specifications, upload multiple photos, and auto-generate SEO metadata.</p>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632] flex items-center justify-center">
+                    <AddProductIcon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Full Product Creation Studio</h2>
+                    <p className={`text-xs ${subtitleColor}`}>Configure metal specifications, upload multiple photos, and auto-generate SEO metadata.</p>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"
                     onClick={() => setActiveTab('products')}
                     className={`px-4 py-2 border rounded-[5px] text-xs font-medium transition-colors ${
-                      isLight ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
+                      isLight ? 'bg-[#f8f5ee] text-[#4a3f35] border-[#ded3c5]' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
                     }`}
                   >
-                    Cancel & Return
+                    Cancel &amp; Return
                   </button>
                   <button
                     type="submit"
-                    className={`px-6 py-2.5 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-lg transition-all`}
+                    className={`px-6 py-2.5 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-xs transition-all flex items-center gap-1.5`}
                   >
-                    🚀 Save & Publish Live to Site
+                    <CheckIcon className="w-4 h-4" />
+                    <span>Save &amp; Publish Live to Site</span>
                   </button>
                 </div>
               </div>
@@ -1719,8 +1780,9 @@ export default function AdminDashboardPage() {
                 <div className="lg:col-span-2 space-y-6">
                   {/* Card 1: Core Product Specs */}
                   <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
-                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2`}>
-                      1. Basic Product Information
+                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2 flex items-center gap-2`}>
+                      <DiamondIcon className="w-4 h-4" />
+                      <span>1. Basic Product Information</span>
                     </h3>
 
                     <div className="space-y-3">
@@ -1754,15 +1816,17 @@ export default function AdminDashboardPage() {
                               </option>
                             ))}
                           </select>
-
                         </div>
 
                         <div>
                           <div className="flex items-center justify-between mb-1">
                             <label className={`block text-xs font-semibold ${subtitleColor}`}>
-                              Metal Purity & Spec *
+                              Metal Purity &amp; Spec *
                             </label>
-                            <span className="text-[10px] text-[#dec29b] font-mono">✍️ Type custom</span>
+                            <span className="text-[10px] text-[#9b7632] font-mono flex items-center gap-1">
+                              <EditIcon className="w-3 h-3" />
+                              Type custom
+                            </span>
                           </div>
                           <input
                             type="text"
@@ -1790,8 +1854,8 @@ export default function AdminDashboardPage() {
                                 key={preset}
                                 type="button"
                                 onClick={() => setAddForm({ ...addForm, metal: preset })}
-                                className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-[#dec29b]/30 hover:border-[#dec29b] transition-all ${
-                                  addForm.metal === preset ? 'bg-[#dec29b]/30 text-[#8c6b2d] font-bold' : subtitleColor
+                                className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-[#9b7632]/30 hover:border-[#9b7632] transition-all ${
+                                  addForm.metal === preset ? 'bg-[#9b7632]/15 text-[#9b7632] font-bold' : subtitleColor
                                 }`}
                               >
                                 {preset}
@@ -1801,11 +1865,10 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
-
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div>
                           <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                            Price ($ USD) *
+                            Price (£ GBP) *
                           </label>
                           <input
                             type="number"
@@ -1819,7 +1882,7 @@ export default function AdminDashboardPage() {
 
                         <div>
                           <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                            Original / Compare Price ($)
+                            Compare Price (£)
                           </label>
                           <input
                             type="number"
@@ -1854,9 +1917,10 @@ export default function AdminDashboardPage() {
                             <button
                               type="button"
                               onClick={generateAutoSku}
-                              className={`text-[10px] ${accentGold} hover:underline font-semibold`}
+                              className={`text-[10px] ${accentGold} hover:underline font-semibold flex items-center gap-1`}
                             >
-                              ⚡ Auto Generate
+                              <BoltIcon className="w-3 h-3" />
+                              <span>Auto Generate</span>
                             </button>
                           </div>
                           <input
@@ -1885,7 +1949,7 @@ export default function AdminDashboardPage() {
 
                       <div>
                         <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                          Detailed Description & Craftsmanship Details
+                          Detailed Description &amp; Craftsmanship Details
                         </label>
                         <textarea
                           rows={3}
@@ -1900,9 +1964,10 @@ export default function AdminDashboardPage() {
 
                   {/* Card 2: Multiple Product Images Manager */}
                   <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
-                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-20">
-                      <h3 className={`font-serif text-base font-bold ${accentGold}`}>
-                        2. Multiple Product Images Studio
+                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-15">
+                      <h3 className={`font-serif text-base font-bold ${accentGold} flex items-center gap-2`}>
+                        <ImageIcon className="w-4 h-4" />
+                        <span>2. Multiple Product Images Studio</span>
                       </h3>
                       <span className={`text-xs ${subtitleColor}`}>
                         Total: {1 + addForm.additionalImages.length} Images
@@ -1911,13 +1976,14 @@ export default function AdminDashboardPage() {
 
                     <div className="space-y-4">
                       {/* Device File Upload Box */}
-                      <div className={`p-5 ${isLight ? 'bg-[#fdfbf7] border-[#dcd3c5]' : 'bg-[#1a120e] border-[#3a2c23]'} border-2 border-dashed rounded-[5px] text-center space-y-2`}>
-                        <div className="text-3xl">📁</div>
+                      <div className={`p-5 ${isLight ? 'bg-[#fbf9f6] border-[#ded3c5]' : 'bg-[#1a120e] border-[#3a2c23]'} border-2 border-dashed rounded-[5px] text-center space-y-2`}>
+                        <ImageIcon className="w-8 h-8 text-[#9b7632] mx-auto" />
                         <h4 className={`text-xs font-bold ${titleColor}`}>Upload Photo Files from Device (PC or Mobile)</h4>
                         <p className={`text-[10px] ${subtitleColor}`}>Select device image files (JPG, PNG, WEBP)</p>
                         
-                        <label className={`inline-flex items-center space-x-2 px-5 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px] shadow cursor-pointer transition-all`}>
-                          <span>📷 Choose Photo Files...</span>
+                        <label className={`inline-flex items-center space-x-2 px-5 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px] shadow-xs cursor-pointer transition-all`}>
+                          <ImageIcon className="w-3.5 h-3.5" />
+                          <span>Choose Photo Files...</span>
                           <input
                             type="file"
                             accept="image/*"
@@ -1945,7 +2011,7 @@ export default function AdminDashboardPage() {
                       {/* Additional Image URLs List */}
                       <div className="space-y-2">
                         <label className={`block text-xs font-semibold ${subtitleColor}`}>
-                          Additional Angle Photos & Gallery Images
+                          Additional Angle Photos &amp; Gallery Images
                         </label>
 
                         <div className="flex items-center space-x-2">
@@ -1959,9 +2025,10 @@ export default function AdminDashboardPage() {
                           <button
                             type="button"
                             onClick={handleAddImageUrl}
-                            className={`px-4 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px]`}
+                            className={`px-4 py-2.5 ${primaryBtn} font-bold text-xs rounded-[5px] flex items-center gap-1.5`}
                           >
-                            + Add Image URL
+                            <PlusIcon className="w-3.5 h-3.5" />
+                            <span>Add URL</span>
                           </button>
                         </div>
                       </div>
@@ -1978,17 +2045,17 @@ export default function AdminDashboardPage() {
                           <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
                             {/* Primary */}
                             {addForm.primaryImage && (
-                              <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#b38b40] group bg-[#f4efe6]">
+                              <div className="relative h-20 rounded-[5px] overflow-hidden border-2 border-[#9b7632] group bg-[#f8f5ee]">
                                 <Image src={addForm.primaryImage} alt="Primary Cover" fill className="object-cover" />
                                 <button
                                   type="button"
                                   onClick={() => setAddForm(prev => ({ ...prev, primaryImage: '' }))}
-                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
+                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center shadow transition-transform hover:scale-110"
                                   title="Remove cover photo"
                                 >
-                                  ✕
+                                  <XIcon className="w-3 h-3" />
                                 </button>
-                                <span className="absolute bottom-0 left-0 right-0 bg-[#b38b40] text-white text-[9px] text-center font-bold uppercase py-0.5">
+                                <span className="absolute bottom-0 left-0 right-0 bg-[#9b7632] text-white text-[9px] text-center font-bold uppercase py-0.5">
                                   COVER PHOTO
                                 </span>
                               </div>
@@ -1996,15 +2063,15 @@ export default function AdminDashboardPage() {
 
                             {/* Additional Images */}
                             {addForm.additionalImages.map((imgUrl, idx) => (
-                              <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#dcd3c5] dark:border-[#3a2c23] group bg-[#f4efe6]">
+                              <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-[#ded3c5] dark:border-[#3a2c23] group bg-[#f8f5ee]">
                                 <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveImage(idx)}
-                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shadow"
+                                  className="absolute top-1 right-1 bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center shadow transition-transform hover:scale-110"
                                   title="Remove photo"
                                 >
-                                  ✕
+                                  <XIcon className="w-3 h-3" />
                                 </button>
                                 <span className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-[8px] text-center py-0.5">
                                   Angle #{idx + 2}
@@ -2019,19 +2086,21 @@ export default function AdminDashboardPage() {
 
                   {/* Card 3: Automated SEO Engine */}
                   <div className={`${cardBg} p-6 rounded-[5px] space-y-4`}>
-                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-20">
+                    <div className="flex items-center justify-between border-b pb-2 border-current border-opacity-15">
                       <div>
-                        <h3 className={`font-serif text-base font-bold ${accentGold}`}>
-                          3. Automated SEO Metadata & Search Keywords
+                        <h3 className={`font-serif text-base font-bold ${accentGold} flex items-center gap-2`}>
+                          <SparklesIcon className="w-4 h-4" />
+                          <span>3. Automated SEO Metadata &amp; Search Keywords</span>
                         </h3>
                         <p className={`text-xs ${subtitleColor}`}>Google SEO tags and search keywords automatically generated.</p>
                       </div>
                       <button
                         type="button"
                         onClick={generateAutoSeo}
-                        className={`px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-[5px] shadow transition-all`}
+                        className={`px-3 py-1.5 bg-[#9b7632] hover:bg-[#856327] text-white text-xs font-bold rounded-[5px] shadow-xs transition-all flex items-center gap-1.5`}
                       >
-                        ⚡ Auto-Generate SEO Keywords
+                        <SparklesIcon className="w-3.5 h-3.5" />
+                        <span>Auto-Generate SEO</span>
                       </button>
                     </div>
 
@@ -2092,13 +2161,14 @@ export default function AdminDashboardPage() {
                 {/* RIGHT COL: REAL-TIME STOREFRONT CARD PREVIEW */}
                 <div className="space-y-6">
                   <div className={`${cardBg} p-6 rounded-[5px] space-y-4 sticky top-6`}>
-                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2`}>
-                      👁️ Real-Time Storefront Preview
+                    <h3 className={`font-serif text-base font-bold ${accentGold} border-b ${cardHeaderBorder} pb-2 flex items-center gap-2`}>
+                      <EyeIcon className="w-4 h-4 text-[#9b7632]" />
+                      <span>Real-Time Storefront Preview</span>
                     </h3>
 
                     {/* Store Card Preview */}
-                    <div className="bg-[#FAF7F2] border border-[#E5DCD3] rounded-[5px] overflow-hidden shadow-md text-[#1c1510] max-w-sm mx-auto">
-                      <div className="relative w-full h-56 bg-[#f4efe6] dark:bg-[#1a120e] flex flex-col items-center justify-center text-center">
+                    <div className="bg-[#FAF7F2] border border-[#E5DCD3] rounded-[5px] overflow-hidden shadow-sm text-[#1c1510] max-w-sm mx-auto">
+                      <div className="relative w-full h-56 bg-[#f8f5ee] dark:bg-[#1a120e] flex flex-col items-center justify-center text-center">
                         {addForm.primaryImage ? (
                           <Image
                             src={addForm.primaryImage}
@@ -2108,7 +2178,7 @@ export default function AdminDashboardPage() {
                           />
                         ) : (
                           <div className="p-4 space-y-1">
-                            <span className="text-3xl">📷</span>
+                            <ImageIcon className="w-8 h-8 text-[#9b7632]/50 mx-auto" />
                             <p className="text-xs font-bold text-[#8c6b2d]">No Image Selected Yet</p>
                             <p className="text-[10px] text-[#8c7d6c]">Upload a photo or enter URL above to preview here</p>
                           </div>
@@ -2176,15 +2246,16 @@ export default function AdminDashboardPage() {
 
         {/* TAB: REAL-TIME CATEGORIES & COLLECTIONS MANAGER */}
         {activeTab === 'categories' && (
-
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             {/* KPI STAT CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#b38b40]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Categories</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className={`text-2xl font-serif font-bold ${titleColor}`}>{categories.length}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">🗂️</span>
+                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                    <CategoriesIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className={`text-[10px] ${subtitleColor} mt-1`}>Active storefront collections</p>
               </div>
@@ -2195,7 +2266,9 @@ export default function AdminDashboardPage() {
                   <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">
                     {categories.filter(c => c.is_active !== false).length}
                   </span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">✓</span>
+                  <div className="p-1.5 rounded-[5px] bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-600">
+                    <CheckCircleIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Live visible in catalog</p>
               </div>
@@ -2204,19 +2277,23 @@ export default function AdminDashboardPage() {
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Catalog Products</p>
                 <div className="flex items-center justify-between mt-1">
                   <span className={`text-2xl font-serif font-bold ${titleColor}`}>{products.length}</span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-sky-100 dark:bg-sky-950 text-sky-600">💎</span>
+                  <div className="p-1.5 rounded-[5px] bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800 text-sky-600">
+                    <DiamondIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className={`text-[10px] ${subtitleColor} mt-1`}>Total products distributed</p>
               </div>
 
-              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#dec29b]`}>
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#9b7632]`}>
                 <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Database Sync</p>
                 <div className="flex items-center justify-between mt-1">
-                  <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                     Supabase Live
                   </span>
-                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">⚡</span>
+                  <div className="p-1.5 rounded-[5px] bg-[#9b7632]/10 border border-[#9b7632]/25 text-[#9b7632]">
+                    <BoltIcon className="w-4 h-4" />
+                  </div>
                 </div>
                 <p className={`text-[10px] ${subtitleColor} mt-1`}>Real-time auto replication</p>
               </div>
@@ -2224,13 +2301,15 @@ export default function AdminDashboardPage() {
 
             {/* Notification Messages */}
             {catSaveSuccess && (
-              <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-[5px] text-xs font-semibold flex items-center space-x-2 animate-bounce">
+              <div className="p-3.5 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-[5px] text-xs font-semibold flex items-center gap-2 shadow-xs">
+                <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
                 <span>{catSaveSuccess}</span>
               </div>
             )}
             {catError && (
-              <div className="p-4 bg-red-100 border border-red-300 text-red-900 rounded-[5px] text-xs font-semibold flex items-center space-x-2">
-                <span>⚠️ {catError}</span>
+              <div className="p-3.5 bg-red-50 border border-red-300 text-red-900 rounded-[5px] text-xs font-semibold flex items-center gap-2 shadow-xs">
+                <AlertTriangleIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
+                <span>{catError}</span>
               </div>
             )}
 
@@ -2238,11 +2317,21 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* LEFT: ADD / EDIT CATEGORY FORM */}
               <div className="lg:col-span-5 space-y-4">
-                <div className={`${cardBg} p-6 rounded-[5px] space-y-4 shadow-sm border border-[#ded3c5] dark:border-[#3a2c23]`}>
+                <div className={`${cardBg} p-6 rounded-[5px] space-y-4 shadow-xs border border-[#ded3c5] dark:border-[#3a2c23]`}>
                   <div className="flex items-center justify-between border-b border-current border-opacity-10 pb-3">
                     <div>
-                      <h3 className={`font-serif text-base font-bold ${accentGold}`}>
-                        {editingCategory ? '✏️ Edit Category' : '➕ Add New Category'}
+                      <h3 className={`font-serif text-base font-bold ${accentGold} flex items-center gap-2`}>
+                        {editingCategory ? (
+                          <>
+                            <EditIcon className="w-4 h-4" />
+                            <span>Edit Category</span>
+                          </>
+                        ) : (
+                          <>
+                            <PlusIcon className="w-4 h-4" />
+                            <span>Add New Category</span>
+                          </>
+                        )}
                       </h3>
                       <p className={`text-[11px] ${subtitleColor}`}>
                         {editingCategory ? `Modifying: ${editingCategory.name}` : 'Instantly visible on storefront'}
@@ -2345,7 +2434,7 @@ export default function AdminDashboardPage() {
                             type="button"
                             onClick={() => setCategoryForm({ ...categoryForm, image: p.url })}
                             className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-current border-opacity-20 hover:border-opacity-60 transition-all ${
-                              categoryForm.image === p.url ? 'bg-[#dec29b]/30 font-bold text-[#8c6b2d]' : subtitleColor
+                              categoryForm.image === p.url ? 'bg-[#9b7632]/20 font-bold text-[#9b7632]' : subtitleColor
                             }`}
                           >
                             {p.label}
@@ -2369,8 +2458,8 @@ export default function AdminDashboardPage() {
                     </div>
 
                     {/* Live Preview Card */}
-                    <div className="p-3 rounded-[5px] bg-[#f5efe6] dark:bg-[#1a120c] border border-[#dcd3c5] dark:border-[#3a2c23] flex items-center gap-3">
-                      <div className="relative w-12 h-12 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#281b13] flex-shrink-0">
+                    <div className="p-3 rounded-[5px] bg-[#f8f5ee] dark:bg-[#1a120c] border border-[#ded3c5] dark:border-[#3a2c23] flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#281b13] flex-shrink-0 border border-[#ded3c5]">
                         <Image
                           src={categoryForm.image || '/images/category-rings.jpg'}
                           alt="Preview"
@@ -2392,7 +2481,7 @@ export default function AdminDashboardPage() {
                     <button
                       type="submit"
                       disabled={catSaving}
-                      className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-md transition-all flex items-center justify-center gap-2`}
+                      className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-xs transition-all flex items-center justify-center gap-2`}
                     >
                       {catSaving ? (
                         <>
@@ -2400,7 +2489,10 @@ export default function AdminDashboardPage() {
                           <span>Saving to Supabase...</span>
                         </>
                       ) : (
-                        <span>{editingCategory ? '✓ Update Category' : '🚀 Save & Publish Category'}</span>
+                        <>
+                          {editingCategory ? <CheckIcon className="w-4 h-4" /> : <SparklesIcon className="w-4 h-4" />}
+                          <span>{editingCategory ? 'Update Category' : 'Save & Publish Category'}</span>
+                        </>
                       )}
                     </button>
                   </form>
@@ -2422,10 +2514,10 @@ export default function AdminDashboardPage() {
                     <Link
                       href="/categories"
                       target="_blank"
-                      className="px-3 py-1.5 rounded-[4px] bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-[11px] font-semibold transition-colors flex items-center gap-1"
+                      className="px-3 py-1.5 rounded-[4px] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[11px] font-semibold border border-[#ded3c5] transition-colors flex items-center gap-1.5 shadow-2xs"
                     >
-                      <span>View Storefront Page</span>
-                      <span>&rarr;</span>
+                      <span>View Storefront</span>
+                      <ExternalLinkIcon className="w-3 h-3" />
                     </Link>
                   </div>
 
@@ -2449,7 +2541,7 @@ export default function AdminDashboardPage() {
                           return (
                             <tr key={cat.id || cat.slug} className="transition-colors">
                               <td className="p-3.5 flex items-center gap-3">
-                                <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#251a13] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
+                                <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#251a13] flex-shrink-0 border border-[#ded3c5] dark:border-[#3a2c23]">
                                   <Image
                                     src={cat.image || '/images/category-rings.jpg'}
                                     alt={cat.name}
@@ -2473,12 +2565,12 @@ export default function AdminDashboardPage() {
                                 <Link
                                   href={`/shop?category=${encodeURIComponent(cat.name)}`}
                                   target="_blank"
-                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[4px] bg-[#dec29b]/20 hover:bg-[#dec29b]/35 text-[#8c6b2d] dark:text-[#dec29b] text-[11px] font-semibold border border-[#dec29b]/30 transition-colors"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[4px] bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] text-[11px] font-semibold border border-[#ded3c5] transition-colors"
                                   title="View items in this category"
                                 >
                                   <span>{productCount}</span>
                                   <span>items</span>
-                                  <span>↗</span>
+                                  <ExternalLinkIcon className="w-2.5 h-2.5 ml-0.5" />
                                 </Link>
                               </td>
 
@@ -2500,17 +2592,18 @@ export default function AdminDashboardPage() {
                                         display_order: cat.display_order || 1,
                                       });
                                     }}
-                                    className="px-2.5 py-1 bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#dec29b]/50 flex items-center gap-1 shadow-2xs"
+                                    className="px-2.5 py-1 bg-[#f8f5ee] hover:bg-[#ede5d8] text-[#9b7632] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#ded3c5] flex items-center gap-1 shadow-2xs"
                                   >
-                                    <span>✏️</span>
+                                    <EditIcon className="w-3 h-3" />
                                     <span>Edit</span>
                                   </button>
                                   <button
                                     type="button"
                                     onClick={() => handleDeleteCategory(cat)}
-                                    className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] font-semibold transition-colors border border-red-300 dark:border-red-900"
+                                    className="px-2.5 py-1 bg-red-50 hover:bg-red-100 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] font-semibold transition-colors border border-red-200 dark:border-red-900 flex items-center gap-1 shadow-2xs"
                                   >
-                                    Delete
+                                    <TrashIcon className="w-3 h-3" />
+                                    <span>Delete</span>
                                   </button>
                                 </div>
                               </td>
@@ -2534,12 +2627,16 @@ export default function AdminDashboardPage() {
             <div className={`${cardBg} rounded-[5px] p-6 space-y-6`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-current border-opacity-15 pb-4">
                 <div>
-                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>⚡ Main Storefront Hero Section Editor</h2>
+                  <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
+                    <BoltIcon className="w-5 h-5 text-[#9b7632]" />
+                    <span>Main Storefront Hero Section Editor</span>
+                  </h2>
                   <p className={`text-xs ${subtitleColor}`}>Edit headline, subtext, button links, background campaign image, and featured card live on the main website homepage.</p>
                 </div>
                 {heroSaveMsg && (
-                  <span className="px-3 py-1.5 rounded-[5px] bg-emerald-600 text-white text-xs font-bold animate-bounce shadow">
-                    ✓ Hero Section Saved & Live!
+                  <span className="px-3 py-1.5 rounded-[5px] bg-emerald-600 text-white text-xs font-bold shadow flex items-center gap-1.5">
+                    <CheckIcon className="w-3.5 h-3.5" />
+                    <span>Hero Section Saved &amp; Live!</span>
                   </span>
                 )}
               </div>
@@ -2633,7 +2730,7 @@ export default function AdminDashboardPage() {
                           type="file"
                           accept="image/*"
                           onChange={(e) => handleHeroImageUpload(e, 'heroImage')}
-                          className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#b38b40] file:text-white cursor-pointer"
+                          className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#9b7632] file:text-white cursor-pointer"
                         />
                         <span className={`text-[10px] ${subtitleColor}`}>or URL:</span>
                         <input
@@ -2677,7 +2774,7 @@ export default function AdminDashboardPage() {
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleHeroImageUpload(e, 'featuredImage')}
-                            className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#b38b40] file:text-white cursor-pointer"
+                            className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-[5px] file:border-0 file:text-xs file:font-semibold file:bg-[#9b7632] file:text-white cursor-pointer"
                           />
                           <input
                             type="text"
@@ -2694,7 +2791,10 @@ export default function AdminDashboardPage() {
                   {/* Right Column: Interactive Real-Time Preview */}
                   <div className="lg:col-span-5 space-y-4">
                     <div className="sticky top-6 space-y-3">
-                      <span className={`block font-bold text-xs ${accentGold}`}>👁️ Live Real-Time Hero Preview</span>
+                      <span className={`flex items-center gap-1.5 font-bold text-xs ${accentGold}`}>
+                        <EyeIcon className="w-4 h-4" />
+                        <span>Live Real-Time Hero Preview</span>
+                      </span>
                       <div className="relative w-full rounded-[5px] overflow-hidden bg-[#120e0b] border border-[#3a2c23] p-6 text-white min-h-[300px] flex flex-col justify-between shadow-xl">
                         {heroForm.heroImage && (
                           <Image src={heroForm.heroImage} alt="Hero Preview" fill className="object-cover opacity-50 z-0" />
@@ -2708,8 +2808,9 @@ export default function AdminDashboardPage() {
                           </h3>
                           <p className="text-xs text-[#cfc6bc] line-clamp-3 font-light">{heroForm.description}</p>
                           <div className="pt-2">
-                            <span className="px-4 py-2 rounded-full bg-[#dec29b] text-[#140e0b] font-bold text-xs inline-block">
-                              {heroForm.primaryCtaText || 'Shop Collection'} →
+                            <span className="px-4 py-2 rounded-full bg-[#dec29b] text-[#140e0b] font-bold text-xs inline-flex items-center gap-1">
+                              <span>{heroForm.primaryCtaText || 'Shop Collection'}</span>
+                              <ChevronRightIcon className="w-3.5 h-3.5" />
                             </span>
                           </div>
                         </div>
@@ -2731,9 +2832,10 @@ export default function AdminDashboardPage() {
 
                       <button
                         type="submit"
-                        className={`w-full py-3.5 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-xl transition-all hover:scale-[1.01]`}
+                        className={`w-full py-3.5 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-xl transition-all flex items-center justify-center gap-2`}
                       >
-                        ⚡ Save Real-Time Hero Section Live
+                        <BoltIcon className="w-4 h-4" />
+                        <span>Save Real-Time Hero Section Live</span>
                       </button>
                     </div>
                   </div>
@@ -2748,9 +2850,10 @@ export default function AdminDashboardPage() {
               </div>
               <button
                 onClick={() => setIsAddSlideOpen(true)}
-                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md`}
+                className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-md flex items-center gap-1.5`}
               >
-                + Add New Hero Slide
+                <PlusIcon className="w-3.5 h-3.5" />
+                <span>Add New Hero Slide</span>
               </button>
             </div>
 
@@ -2908,9 +3011,7 @@ export default function AdminDashboardPage() {
                         : 'bg-[#1f1612] text-[#dec29b] border-[#4a392b] hover:bg-[#2b1f17]'
                     }`}
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                    </svg>
+                    <PrinterIcon className="w-3.5 h-3.5" />
                     <span>Print Invoice / Receipt</span>
                   </button>
                 </div>
@@ -3014,8 +3115,18 @@ export default function AdminDashboardPage() {
             {/* Sub-tab Switcher Header */}
             <div className={`flex flex-col sm:flex-row items-center justify-between gap-4 ${cardBg} p-4 rounded-[5px]`}>
               <div>
-                <h2 className={`font-serif text-lg font-bold ${accentGold}`}>
-                  {userTabMode === 'users' ? '👤 Registered User Accounts' : '🛡️ Live IP Security & Login Audit Logs'}
+                <h2 className={`font-serif text-lg font-bold ${accentGold} flex items-center gap-2`}>
+                  {userTabMode === 'users' ? (
+                    <>
+                      <UsersIcon className="w-5 h-5 text-[#9b7632]" />
+                      <span>Registered User Accounts</span>
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheckIcon className="w-5 h-5 text-[#9b7632]" />
+                      <span>Live IP Security &amp; Login Audit Logs</span>
+                    </>
+                  )}
                 </h2>
                 <p className={`text-xs ${subtitleColor}`}>
                   {userTabMode === 'users'
@@ -3028,28 +3139,30 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setUserTabMode('users')}
-                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border ${
+                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border flex items-center gap-1.5 ${
                     userTabMode === 'users'
-                      ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-sm font-bold'
+                      ? 'bg-[#9b7632] text-white border-[#9b7632] shadow-sm font-bold'
                       : isLight
                       ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
                       : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
                   }`}
                 >
-                  👤 User Accounts ({registeredUsers.length})
+                  <UsersIcon className="w-3.5 h-3.5" />
+                  <span>User Accounts ({registeredUsers.length})</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setUserTabMode('security')}
-                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border ${
+                  className={`px-4 py-2 rounded-[5px] text-xs font-semibold transition-all border flex items-center gap-1.5 ${
                     userTabMode === 'security'
-                      ? 'bg-[#b38b40] text-white border-[#b38b40] shadow-sm font-bold'
+                      ? 'bg-[#9b7632] text-white border-[#9b7632] shadow-sm font-bold'
                       : isLight
                       ? 'bg-[#f4efe6] text-[#5c4d40] border-[#dcd3c5]'
                       : 'bg-[#1a120e] text-[#c2b4a3] border-[#3a2c23]'
                   }`}
                 >
-                  🛡️ Security Audit Logs ({loginAttemptsLogs.length})
+                  <ShieldCheckIcon className="w-3.5 h-3.5" />
+                  <span>Security Audit Logs ({loginAttemptsLogs.length})</span>
                 </button>
               </div>
             </div>
@@ -3061,11 +3174,11 @@ export default function AdminDashboardPage() {
                 {userActionMsg && (
                   <div className="p-3.5 rounded-[5px] bg-emerald-700 text-white text-xs font-semibold flex items-center justify-between shadow-md animate-fadeIn">
                     <div className="flex items-center gap-2">
-                      <span>✓</span>
+                      <CheckIcon className="w-4 h-4 text-white" />
                       <span>{userActionMsg}</span>
                     </div>
                     <button type="button" onClick={() => setUserActionMsg('')} className="text-white hover:text-gray-200">
-                      ✕
+                      <XIcon className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 )}
@@ -3115,9 +3228,9 @@ export default function AdminDashboardPage() {
                       <button
                         type="button"
                         onClick={() => setUserSearchText('')}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
                       >
-                        ✕
+                        <XIcon className="w-3 h-3" />
                       </button>
                     )}
                   </div>
@@ -3210,58 +3323,75 @@ export default function AdminDashboardPage() {
                                           : badgeBg
                                       }`}
                                     >
-                                      {u.role === 'admin' ? '👑 Admin' : '👤 Client'}
+                                      {u.role === 'admin' ? (
+                                        <span className="inline-flex items-center gap-1"><CrownIcon className="w-3 h-3 text-[#9b7632]" /> Admin</span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1"><UsersIcon className="w-3 h-3" /> Client</span>
+                                      )}
                                     </span>
                                   </td>
                                   <td className="p-4">
                                     {isBanned ? (
-                                      <span className="px-2.5 py-1 rounded-[5px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-bold text-[10.5px] inline-flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-                                        🔴 Banned
+                                        <span>Banned</span>
                                       </span>
                                     ) : isInactive ? (
-                                      <span className="px-2.5 py-1 rounded-[5px] bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950 dark:text-amber-300 font-bold text-[10.5px] inline-flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
-                                        🟡 Inactive
+                                        <span>Inactive</span>
                                       </span>
                                     ) : (
-                                      <span className="px-2.5 py-1 rounded-[5px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 font-bold text-[10.5px] inline-flex items-center gap-1">
+                                      <span className="px-2.5 py-1 rounded-[5px] bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 font-bold text-[10.5px] inline-flex items-center gap-1.5">
                                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                                        🟢 Active
+                                        <span>Active</span>
                                       </span>
                                     )}
                                   </td>
                                   <td className="p-4">
                                     {u.isLocked ? (
-                                      <span className="px-2 py-0.5 rounded-[4px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-semibold text-[10px] block">
-                                        🔒 IP Locked ({u.failedAttempts}/5)
+                                      <span className="px-2 py-0.5 rounded-[4px] bg-red-100 text-red-900 border border-red-300 dark:bg-red-950 dark:text-red-300 font-semibold text-[10px] inline-flex items-center gap-1">
+                                        <LockIcon className="w-3 h-3 text-red-600" />
+                                        <span>IP Locked ({u.failedAttempts}/5)</span>
                                       </span>
                                     ) : (
-                                      <span className={`text-[10.5px] font-mono ${u.failedAttempts > 0 ? 'text-amber-600' : subtitleColor}`}>
-                                        {u.failedAttempts > 0 ? `⚠️ ${u.failedAttempts} Failed Attempts` : '✓ 0 Security Issues'}
+                                      <span className={`text-[10.5px] font-mono inline-flex items-center gap-1 ${u.failedAttempts > 0 ? 'text-amber-600' : subtitleColor}`}>
+                                        {u.failedAttempts > 0 ? (
+                                          <>
+                                            <AlertTriangleIcon className="w-3 h-3 text-amber-600" />
+                                            <span>{u.failedAttempts} Failed Attempts</span>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <CheckCircleIcon className="w-3 h-3 text-emerald-600" />
+                                            <span>0 Security Issues</span>
+                                          </>
+                                        )}
                                       </span>
                                     )}
                                   </td>
                                   <td className="p-4 text-right">
                                     <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                      {/* Ban / Unban Toggle Button */}
+                                       {/* Ban / Unban Toggle Button */}
                                       {isBanned ? (
                                         <button
                                           type="button"
                                           disabled={isLoading}
                                           onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'activate')}
-                                          className="px-2.5 py-1 rounded-[4px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                          className="px-2.5 py-1 rounded-[4px] bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs flex items-center gap-1"
                                         >
-                                          {isLoading ? '...' : '✓ Unban & Activate'}
+                                          <CheckCircleIcon className="w-3 h-3" />
+                                          <span>{isLoading ? '...' : 'Unban & Activate'}</span>
                                         </button>
                                       ) : (
                                         <button
                                           type="button"
                                           disabled={isLoading}
                                           onClick={() => handleUpdateUserStatus(u.id, u.email, 'banned', 'ban')}
-                                          className="px-2.5 py-1 rounded-[4px] bg-red-600 hover:bg-red-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                          className="px-2.5 py-1 rounded-[4px] bg-red-600 hover:bg-red-700 text-white font-semibold text-[10.5px] transition-all shadow-2xs flex items-center gap-1"
                                         >
-                                          {isLoading ? '...' : '🚫 Ban User'}
+                                          <AlertCircleIcon className="w-3 h-3" />
+                                          <span>{isLoading ? '...' : 'Ban User'}</span>
                                         </button>
                                       )}
 
@@ -3272,18 +3402,20 @@ export default function AdminDashboardPage() {
                                             type="button"
                                             disabled={isLoading}
                                             onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'activate')}
-                                            className="px-2 py-1 rounded-[4px] bg-[#dec29b] text-[#1c1510] font-semibold text-[10.5px] hover:bg-[#c9ad84] transition-all shadow-2xs"
+                                            className="px-2 py-1 rounded-[4px] bg-[#9b7632] text-white font-semibold text-[10.5px] hover:bg-[#856327] transition-all shadow-2xs flex items-center gap-1"
                                           >
-                                            {isLoading ? '...' : '🟢 Activate'}
+                                            <CheckCircleIcon className="w-3 h-3" />
+                                            <span>{isLoading ? '...' : 'Activate'}</span>
                                           </button>
                                         ) : (
                                           <button
                                             type="button"
                                             disabled={isLoading}
                                             onClick={() => handleUpdateUserStatus(u.id, u.email, 'inactive', 'deactivate')}
-                                            className="px-2 py-1 rounded-[4px] border border-amber-600 text-amber-700 dark:text-amber-400 font-semibold text-[10.5px] hover:bg-amber-100 dark:hover:bg-amber-950 transition-all"
+                                            className="px-2 py-1 rounded-[4px] border border-amber-600 text-amber-700 dark:text-amber-400 font-semibold text-[10.5px] hover:bg-amber-100 dark:hover:bg-amber-950 transition-all flex items-center gap-1"
                                           >
-                                            {isLoading ? '...' : '⏸️ Inactive'}
+                                            <LockIcon className="w-3 h-3" />
+                                            <span>{isLoading ? '...' : 'Inactive'}</span>
                                           </button>
                                         )
                                       )}
@@ -3294,9 +3426,10 @@ export default function AdminDashboardPage() {
                                           type="button"
                                           disabled={isLoading}
                                           onClick={() => handleUpdateUserStatus(u.id, u.email, 'active', 'unlock')}
-                                          className="px-2 py-1 rounded-[4px] bg-purple-700 hover:bg-purple-800 text-white font-semibold text-[10.5px] transition-all shadow-2xs"
+                                          className="px-2 py-1 rounded-[4px] bg-purple-700 hover:bg-purple-800 text-white font-semibold text-[10.5px] transition-all shadow-2xs flex items-center gap-1"
                                         >
-                                          🔓 Unlock
+                                          <ShieldCheckIcon className="w-3 h-3" />
+                                          <span>Unlock</span>
                                         </button>
                                       )}
                                     </div>
@@ -3321,7 +3454,9 @@ export default function AdminDashboardPage() {
                     <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Audit Events</p>
                     <div className="flex items-center justify-between mt-1">
                       <span className={`text-2xl font-serif font-bold ${titleColor}`}>{auditLogs.length}</span>
-                      <span className="text-base p-1.5 rounded-[5px] bg-purple-100 dark:bg-purple-950 text-purple-600">🛡️</span>
+                      <span className="p-1.5 rounded-[5px] bg-purple-100 dark:bg-purple-950 text-purple-600">
+                        <ShieldCheckIcon className="w-5 h-5" />
+                      </span>
                     </div>
                     <p className={`text-[10px] ${subtitleColor} mt-1`}>Recorded in current audit session</p>
                   </div>
@@ -3332,7 +3467,9 @@ export default function AdminDashboardPage() {
                       <span className="text-2xl font-serif font-bold text-red-600 dark:text-red-400">
                         {auditLogs.filter((l) => l.severity === 'CRITICAL').length}
                       </span>
-                      <span className="text-base p-1.5 rounded-[5px] bg-red-100 dark:bg-red-950 text-red-600 animate-pulse">🚫</span>
+                      <span className="p-1.5 rounded-[5px] bg-red-100 dark:bg-red-950 text-red-600 animate-pulse">
+                        <AlertTriangleIcon className="w-5 h-5" />
+                      </span>
                     </div>
                     <p className="text-[10px] text-red-600 dark:text-red-400 mt-1">IP locks &amp; rate violations</p>
                   </div>
@@ -3343,7 +3480,9 @@ export default function AdminDashboardPage() {
                       <span className="text-2xl font-serif font-bold text-blue-600 dark:text-blue-400">
                         {auditLogs.filter((l) => l.category === 'AUTH').length}
                       </span>
-                      <span className="text-base p-1.5 rounded-[5px] bg-blue-100 dark:bg-blue-950 text-blue-600">🔑</span>
+                      <span className="p-1.5 rounded-[5px] bg-blue-100 dark:bg-blue-950 text-blue-600">
+                        <LockIcon className="w-5 h-5" />
+                      </span>
                     </div>
                     <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">HMAC sessions &amp; logins</p>
                   </div>
@@ -3354,7 +3493,9 @@ export default function AdminDashboardPage() {
                       <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">
                         {auditLogs.filter((l) => l.category === 'ORDER' || l.category === 'INVENTORY').length}
                       </span>
-                      <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">📦</span>
+                      <span className="p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">
+                        <ProductsIcon className="w-5 h-5" />
+                      </span>
                     </div>
                     <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Order &amp; stock mutations</p>
                   </div>
@@ -3417,12 +3558,10 @@ export default function AdminDashboardPage() {
                     <button
                       type="button"
                       onClick={handleExportAuditCSV}
-                      className="px-3.5 py-2 rounded-[5px] border border-[#dec29b] bg-[#dec29b]/20 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
+                      className="px-3.5 py-2 rounded-[5px] border border-[#ded3c5] bg-[#ffffff] hover:bg-[#fbfaf8] text-[#9b7632] dark:border-[#3a2c23] dark:bg-[#1a120e] dark:text-[#dec29b] text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs"
                       title="Download complete security audit log as CSV"
                     >
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                      </svg>
+                      <ExportIcon className="w-3.5 h-3.5" />
                       <span>Export Audit CSV</span>
                     </button>
                   </div>
@@ -3463,14 +3602,28 @@ export default function AdminDashboardPage() {
                               <td className={`p-4 font-mono font-bold ${accentGold}`}>{log.id}</td>
                               <td className={`p-4 font-mono ${subtitleColor} text-[11px]`}>{log.timestamp}</td>
                               <td className="p-4">
-                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold border ${badgeBg}`}>
-                                  {log.category === 'AUTH'
-                                    ? '🔑 AUTH'
-                                    : log.category === 'SECURITY'
-                                    ? '🛡️ SECURITY'
-                                    : log.category === 'ORDER'
-                                    ? '📦 ORDER'
-                                    : '💎 INVENTORY'}
+                                <span className={`px-2 py-0.5 rounded-[4px] text-[10px] font-bold border inline-flex items-center gap-1 ${badgeBg}`}>
+                                  {log.category === 'AUTH' ? (
+                                    <>
+                                      <LockIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <span>AUTH</span>
+                                    </>
+                                  ) : log.category === 'SECURITY' ? (
+                                    <>
+                                      <ShieldCheckIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <span>SECURITY</span>
+                                    </>
+                                  ) : log.category === 'ORDER' ? (
+                                    <>
+                                      <OrdersIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <span>ORDER</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <DiamondIcon className="w-3 h-3 text-[#9b7632]" />
+                                      <span>INVENTORY</span>
+                                    </>
+                                  )}
                                 </span>
                               </td>
                               <td className={`p-4 font-mono font-semibold ${titleColor} text-[11px]`}>{log.action}</td>
@@ -3508,7 +3661,10 @@ export default function AdminDashboardPage() {
           <ScrollReveal direction="up" delay={100} className="space-y-6">
             <div className={`${cardBg} rounded-[5px] p-6 max-w-2xl mx-auto space-y-6`}>
               <div>
-                <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Live Gold Bullion Pricing Engine</h2>
+                <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
+                  <GoldRatesIcon className="w-5 h-5 text-[#9b7632]" />
+                  <span>Live Gold Bullion Pricing Engine</span>
+                </h2>
                 <p className={`text-xs ${subtitleColor} mt-1`}>
                   Adjust per-gram rates in PKR to update catalog prices automatically across the entire site.
                 </p>
@@ -3540,15 +3696,19 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className={`p-4 ${isLight ? 'bg-[#f7f3eb] border-[#e8dfd3]' : 'bg-[#1a120e] border-[#2c201a]'} border rounded-[5px] text-xs ${subtitleColor}`}>
-                  <p className={`font-semibold ${accentGold} mb-1`}>💡 Automated Pricing Formula:</p>
+                  <p className={`font-semibold ${accentGold} mb-1 flex items-center gap-1.5`}>
+                    <SparklesIcon className="w-4 h-4 text-[#9b7632]" />
+                    <span>Automated Pricing Formula:</span>
+                  </p>
                   <p>Catalog price = (Gold Weight × 22K Rate) + Artisan Making Charges + Diamond Carat Value.</p>
                 </div>
 
                 <button
                   onClick={() => alert("Gold Rates Updated Live!")}
-                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md`}
+                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md flex items-center justify-center gap-2`}
                 >
-                  Save & Push Gold Rates Live
+                  <GoldRatesIcon className="w-4 h-4" />
+                  <span>Save &amp; Push Gold Rates Live</span>
                 </button>
               </div>
             </div>
@@ -3562,12 +3722,16 @@ export default function AdminDashboardPage() {
             <div className={`${cardBg} rounded-[5px] p-6 max-w-3xl mx-auto space-y-6`}>
               <div className="flex items-center justify-between border-b border-current border-opacity-15 pb-3">
                 <div>
-                  <h2 className={`font-serif text-xl font-bold ${accentGold}`}>📢 Real-Time Top Announcement Bar Manager</h2>
-                  <p className={`text-xs ${subtitleColor}`}>Edit promotional top-bar text slides & toggle visibility on main site live.</p>
+                  <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
+                    <StoreIcon className="w-5 h-5 text-[#9b7632]" />
+                    <span>Real-Time Top Announcement Bar Manager</span>
+                  </h2>
+                  <p className={`text-xs ${subtitleColor}`}>Edit promotional top-bar text slides &amp; toggle visibility on main site live.</p>
                 </div>
                 {announcementSaveMsg && (
-                  <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-[5px] animate-bounce shadow">
-                    ✓ Announcement Live!
+                  <span className="px-3 py-1 bg-emerald-600 text-white text-xs font-bold rounded-[5px] shadow flex items-center gap-1">
+                    <CheckIcon className="w-3.5 h-3.5" />
+                    <span>Announcement Live!</span>
                   </span>
                 )}
               </div>
@@ -3627,16 +3791,20 @@ export default function AdminDashboardPage() {
 
                 <button
                   type="submit"
-                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md`}
+                  className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] transition-all shadow-md flex items-center justify-center gap-2`}
                 >
-                  📢 Save & Push Announcement Bar Live
+                  <SparklesIcon className="w-4 h-4" />
+                  <span>Save &amp; Push Announcement Bar Live</span>
                 </button>
               </form>
             </div>
 
             {/* STORE CONFIGURATION */}
             <div className={`${cardBg} rounded-[5px] p-6 max-w-3xl mx-auto space-y-6`}>
-              <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Storewide Configuration</h2>
+              <h2 className={`font-serif text-xl font-bold ${accentGold} flex items-center gap-2`}>
+                <SettingsIcon className="w-5 h-5 text-[#9b7632]" />
+                <span>Storewide Configuration</span>
+              </h2>
 
               <div className="space-y-4 text-xs">
                 <div>
@@ -3668,8 +3836,13 @@ export default function AdminDashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className={`${cardBg} rounded-[5px] max-w-md w-full p-6 shadow-2xl space-y-4`}>
             <div className={`flex justify-between items-center border-b ${cardHeaderBorder} pb-3`}>
-              <h3 className={`font-serif text-lg ${accentGold} font-bold`}>Add Hero Slide Banner</h3>
-              <button onClick={() => setIsAddSlideOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>✕</button>
+              <h3 className={`font-serif text-lg ${accentGold} font-bold flex items-center gap-2`}>
+                <SlidesIcon className="w-5 h-5 text-[#9b7632]" />
+                <span>Add Hero Slide Banner</span>
+              </h3>
+              <button onClick={() => setIsAddSlideOpen(false)} className={`${subtitleColor} hover:${titleColor}`}>
+                <XIcon className="w-4 h-4" />
+              </button>
             </div>
             <form onSubmit={handleAddSlide} className="space-y-3 text-xs">
               <div>
@@ -3732,9 +3905,10 @@ export default function AdminDashboardPage() {
                 </button>
                 <button
                   type="submit"
-                  className={`px-4 py-2 ${primaryBtn} font-bold rounded-[5px]`}
+                  className={`px-4 py-2 ${primaryBtn} font-bold rounded-[5px] flex items-center gap-1.5`}
                 >
-                  Publish Slide
+                  <SparklesIcon className="w-3.5 h-3.5" />
+                  <span>Publish Slide</span>
                 </button>
               </div>
             </form>
@@ -3749,7 +3923,7 @@ export default function AdminDashboardPage() {
             {/* NO-PRINT ACTION BAR */}
             <div className="no-print bg-[#1c1510] text-[#f5efe8] px-5 py-3.5 flex items-center justify-between border-b border-[#dec29b]/40">
               <div className="flex items-center gap-2">
-                <span className="text-lg">🧾</span>
+                <PrinterIcon className="w-5 h-5 text-[#dec29b]" />
                 <div>
                   <h3 className="text-xs sm:text-sm font-semibold tracking-wide">
                     Official Tax Invoice &amp; Authenticity Receipt
@@ -3762,19 +3936,18 @@ export default function AdminDashboardPage() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="px-4 py-2 rounded-[4px] bg-[#b38b40] hover:bg-[#99752b] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
+                  className="px-4 py-2 rounded-[4px] bg-[#9b7632] hover:bg-[#856327] text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24-1.002-.375-2.046-.375-3.118 0-4.526 3.654-8.191 8.16-8.191s8.16 3.665 8.16 8.191c0 1.072-.135 2.116-.375 3.118M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
+                  <PrinterIcon className="w-4 h-4" />
                   <span>Print Invoice / PDF</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedInvoiceOrder(null)}
-                  className="px-3 py-2 rounded-[4px] bg-white/10 hover:bg-white/20 text-[#f5efe8] text-xs font-semibold transition-colors"
+                  className="px-3 py-2 rounded-[4px] bg-white/10 hover:bg-white/20 text-[#f5efe8] text-xs font-semibold transition-colors flex items-center gap-1"
                 >
-                  ✕ Close
+                  <XIcon className="w-3.5 h-3.5" />
+                  <span>Close</span>
                 </button>
               </div>
             </div>
@@ -3785,7 +3958,7 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-6 border-b-2 border-[#1c1510] gap-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl text-[#b38b40]">👑</span>
+                    <CrownIcon className="w-6 h-6 text-[#9b7632]" />
                     <h1 className="font-serif text-2xl font-bold tracking-widest text-[#1c1510] uppercase">
                       BHAI JEWELLER
                     </h1>
@@ -3882,7 +4055,7 @@ export default function AdminDashboardPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 pt-2">
                 {/* Assay Seal Box */}
                 <div className="sm:max-w-xs p-3.5 rounded-[4px] bg-[#faf6ee] border border-[#dec29b]/60 flex items-start gap-3">
-                  <span className="text-2xl text-[#8c6b2d]">🛡️</span>
+                  <ShieldCheckIcon className="w-7 h-7 text-[#9b7632] flex-shrink-0" />
                   <div>
                     <h4 className="text-xs font-bold text-[#1c1510]">UK Hallmarking Act 1973 Guarantee</h4>
                     <p className="text-[10px] text-[#6b5c50] mt-1 leading-snug">
