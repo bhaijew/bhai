@@ -270,7 +270,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && Array.isArray(data)) {
+        if (!error && Array.isArray(data) && data.length > 0) {
           const mappedProducts: ProductItem[] = data.map((p: any) => ({
             id: p.id,
             name: p.name,
@@ -603,13 +603,19 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     }
 
     // 4. Trigger background refresh to ensure perfect consistency
-    await refreshProducts();
+    refreshProducts().catch(() => {});
     return ok;
   };
 
   const updateProduct = async (updatedProd: ProductItem): Promise<boolean> => {
+    const trimmedName = updatedProd.name.trim().toLowerCase();
+
     setProducts((prev) => {
-      const updated = prev.map((p) => (p.id === updatedProd.id ? updatedProd : p));
+      const updated = prev.map((p) =>
+        p.id === updatedProd.id || p.name.trim().toLowerCase() === trimmedName
+          ? updatedProd
+          : p
+      );
       try {
         localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {}
@@ -619,8 +625,19 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
     let ok = false;
     if (supabase) {
       try {
+        let dbTargetId = updatedProd.id;
+        const { data: dbMatch } = await supabase
+          .from('products')
+          .select('id, slug, sku')
+          .ilike('name', updatedProd.name.trim())
+          .maybeSingle();
+
+        if (dbMatch) {
+          dbTargetId = dbMatch.id;
+        }
+
         const { error } = await supabase.from('products').upsert({
-          id: updatedProd.id,
+          id: dbTargetId,
           name: updatedProd.name,
           category: updatedProd.category,
           price: updatedProd.price,
@@ -631,14 +648,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           is_featured: updatedProd.isFeatured,
           image: updatedProd.image,
           images: updatedProd.images,
-          sku: updatedProd.sku,
+          sku: dbMatch?.sku || updatedProd.sku || `BJ-${dbTargetId}`,
           description: updatedProd.description,
-          slug: updatedProd.slug,
+          slug: dbMatch?.slug || updatedProd.slug || dbTargetId,
           weight_grams: updatedProd.weightGrams,
           seo_title: updatedProd.seoTitle,
           seo_description: updatedProd.seoDescription,
           focus_keywords: updatedProd.focusKeywords,
-        });
+        }, { onConflict: 'id' });
         if (!error) ok = true;
       } catch (e) {
         console.warn('Direct Supabase update notice:', e);
@@ -658,7 +675,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       if (data.success) ok = true;
     } catch {}
 
-    await refreshProducts();
+    refreshProducts().catch(() => {});
     return ok;
   };
 

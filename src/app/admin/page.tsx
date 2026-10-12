@@ -59,6 +59,7 @@ export default function AdminDashboardPage() {
   const {
     products,
     addProduct,
+    updateProduct,
     deleteProduct: removeStoreProduct,
     updateProductStock,
     categories,
@@ -72,8 +73,11 @@ export default function AdminDashboardPage() {
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add-product' | 'categories' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
 
-  // Product Edit Modal State
+  // Product Edit States
   const [editingAdminProduct, setEditingAdminProduct] = useState<ProductItem | null>(null);
+  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
+  const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
+  const [productErrorMsg, setProductErrorMsg] = useState('');
 
   // Category Management States
   const [categoryForm, setCategoryForm] = useState({
@@ -451,26 +455,110 @@ export default function AdminDashboardPage() {
 
   const [saveSuccessMsg, setSaveSuccessMsg] = useState(false);
 
-  // Handle Upload Image File directly from device (Mobile / PC)
-  const handleDeviceFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Client-Side Image Compressor to prevent 413 Payload Too Large on Vercel/Supabase
+  const compressImageFile = (file: File, maxWidth = 1200, quality = 0.82): Promise<string> => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new (window as any).Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth || height > maxWidth) {
+            if (width > height) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxWidth) / height);
+              height = maxWidth;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          } else {
+            resolve(e.target?.result as string);
+          }
+        };
+        img.onerror = () => resolve(e.target?.result as string);
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Handle Upload Image File directly from device (Mobile / PC) with auto-compression
+  const handleDeviceFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const resultUrl = event.target?.result as string;
-        if (!resultUrl) return;
+    for (const file of Array.from(files)) {
+      const compressedUrl = await compressImageFile(file);
+      if (!compressedUrl) continue;
 
-        setAddForm((prev) => {
-          if (!prev.primaryImage) {
-            return { ...prev, primaryImage: resultUrl };
-          }
-          return { ...prev, additionalImages: [...prev.additionalImages, resultUrl] };
-        });
-      };
-      reader.readAsDataURL(file);
+      setAddForm((prev) => {
+        if (!prev.primaryImage) {
+          return { ...prev, primaryImage: compressedUrl };
+        }
+        return { ...prev, additionalImages: [...prev.additionalImages, compressedUrl] };
+      });
+    }
+  };
+
+  // Start Editing Product in full page editor
+  const handleStartEditProduct = (p: ProductItem) => {
+    setEditingProduct(p);
+    const imagesList = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image];
+    setAddForm({
+      name: p.name,
+      category: p.category || 'Rings',
+      price: String(p.price),
+      originalPrice: String(p.originalPrice || p.price),
+      stock: String(p.stock ?? 10),
+      metal: p.metal || '18k Yellow Gold',
+      sku: p.sku || '',
+      weightGrams: String(p.weightGrams || '5.0'),
+      description: p.description || '',
+      primaryImage: p.image || imagesList[0] || '',
+      additionalImages: imagesList.filter((img) => img !== p.image),
+      newImageUrlInput: '',
+      seoTitle: p.seoTitle || '',
+      seoDescription: p.seoDescription || '',
+      slug: p.slug || '',
+      focusKeywordsText: Array.isArray(p.focusKeywords) ? p.focusKeywords.join(', ') : '',
     });
+    setProductErrorMsg('');
+    setActiveTab('add-product');
+  };
+
+  // Open clean Add Product studio
+  const handleOpenAddProduct = () => {
+    setEditingProduct(null);
+    setProductErrorMsg('');
+    setAddForm({
+      name: '',
+      category: 'Rings',
+      price: '',
+      originalPrice: '',
+      stock: '10',
+      metal: '18k Yellow Gold',
+      sku: '',
+      weightGrams: '6.5',
+      description: '',
+      primaryImage: '',
+      additionalImages: [],
+      newImageUrlInput: '',
+      seoTitle: '',
+      seoDescription: '',
+      slug: '',
+      focusKeywordsText: '',
+    });
+    setActiveTab('add-product');
   };
 
   // Auto Generate SKU
@@ -524,69 +612,96 @@ export default function AdminDashboardPage() {
     }));
   };
 
-  // Submit Full Page Add Product Form
+  // Submit Full Page Add / Edit Product Form
   const handleFullProductSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!addForm.name || !addForm.price) return;
+    if (!addForm.name.trim()) {
+      alert('Please enter a product name.');
+      return;
+    }
+    if (addForm.price === '' || isNaN(Number(addForm.price))) {
+      alert('Please enter a valid product price.');
+      return;
+    }
 
-    const trimmedName = addForm.name.trim();
-    const existingProduct = products.find(
-      (p) => p.name.trim().toLowerCase() === trimmedName.toLowerCase()
-    );
+    setIsSubmittingProduct(true);
+    setProductErrorMsg('');
 
-    const allImagesList = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean);
-    const generatedSlug = existingProduct?.slug || addForm.slug || addForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const autoSku = existingProduct?.sku || addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    try {
+      const trimmedName = addForm.name.trim();
+      const existingProduct = editingProduct || products.find(
+        (p) => p.name.trim().toLowerCase() === trimmedName.toLowerCase()
+      );
 
-    const newProductObject: ProductItem = {
-      id: existingProduct?.id || `prod-${Date.now()}`,
-      name: trimmedName,
-      category: addForm.category,
-      price: Number(addForm.price),
-      originalPrice: Number(addForm.originalPrice || addForm.price),
-      stock: Number(addForm.stock || 1),
-      metal: addForm.metal,
-      status: Number(addForm.stock) > 0 ? 'In Stock' : 'Out of Stock',
-      isFeatured: true,
-      image: addForm.primaryImage || (allImagesList[0] || '/images/detail-ring-hero.jpg'),
-      images: allImagesList.length > 0 ? allImagesList : ['/images/detail-ring-hero.jpg'],
-      sku: autoSku,
-      description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
-      slug: generatedSlug,
-      weightGrams: Number(addForm.weightGrams || 5.0),
-      seoTitle: addForm.seoTitle || `${addForm.name} | Bhai Jeweller`,
-      seoDescription: addForm.seoDescription || `Buy ${addForm.name} online in Pakistan & UK. Handcrafted luxury jewelry.`,
-      focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [addForm.name.toLowerCase()]
-    };
+      const allImagesList = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean);
+      const finalPrimary = addForm.primaryImage || (allImagesList[0] || '/images/detail-ring-hero.jpg');
+      const finalImages = allImagesList.length > 0 ? allImagesList : [finalPrimary];
+      const generatedSlug = existingProduct?.slug || addForm.slug || trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const autoSku = existingProduct?.sku || addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const resolvedId = existingProduct?.id || `prod-${Date.now()}`;
 
-    // Save to real-time SQL Database and persistent StoreContext
-    await addProduct(newProductObject);
+      const newProductObject: ProductItem = {
+        id: resolvedId,
+        name: trimmedName,
+        category: addForm.category,
+        price: Number(addForm.price),
+        originalPrice: Number(addForm.originalPrice || addForm.price),
+        stock: Number(addForm.stock || 0),
+        metal: addForm.metal,
+        status: Number(addForm.stock) > 0 ? (Number(addForm.stock) <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock',
+        isFeatured: true,
+        image: finalPrimary,
+        images: finalImages,
+        sku: autoSku,
+        description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
+        slug: generatedSlug,
+        weightGrams: Number(addForm.weightGrams || 5.0),
+        seoTitle: addForm.seoTitle || `${trimmedName} | Bhai Jeweller`,
+        seoDescription: addForm.seoDescription || `Buy ${trimmedName} online in Pakistan & UK. Handcrafted luxury jewelry.`,
+        focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [trimmedName.toLowerCase()]
+      };
 
-    setSaveSuccessMsg(true);
-    setTimeout(() => {
-      setSaveSuccessMsg(false);
-      setActiveTab('products');
-    }, 1200);
+      // Save to real-time SQL Database and persistent StoreContext
+      if (existingProduct) {
+        await updateProduct(newProductObject);
+      } else {
+        await addProduct(newProductObject);
+      }
 
-    // Reset Form
-    setAddForm({
-      name: '',
-      category: 'Rings',
-      price: '',
-      originalPrice: '',
-      stock: '10',
-      metal: '18k Yellow Gold',
-      sku: '',
-      weightGrams: '6.5',
-      description: '',
-      primaryImage: '',
-      additionalImages: [],
-      newImageUrlInput: '',
-      seoTitle: '',
-      seoDescription: '',
-      slug: '',
-      focusKeywordsText: '',
-    });
+      setSaveSuccessMsg(true);
+      setEditingProduct(null);
+
+      // Reset Form
+      setAddForm({
+        name: '',
+        category: 'Rings',
+        price: '',
+        originalPrice: '',
+        stock: '10',
+        metal: '18k Yellow Gold',
+        sku: '',
+        weightGrams: '6.5',
+        description: '',
+        primaryImage: '',
+        additionalImages: [],
+        newImageUrlInput: '',
+        seoTitle: '',
+        seoDescription: '',
+        slug: '',
+        focusKeywordsText: '',
+      });
+
+      // Switch back to products tab immediately
+      setTimeout(() => {
+        setSaveSuccessMsg(false);
+        setActiveTab('products');
+      }, 600);
+
+    } catch (err: any) {
+      setProductErrorMsg(err?.message || 'Failed to save product to database.');
+    } finally {
+      setIsSubmittingProduct(false);
+    }
   };
 
   // Category Submit & Delete Handlers
@@ -1030,7 +1145,11 @@ export default function AdminDashboardPage() {
                 <button
                   key={item.id}
                   onClick={() => {
-                    setActiveTab(item.id as any);
+                    if (item.id === 'add-product') {
+                      handleOpenAddProduct();
+                    } else {
+                      setActiveTab(item.id as any);
+                    }
                     setMobileDrawerOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-[5px] text-sm font-medium transition-all ${
@@ -1144,7 +1263,13 @@ export default function AdminDashboardPage() {
           {NAV_ITEMS.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id as any)}
+              onClick={() => {
+                if (item.id === 'add-product') {
+                  handleOpenAddProduct();
+                } else {
+                  setActiveTab(item.id as any);
+                }
+              }}
               className={`w-full flex items-center ${
                 sidebarOpen ? 'justify-between px-3.5' : 'justify-center px-0'
               } py-2 rounded-[4px] text-xs font-medium transition-all ${
@@ -1241,7 +1366,7 @@ export default function AdminDashboardPage() {
               Luxury Fine Jewellery Administration
             </span>
             <h1 className={`font-serif text-lg sm:text-xl ${titleColor} font-bold tracking-wide capitalize mt-0.5`}>
-              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? 'Add New Product Studio' : activeTab}
+              {activeTab === 'slides' ? 'Slider & Banner Manager' : activeTab === 'add-product' ? (editingProduct ? `Edit Product: ${editingProduct.name}` : 'Add New Product Studio') : activeTab}
             </h1>
           </div>
           <div className="flex items-center space-x-3">
@@ -1264,7 +1389,8 @@ export default function AdminDashboardPage() {
             </span>
             {activeTab !== 'add-product' && (
               <button
-                onClick={() => setActiveTab('add-product')}
+                type="button"
+                onClick={handleOpenAddProduct}
                 className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-xs flex items-center space-x-1.5`}
               >
                 <PlusIcon className="w-3.5 h-3.5" />
@@ -1410,7 +1536,8 @@ export default function AdminDashboardPage() {
                     Create a new product with multiple images and auto-generated SEO metadata.
                   </p>
                   <button
-                    onClick={() => setActiveTab('add-product')}
+                    type="button"
+                    onClick={handleOpenAddProduct}
                     className={`w-full py-3 ${primaryBtn} rounded-[5px] text-xs font-bold uppercase tracking-wider shadow-xs transition-all mb-4 flex items-center justify-center gap-1.5`}
                   >
                     <PlusIcon className="w-4 h-4" />
@@ -1601,7 +1728,8 @@ export default function AdminDashboardPage() {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab('add-product')}
+                  type="button"
+                  onClick={handleOpenAddProduct}
                   className={`px-4 py-2 ${primaryBtn} font-semibold text-xs rounded-[5px] transition-all shadow-xs flex items-center gap-1.5`}
                 >
                   <PlusIcon className="w-3.5 h-3.5" />
@@ -1698,9 +1826,9 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 type="button"
-                                onClick={() => setEditingAdminProduct(p)}
+                                onClick={() => handleStartEditProduct(p)}
                                 className="px-2.5 py-1 bg-gray-50 hover:bg-gray-100 text-gray-900 dark:text-slate-200 rounded-[5px] text-[10px] font-bold transition-colors border border-gray-200 flex items-center gap-1 shadow-2xs"
-                                title="Edit product"
+                                title="Edit product in studio"
                               >
                                 <EditIcon className="w-3 h-3" />
                                 <span>Edit</span>
@@ -1736,7 +1864,14 @@ export default function AdminDashboardPage() {
             {saveSuccessMsg && (
               <div className="p-4 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-[5px] text-xs font-semibold flex items-center gap-2.5 shadow-xs">
                 <CheckCircleIcon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
-                <span>Product saved to real-time database! Synced live with Storefront catalog.</span>
+                <span>{editingProduct ? 'Product updated and synced live in real-time!' : 'Product saved to real-time database! Synced live with Storefront catalog.'}</span>
+              </div>
+            )}
+
+            {productErrorMsg && (
+              <div className="p-4 bg-red-50 border border-red-300 text-red-900 rounded-[5px] text-xs font-semibold flex items-center gap-2.5 shadow-xs">
+                <AlertCircleIcon className="w-5 h-5 text-red-600 flex-shrink-0" />
+                <span>{productErrorMsg}</span>
               </div>
             )}
 
@@ -1745,29 +1880,48 @@ export default function AdminDashboardPage() {
               <div className={`${cardBg} p-5 rounded-[5px] flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-[5px] bg-gray-100 border border-gray-200 text-gray-900 flex items-center justify-center">
-                    <AddProductIcon className="w-5 h-5" />
+                    {editingProduct ? <EditIcon className="w-5 h-5" /> : <AddProductIcon className="w-5 h-5" />}
                   </div>
                   <div>
-                    <h2 className={`font-serif text-xl font-bold ${accentGold}`}>Full Product Creation Studio</h2>
-                    <p className={`text-xs ${subtitleColor}`}>Configure metal specifications, upload multiple photos, and auto-generate SEO metadata.</p>
+                    <h2 className={`font-serif text-xl font-bold ${accentGold}`}>
+                      {editingProduct ? `Edit Product: ${editingProduct.name}` : 'Full Product Creation Studio'}
+                    </h2>
+                    <p className={`text-xs ${subtitleColor}`}>
+                      {editingProduct
+                        ? 'Modify specifications, prices, stock, and photos. Updates in real-time.'
+                        : 'Configure metal specifications, upload multiple photos, and auto-generate SEO metadata.'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"
-                    onClick={() => setActiveTab('products')}
+                    onClick={() => {
+                      setEditingProduct(null);
+                      setActiveTab('products');
+                    }}
                     className={`px-4 py-2 border rounded-[5px] text-xs font-medium transition-colors ${
-                      isLight ? 'bg-gray-50 text-[#4a3f35] border-gray-200' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23]'
+                      isLight ? 'bg-gray-50 text-[#4a3f35] border-gray-200 hover:bg-gray-100' : 'bg-[#1f1612] text-[#c2b4a3] border-[#3a2c23] hover:bg-[#2d1e17]'
                     }`}
                   >
                     Cancel &amp; Return
                   </button>
                   <button
                     type="submit"
-                    className={`px-6 py-2.5 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-xs transition-all flex items-center gap-1.5`}
+                    disabled={isSubmittingProduct}
+                    className={`px-6 py-2.5 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    <CheckIcon className="w-4 h-4" />
-                    <span>Save &amp; Publish Live to Site</span>
+                    {isSubmittingProduct ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <span>{editingProduct ? 'Updating in Real Time...' : 'Saving to Database...'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <CheckIcon className="w-4 h-4" />
+                        <span>{editingProduct ? 'Update Product in Real Time' : 'Save & Publish Live to Site'}</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </div>
@@ -2230,9 +2384,17 @@ export default function AdminDashboardPage() {
                     <div className="pt-4 border-t border-current border-opacity-20">
                       <button
                         type="submit"
-                        className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-lg transition-all`}
+                        disabled={isSubmittingProduct}
+                        className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-widest rounded-[5px] shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
-                        Publish to Storefront Catalog
+                        {isSubmittingProduct ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>{editingProduct ? 'Updating...' : 'Publishing...'}</span>
+                          </>
+                        ) : (
+                          <span>{editingProduct ? 'Update Product in Real Time' : 'Publish to Storefront Catalog'}</span>
+                        )}
                       </button>
                     </div>
                   </div>
