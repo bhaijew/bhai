@@ -46,10 +46,16 @@ export default function ProductDetailPage() {
   // Fallback product details if matching
   const productData = useMemo(() => {
     if (currentProduct) {
-      const allImgs = [
+      const rawImgs = [
         currentProduct.image,
-        ...(currentProduct.images || []),
-      ].filter(Boolean);
+        ...(Array.isArray(currentProduct.images) ? currentProduct.images : []),
+      ].filter(Boolean).map(s => String(s).trim());
+      const uniqueImgs = Array.from(new Set(rawImgs));
+      const allImgs = uniqueImgs.length > 0 ? uniqueImgs : ['/images/detail-ring-hero.jpg'];
+
+      const resolvedSizes = Array.isArray(currentProduct.sizes) && currentProduct.sizes.length > 0
+        ? currentProduct.sizes
+        : (currentProduct.size ? [currentProduct.size] : []);
 
       return {
         id: currentProduct.id,
@@ -62,10 +68,12 @@ export default function ProductDetailPage() {
         description: currentProduct.description || `Exquisite handcrafted ${currentProduct.metal || '18k gold'} ${currentProduct.name} designed by master artisans with hallmark certification.`,
         rating: currentProduct.rating || 5,
         reviewCount: currentProduct.reviewCount || 12,
-        images: allImgs.length > 0 ? allImgs : ['/images/detail-ring-hero.jpg'],
+        images: allImgs,
         slug: currentProduct.slug || currentProduct.id,
         sku: currentProduct.sku || `BJ-${currentProduct.id.slice(-4)}`,
         stock: currentProduct.stock ?? 10,
+        size: currentProduct.size,
+        sizes: resolvedSizes,
       };
     }
 
@@ -91,10 +99,36 @@ export default function ProductDetailPage() {
       slug: rawSlug || 'solara-diamond-ring',
       sku: 'BJ-SLR-1001',
       stock: 10,
+      size: '7',
+      sizes: ['5', '6', '7', '8', '9'],
     };
   }, [currentProduct, rawSlug]);
 
   const productGallery = productData.images;
+
+  // Dynamic Sizes based on product data or category
+  const sizes = useMemo(() => {
+    if (Array.isArray(productData.sizes) && productData.sizes.length > 0) {
+      return productData.sizes;
+    }
+    const cat = (productData.category || '').toLowerCase();
+    if (cat.includes('ring')) {
+      return ['5', '6', '7', '8', '9'];
+    }
+    if (cat.includes('necklace') || cat.includes('chain')) {
+      return ['16"', '18"', '20"', '22"'];
+    }
+    if (cat.includes('bangle') || cat.includes('bracelet')) {
+      return ['2.4', '2.6', '2.8'];
+    }
+    return ['Standard'];
+  }, [productData.sizes, productData.category]);
+
+  useEffect(() => {
+    if (sizes.length > 0 && !sizes.includes(selectedSize)) {
+      setSelectedSize(productData.size || sizes[0]);
+    }
+  }, [sizes, productData.size, selectedSize]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -125,8 +159,6 @@ export default function ProductDetailPage() {
   const toggleAccordion = (id: string) => {
     setOpenAccordion((prev) => (prev === id ? null : id));
   };
-
-  const sizes = ['4', '5', '6', '7', '8', '9'];
 
   return (
     <main className="w-full bg-[#faf7f2] min-h-screen text-[#1c1510] pt-20 sm:pt-24 pb-16 md:pb-24">
@@ -428,6 +460,7 @@ export default function ProductDetailPage() {
                       <p>• Metal: {productData.metal}</p>
                       <p>• Weight: {productData.weight}</p>
                       <p>• Category: {productData.category}</p>
+                      <p>• Available Sizes: {sizes.join(', ')}</p>
                       <p>• Certification: Authentic UK & International Hallmark Certified</p>
                     </div>
                   )}

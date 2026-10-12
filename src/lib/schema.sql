@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS products (
     weight_grams DECIMAL(6, 2) DEFAULT 0.0,
     seo_title VARCHAR(255),
     seo_description TEXT,
+    size VARCHAR(50) DEFAULT 'Standard',
+    sizes JSONB DEFAULT '[]'::jsonb,
     focus_keywords JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -32,6 +34,8 @@ CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_name_unique ON products (LOWER(TRIM(name)));
+ALTER TABLE products ADD COLUMN IF NOT EXISTS size VARCHAR(50) DEFAULT 'Standard';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes JSONB DEFAULT '[]'::jsonb;
 
 -- 2. ORDERS TABLE
 CREATE TABLE IF NOT EXISTS orders (

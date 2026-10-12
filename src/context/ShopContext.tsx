@@ -39,6 +39,8 @@ export interface ProductItem {
   sku: string;
   description: string;
   slug: string;
+  size?: string;
+  sizes?: string[];
   rating?: number;
   reviewCount?: number;
   weightGrams?: number;
@@ -271,26 +273,49 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           .order('created_at', { ascending: false });
 
         if (!error && Array.isArray(data) && data.length > 0) {
-          const mappedProducts: ProductItem[] = data.map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            category: p.category,
-            price: Number(p.price),
-            originalPrice: Number(p.original_price || p.price),
-            stock: Number(p.stock),
-            metal: p.metal,
-            status: p.status,
-            isFeatured: Boolean(p.is_featured),
-            image: p.image || '/images/detail-ring-hero.jpg',
-            images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image || '/images/detail-ring-hero.jpg'],
-            sku: p.sku || `BJ-${p.id}`,
-            description: p.description || '',
-            slug: p.slug || p.id,
-            weightGrams: Number(p.weight_grams || 0),
-            seoTitle: p.seo_title,
-            seoDescription: p.seo_description,
-            focusKeywords: Array.isArray(p.focus_keywords) ? p.focus_keywords : [],
-          }));
+          const mappedProducts: ProductItem[] = data.map((p: any) => {
+            const rawKeywords = Array.isArray(p.focus_keywords) ? p.focus_keywords : [];
+            const sizeKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('size:'));
+            const sizesKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('sizes:'));
+
+            const parsedSizes: string[] = Array.isArray(p.sizes) && p.sizes.length > 0
+              ? p.sizes
+              : (sizesKeyword
+                ? sizesKeyword.replace('sizes:', '').split(',').map((s: string) => s.trim()).filter(Boolean)
+                : []);
+            const parsedSize: string = p.size || (sizeKeyword ? sizeKeyword.replace('size:', '').trim() : (parsedSizes[0] || ''));
+
+            // Deduplicate images and guarantee primary image is not duplicated in list
+            const rawImgs = [p.image, ...(Array.isArray(p.images) ? p.images : [])]
+              .filter(Boolean)
+              .map((s: any) => String(s).trim());
+            const uniqueImgs = Array.from(new Set(rawImgs));
+            const primaryImg = uniqueImgs[0] || '/images/detail-ring-hero.jpg';
+            const finalImagesList = uniqueImgs.length > 0 ? uniqueImgs : [primaryImg];
+
+            return {
+              id: p.id,
+              name: p.name,
+              category: p.category,
+              price: Number(p.price),
+              originalPrice: Number(p.original_price || p.price),
+              stock: Number(p.stock),
+              metal: p.metal,
+              status: p.status,
+              isFeatured: Boolean(p.is_featured),
+              image: primaryImg,
+              images: finalImagesList,
+              sku: p.sku || `BJ-${p.id}`,
+              description: p.description || '',
+              slug: p.slug || p.id,
+              weightGrams: Number(p.weight_grams || 0),
+              size: parsedSize,
+              sizes: parsedSizes,
+              seoTitle: p.seo_title,
+              seoDescription: p.seo_description,
+              focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')),
+            };
+          });
 
           setProducts(mappedProducts);
           try {
@@ -512,19 +537,28 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const addProduct = async (newProd: ProductItem): Promise<boolean> => {
     const trimmedName = newProd.name.trim().toLowerCase();
 
+    // Deduplicate images and guarantee primary image is not duplicated in list
+    const rawAllImages = [newProd.image, ...(Array.isArray(newProd.images) ? newProd.images : [])]
+      .filter(Boolean)
+      .map((s: any) => String(s).trim());
+    const uniqueImages = Array.from(new Set(rawAllImages));
+    const finalPrimary = uniqueImages[0] || '/images/detail-ring-hero.jpg';
+    const finalImages = uniqueImages.length > 0 ? uniqueImages : [finalPrimary];
+
     // Check if product with this ID or SAME NAME already exists
     const existingMatch = products.find(
       (p) => p.id === newProd.id || p.name.trim().toLowerCase() === trimmedName
     );
 
-    const resolvedProd: ProductItem = existingMatch
-      ? {
-          ...newProd,
-          id: existingMatch.id,
-          slug: existingMatch.slug || newProd.slug,
-          sku: existingMatch.sku || newProd.sku,
-        }
-      : newProd;
+    const resolvedProd: ProductItem = {
+      ...(existingMatch || newProd),
+      ...newProd,
+      id: existingMatch ? existingMatch.id : newProd.id,
+      slug: existingMatch?.slug || newProd.slug,
+      sku: existingMatch?.sku || newProd.sku,
+      image: finalPrimary,
+      images: finalImages,
+    };
 
     // 1. Instant optimistic state and localStorage write (ensures exactly 1 product per name)
     setProducts((prev) => {
@@ -542,6 +576,15 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {}
       return updated;
     });
+
+    const keywordsWithoutSizes = (resolvedProd.focusKeywords || []).filter(
+      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')
+    );
+    const keywordsPayload = [
+      ...keywordsWithoutSizes,
+      ...(resolvedProd.size ? [`size:${resolvedProd.size}`] : []),
+      ...(resolvedProd.sizes && resolvedProd.sizes.length > 0 ? [`sizes:${resolvedProd.sizes.join(',')}`] : []),
+    ];
 
     let ok = false;
     // 2. Direct Supabase write
@@ -577,7 +620,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           weight_grams: resolvedProd.weightGrams,
           seo_title: resolvedProd.seoTitle,
           seo_description: resolvedProd.seoDescription,
-          focus_keywords: resolvedProd.focusKeywords,
+          focus_keywords: keywordsPayload,
         }, { onConflict: 'id' });
 
         if (!error) ok = true;
@@ -594,7 +637,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'x-admin-key': 'BhaiAdmin@Bradford2026!',
         },
-        body: JSON.stringify(resolvedProd),
+        body: JSON.stringify({ ...resolvedProd, focusKeywords: keywordsPayload }),
       });
       const data = await res.json();
       if (data.success) ok = true;
@@ -610,10 +653,24 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
   const updateProduct = async (updatedProd: ProductItem): Promise<boolean> => {
     const trimmedName = updatedProd.name.trim().toLowerCase();
 
+    // Deduplicate images and guarantee primary image is not duplicated in list
+    const rawAllImages = [updatedProd.image, ...(Array.isArray(updatedProd.images) ? updatedProd.images : [])]
+      .filter(Boolean)
+      .map((s: any) => String(s).trim());
+    const uniqueImages = Array.from(new Set(rawAllImages));
+    const finalPrimary = uniqueImages[0] || '/images/detail-ring-hero.jpg';
+    const finalImages = uniqueImages.length > 0 ? uniqueImages : [finalPrimary];
+
+    const cleanProd: ProductItem = {
+      ...updatedProd,
+      image: finalPrimary,
+      images: finalImages,
+    };
+
     setProducts((prev) => {
       const updated = prev.map((p) =>
-        p.id === updatedProd.id || p.name.trim().toLowerCase() === trimmedName
-          ? updatedProd
+        p.id === cleanProd.id || p.name.trim().toLowerCase() === trimmedName
+          ? cleanProd
           : p
       );
       try {
@@ -622,14 +679,23 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
 
+    const keywordsWithoutSizes = (cleanProd.focusKeywords || []).filter(
+      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')
+    );
+    const keywordsPayload = [
+      ...keywordsWithoutSizes,
+      ...(cleanProd.size ? [`size:${cleanProd.size}`] : []),
+      ...(cleanProd.sizes && cleanProd.sizes.length > 0 ? [`sizes:${cleanProd.sizes.join(',')}`] : []),
+    ];
+
     let ok = false;
     if (supabase) {
       try {
-        let dbTargetId = updatedProd.id;
+        let dbTargetId = cleanProd.id;
         const { data: dbMatch } = await supabase
           .from('products')
           .select('id, slug, sku')
-          .ilike('name', updatedProd.name.trim())
+          .ilike('name', cleanProd.name.trim())
           .maybeSingle();
 
         if (dbMatch) {
@@ -638,23 +704,23 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
         const { error } = await supabase.from('products').upsert({
           id: dbTargetId,
-          name: updatedProd.name,
-          category: updatedProd.category,
-          price: updatedProd.price,
-          original_price: updatedProd.originalPrice,
-          stock: updatedProd.stock,
-          metal: updatedProd.metal,
-          status: updatedProd.status,
-          is_featured: updatedProd.isFeatured,
-          image: updatedProd.image,
-          images: updatedProd.images,
-          sku: dbMatch?.sku || updatedProd.sku || `BJ-${dbTargetId}`,
-          description: updatedProd.description,
-          slug: dbMatch?.slug || updatedProd.slug || dbTargetId,
-          weight_grams: updatedProd.weightGrams,
-          seo_title: updatedProd.seoTitle,
-          seo_description: updatedProd.seoDescription,
-          focus_keywords: updatedProd.focusKeywords,
+          name: cleanProd.name,
+          category: cleanProd.category,
+          price: cleanProd.price,
+          original_price: cleanProd.originalPrice,
+          stock: cleanProd.stock,
+          metal: cleanProd.metal,
+          status: cleanProd.status,
+          is_featured: cleanProd.isFeatured,
+          image: cleanProd.image,
+          images: cleanProd.images,
+          sku: dbMatch?.sku || cleanProd.sku || `BJ-${dbTargetId}`,
+          description: cleanProd.description,
+          slug: dbMatch?.slug || cleanProd.slug || dbTargetId,
+          weight_grams: cleanProd.weightGrams,
+          seo_title: cleanProd.seoTitle,
+          seo_description: cleanProd.seoDescription,
+          focus_keywords: keywordsPayload,
         }, { onConflict: 'id' });
         if (!error) ok = true;
       } catch (e) {
@@ -669,7 +735,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'x-admin-key': 'BhaiAdmin@Bradford2026!',
         },
-        body: JSON.stringify(updatedProd),
+        body: JSON.stringify({ ...cleanProd, focusKeywords: keywordsPayload }),
       });
       const data = await res.json();
       if (data.success) ok = true;

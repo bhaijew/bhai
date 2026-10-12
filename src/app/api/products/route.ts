@@ -23,26 +23,45 @@ export async function GET() {
         .order('created_at', { ascending: false });
 
       if (!error && Array.isArray(data)) {
-        const mappedProducts = data.map((p) => ({
-          id: p.id,
-          name: p.name,
-          category: p.category,
-          price: Number(p.price),
-          originalPrice: Number(p.original_price || p.price),
-          stock: Number(p.stock),
-          metal: p.metal,
-          status: p.status,
-          isFeatured: p.is_featured,
-          image: p.image,
-          images: p.images || [],
-          sku: p.sku,
-          description: p.description,
-          slug: p.slug,
-          weightGrams: Number(p.weight_grams || 0),
-          seoTitle: p.seo_title,
-          seoDescription: p.seo_description,
-          focusKeywords: p.focus_keywords || [],
-        }));
+        const mappedProducts = data.map((p) => {
+          const rawKeywords = Array.isArray(p.focus_keywords) ? p.focus_keywords : [];
+          const sizeKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('size:'));
+          const sizesKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('sizes:'));
+          const parsedSizes: string[] = Array.isArray(p.sizes) && p.sizes.length > 0
+            ? p.sizes
+            : (sizesKeyword
+              ? sizesKeyword.replace('sizes:', '').split(',').map((s: string) => s.trim()).filter(Boolean)
+              : []);
+          const parsedSize: string = p.size || (sizeKeyword ? sizeKeyword.replace('size:', '').trim() : (parsedSizes[0] || ''));
+
+          const rawImgs = [p.image, ...(Array.isArray(p.images) ? p.images : [])].filter(Boolean).map((s: any) => String(s).trim());
+          const uniqueImgs = Array.from(new Set(rawImgs));
+          const primaryImg = uniqueImgs[0] || '/images/detail-ring-hero.jpg';
+          const finalImagesList = uniqueImgs.length > 0 ? uniqueImgs : [primaryImg];
+
+          return {
+            id: p.id,
+            name: p.name,
+            category: p.category,
+            price: Number(p.price),
+            originalPrice: Number(p.original_price || p.price),
+            stock: Number(p.stock),
+            metal: p.metal,
+            status: p.status,
+            isFeatured: p.is_featured,
+            image: primaryImg,
+            images: finalImagesList,
+            sku: p.sku,
+            description: p.description,
+            slug: p.slug,
+            weightGrams: Number(p.weight_grams || 0),
+            size: parsedSize,
+            sizes: parsedSizes,
+            seoTitle: p.seo_title,
+            seoDescription: p.seo_description,
+            focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')),
+          };
+        });
 
         // Keep fallback synchronized with database
         SERVER_PRODUCTS_DB = [...mappedProducts];
@@ -126,6 +145,25 @@ export async function POST(request: Request) {
     const resolvedSlug = existingItem ? existingItem.slug : cleanSlug;
     const resolvedSku = existingItem?.sku || body.sku || `BJ-${Date.now()}`;
 
+    const rawImgs = [body.image, ...(Array.isArray(body.images) ? body.images : [])].filter(Boolean).map((s: any) => String(s).trim());
+    const uniqueImgs = Array.from(new Set(rawImgs));
+    const finalPrimary = uniqueImgs[0] || existingItem?.image || '/images/detail-ring-hero.jpg';
+    const finalImages = uniqueImgs.length > 0 ? uniqueImgs : (existingItem?.images || [finalPrimary]);
+
+    const parsedSizes = Array.isArray(body.sizes) && body.sizes.length > 0
+      ? body.sizes
+      : (body.size ? [body.size] : []);
+    const primarySize = body.size || (parsedSizes[0] || 'Standard');
+
+    const keywordsWithoutSizes = (Array.isArray(body.focusKeywords) ? body.focusKeywords : (existingItem?.focus_keywords || [productName.toLowerCase()])).filter(
+      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')
+    );
+    const keywordsPayload = [
+      ...keywordsWithoutSizes,
+      ...(primarySize ? [`size:${primarySize}`] : []),
+      ...(parsedSizes.length > 0 ? [`sizes:${parsedSizes.join(',')}`] : []),
+    ];
+
     const newProduct = {
       id: resolvedId,
       name: productName,
@@ -136,15 +174,17 @@ export async function POST(request: Request) {
       metal: body.metal || existingItem?.metal || '18k Yellow Gold',
       status: Number(body.stock) > 0 ? (Number(body.stock) <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock',
       isFeatured: body.isFeatured ?? (existingItem?.is_featured ?? true),
-      image: body.image || existingItem?.image || '/images/detail-ring-hero.jpg',
-      images: Array.isArray(body.images) && body.images.length > 0 ? body.images : (existingItem?.images || [body.image || '/images/detail-ring-hero.jpg']),
+      image: finalPrimary,
+      images: finalImages,
       sku: resolvedSku,
       description: body.description || existingItem?.description || '',
       slug: resolvedSlug,
       weightGrams: Number(body.weightGrams || existingItem?.weight_grams || 5.0),
+      size: primarySize,
+      sizes: parsedSizes,
       seoTitle: body.seoTitle || existingItem?.seo_title || `${productName} | Bhai Jeweller`,
       seoDescription: body.seoDescription || existingItem?.seo_description || `Buy ${productName} online from Bhai Jeweller Bradford.`,
-      focusKeywords: Array.isArray(body.focusKeywords) ? body.focusKeywords : (existingItem?.focus_keywords || [productName.toLowerCase()]),
+      focusKeywords: keywordsPayload,
       createdAt: existingItem?.created_at || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

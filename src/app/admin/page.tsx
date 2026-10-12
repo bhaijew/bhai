@@ -442,6 +442,8 @@ export default function AdminDashboardPage() {
     metal: '18k Yellow Gold',
     sku: '',
     weightGrams: '6.5',
+    size: '7',
+    sizesText: '5, 6, 7, 8, 9',
     description: '',
     primaryImage: '',
     additionalImages: [] as string[],
@@ -492,7 +494,7 @@ export default function AdminDashboardPage() {
     });
   };
 
-  // Handle Upload Image File directly from device (Mobile / PC) with auto-compression
+  // Handle Upload Image File directly from device (Mobile / PC) with auto-compression & duplicate prevention
   const handleDeviceFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -505,15 +507,32 @@ export default function AdminDashboardPage() {
         if (!prev.primaryImage) {
           return { ...prev, primaryImage: compressedUrl };
         }
+        if (prev.primaryImage === compressedUrl || prev.additionalImages.includes(compressedUrl)) {
+          return prev;
+        }
         return { ...prev, additionalImages: [...prev.additionalImages, compressedUrl] };
       });
     }
   };
 
-  // Start Editing Product in full page editor
+  // Start Editing Product in full page editor (Strict Image Deduplication)
   const handleStartEditProduct = (p: ProductItem) => {
     setEditingProduct(p);
-    const imagesList = Array.isArray(p.images) && p.images.length > 0 ? p.images : [p.image];
+
+    // Extract unique images without any duplicates
+    const rawImagesList = [
+      p.image,
+      ...(Array.isArray(p.images) ? p.images : []),
+    ].filter(Boolean).map(img => String(img).trim());
+    const uniqueImagesList = Array.from(new Set(rawImagesList));
+    const primaryImg = uniqueImagesList[0] || '';
+    const additionalImgs = uniqueImagesList.slice(1);
+
+    const defaultSize = p.size || (p.sizes && p.sizes[0]) || '7';
+    const defaultSizesText = Array.isArray(p.sizes) && p.sizes.length > 0
+      ? p.sizes.join(', ')
+      : (p.size || '5, 6, 7, 8, 9');
+
     setAddForm({
       name: p.name,
       category: p.category || 'Rings',
@@ -523,9 +542,11 @@ export default function AdminDashboardPage() {
       metal: p.metal || '18k Yellow Gold',
       sku: p.sku || '',
       weightGrams: String(p.weightGrams || '5.0'),
+      size: defaultSize,
+      sizesText: defaultSizesText,
       description: p.description || '',
-      primaryImage: p.image || imagesList[0] || '',
-      additionalImages: imagesList.filter((img) => img !== p.image),
+      primaryImage: primaryImg,
+      additionalImages: additionalImgs,
       newImageUrlInput: '',
       seoTitle: p.seoTitle || '',
       seoDescription: p.seoDescription || '',
@@ -549,6 +570,8 @@ export default function AdminDashboardPage() {
       metal: '18k Yellow Gold',
       sku: '',
       weightGrams: '6.5',
+      size: '7',
+      sizesText: '5, 6, 7, 8, 9',
       description: '',
       primaryImage: '',
       additionalImages: [],
@@ -594,14 +617,23 @@ export default function AdminDashboardPage() {
     }));
   };
 
-  // Add Additional Image URL
+  // Add Additional Image URL (with duplicate prevention)
   const handleAddImageUrl = () => {
-    if (!addForm.newImageUrlInput.trim()) return;
-    setAddForm(prev => ({
-      ...prev,
-      additionalImages: [...prev.additionalImages, prev.newImageUrlInput.trim()],
-      newImageUrlInput: ''
-    }));
+    const url = addForm.newImageUrlInput.trim();
+    if (!url) return;
+    setAddForm(prev => {
+      if (!prev.primaryImage) {
+        return { ...prev, primaryImage: url, newImageUrlInput: '' };
+      }
+      if (prev.primaryImage === url || prev.additionalImages.includes(url)) {
+        return { ...prev, newImageUrlInput: '' };
+      }
+      return {
+        ...prev,
+        additionalImages: [...prev.additionalImages, url],
+        newImageUrlInput: ''
+      };
+    });
   };
 
   // Remove Image from list
@@ -633,9 +665,16 @@ export default function AdminDashboardPage() {
         (p) => p.name.trim().toLowerCase() === trimmedName.toLowerCase()
       );
 
-      const allImagesList = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean);
-      const finalPrimary = addForm.primaryImage || (allImagesList[0] || '/images/detail-ring-hero.jpg');
+      const parsedSizes = addForm.sizesText
+        ? addForm.sizesText.split(',').map((s) => s.trim()).filter(Boolean)
+        : [];
+      const primarySize = addForm.size.trim() || parsedSizes[0] || 'Standard';
+
+      const rawImgs = [addForm.primaryImage, ...addForm.additionalImages].filter(Boolean).map((s) => String(s).trim());
+      const allImagesList = Array.from(new Set(rawImgs));
+      const finalPrimary = allImagesList[0] || '/images/detail-ring-hero.jpg';
       const finalImages = allImagesList.length > 0 ? allImagesList : [finalPrimary];
+
       const generatedSlug = existingProduct?.slug || addForm.slug || trimmedName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const autoSku = existingProduct?.sku || addForm.sku || `BJ-${addForm.category.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
       const resolvedId = existingProduct?.id || `prod-${Date.now()}`;
@@ -656,6 +695,8 @@ export default function AdminDashboardPage() {
         description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
         slug: generatedSlug,
         weightGrams: Number(addForm.weightGrams || 5.0),
+        size: primarySize,
+        sizes: parsedSizes.length > 0 ? parsedSizes : [primarySize],
         seoTitle: addForm.seoTitle || `${trimmedName} | Bhai Jeweller`,
         seoDescription: addForm.seoDescription || `Buy ${trimmedName} online in Pakistan & UK. Handcrafted luxury jewelry.`,
         focusKeywords: addForm.focusKeywordsText ? addForm.focusKeywordsText.split(',').map(s => s.trim()) : [trimmedName.toLowerCase()]
@@ -681,6 +722,8 @@ export default function AdminDashboardPage() {
         metal: '18k Yellow Gold',
         sku: '',
         weightGrams: '6.5',
+        size: '7',
+        sizesText: '5, 6, 7, 8, 9',
         description: '',
         primaryImage: '',
         additionalImages: [],
@@ -2099,6 +2142,57 @@ export default function AdminDashboardPage() {
                         </div>
                       </div>
 
+                      {/* Product Sizes & Default Size */}
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2">
+                          <div className="flex justify-between items-center mb-1">
+                            <label className={`text-xs font-semibold ${subtitleColor}`}>
+                              Available Sizes / Variations (Comma separated)
+                            </label>
+                            <span className="text-[10px] text-gray-500 font-mono">e.g. 5, 6, 7, 8, 9</span>
+                          </div>
+                          <input
+                            type="text"
+                            placeholder="e.g. 5, 6, 7, 8, 9 or 16', 18', 20' or 2.4, 2.6, 2.8"
+                            value={addForm.sizesText}
+                            onChange={(e) => setAddForm({ ...addForm, sizesText: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {[
+                              { label: 'Rings (5-9)', val: '5, 6, 7, 8, 9' },
+                              { label: 'Rings UK (J-Q)', val: 'J, L, N, P, Q' },
+                              { label: 'Chains (16-24")', val: '16", 18", 20", 22", 24"' },
+                              { label: 'Bangles (2.4-2.8)', val: '2.4, 2.6, 2.8' },
+                              { label: 'Standard', val: 'Standard, Adjustable' }
+                            ].map((preset) => (
+                              <button
+                                key={preset.label}
+                                type="button"
+                                onClick={() => setAddForm({ ...addForm, sizesText: preset.val, size: preset.val.split(',')[0].trim() })}
+                                className="px-2 py-0.5 rounded-[3px] text-[10px] border border-gray-300 hover:border-gray-900 transition-all text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
+                            Default / Featured Size
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 7"
+                            value={addForm.size}
+                            onChange={(e) => setAddForm({ ...addForm, size: e.target.value })}
+                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          />
+                          <p className={`text-[10px] ${subtitleColor} mt-1.5`}>Shows as active on review &amp; storefront</p>
+                        </div>
+                      </div>
+
                       <div>
                         <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
                           Detailed Description &amp; Craftsmanship Details
@@ -2122,7 +2216,7 @@ export default function AdminDashboardPage() {
                         <span>2. Multiple Product Images Studio</span>
                       </h3>
                       <span className={`text-xs ${subtitleColor}`}>
-                        Total: {1 + addForm.additionalImages.length} Images
+                        Total: {(addForm.primaryImage ? 1 : 0) + addForm.additionalImages.filter(img => img && img !== addForm.primaryImage).length} Images
                       </span>
                     </div>
 
@@ -2213,8 +2307,10 @@ export default function AdminDashboardPage() {
                               </div>
                             )}
 
-                            {/* Additional Images */}
-                            {addForm.additionalImages.map((imgUrl, idx) => (
+                            {/* Additional Images (Strict Deduplication against Primary Cover) */}
+                            {addForm.additionalImages
+                              .filter((imgUrl) => imgUrl && imgUrl !== addForm.primaryImage)
+                              .map((imgUrl, idx) => (
                               <div key={idx} className="relative h-20 rounded-[5px] overflow-hidden border border-gray-200 dark:border-[#3a2c23] group bg-gray-50">
                                 <Image src={imgUrl} alt={`Gallery ${idx + 1}`} fill className="object-cover" />
                                 <button
@@ -2357,18 +2453,45 @@ export default function AdminDashboardPage() {
 
                         <div className="flex items-center space-x-2">
                           <span className="text-base font-serif font-bold text-gray-900">
-                            ${addForm.price ? Number(addForm.price).toLocaleString() : '1,280'}
+                            £{addForm.price ? Number(addForm.price).toLocaleString() : '1,280'}
                           </span>
                           {addForm.originalPrice && Number(addForm.originalPrice) > Number(addForm.price) && (
                             <span className="text-xs text-[#8c7d6c] line-through">
-                              ${Number(addForm.originalPrice).toLocaleString()}
+                              £{Number(addForm.originalPrice).toLocaleString()}
                             </span>
                           )}
                         </div>
 
+                        {/* LIVE PRODUCT REVIEW: SIZE SELECTION PILLS */}
+                        <div className="pt-2 border-t border-[#e8dfd1]">
+                          <div className="flex items-center justify-between text-[10px] text-[#8c7d6c] mb-1.5">
+                            <span className="font-semibold uppercase tracking-wider">Product Size:</span>
+                            <span className="font-bold text-[#1c1510]">{addForm.size || 'Standard'}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1">
+                            {(addForm.sizesText
+                              ? addForm.sizesText.split(',').map(s => s.trim()).filter(Boolean)
+                              : ['5', '6', '7', '8', '9']
+                            ).map((sz, i) => (
+                              <button
+                                key={i}
+                                type="button"
+                                onClick={() => setAddForm(prev => ({ ...prev, size: sz }))}
+                                className={`px-2 py-0.5 rounded-[3px] text-[10px] font-medium transition-all ${
+                                  (addForm.size || '').trim() === sz.trim() || (!addForm.size && i === 0)
+                                    ? 'bg-[#1c1510] text-[#faf7f2] font-bold shadow-xs'
+                                    : 'bg-white text-[#544537] border border-[#d8c8b8] hover:border-black'
+                                }`}
+                              >
+                                {sz}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
                         <div className="pt-2 flex items-center justify-between text-[10px] text-[#8c7d6c] border-t border-[#e8dfd1]">
                           <span>SKU: {addForm.sku || 'BJ-AUTO'}</span>
-                          <span>Images: {1 + addForm.additionalImages.length}</span>
+                          <span>Images: {(addForm.primaryImage ? 1 : 0) + addForm.additionalImages.filter(img => img && img !== addForm.primaryImage).length}</span>
                         </div>
 
                         <button
