@@ -105,14 +105,15 @@ export function Header({
 
   const navLinks = [
     { name: 'Home', href: '/' },
+    { name: 'Categories', href: '/categories' },
     { name: 'Shop All', href: '/shop' },
-    { name: 'Rings', href: '/collections' },
-    { name: 'Necklaces', href: '/collections' },
-    { name: 'Earrings', href: '/collections' },
-    { name: 'Bracelets', href: '/collections' },
+    { name: 'Rings', href: '/shop?category=Rings' },
+    { name: 'Necklaces', href: '/shop?category=Necklaces' },
+    { name: 'Earrings', href: '/shop?category=Earrings' },
     { name: 'Our Story', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
+
 
   return (
     <>

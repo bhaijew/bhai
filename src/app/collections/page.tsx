@@ -1,2 +1,2 @@
-import ShopPage from '../shop/page';
-export default ShopPage;
+import CategoriesPage from '../categories/page';
+export default CategoriesPage;

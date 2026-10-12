@@ -165,6 +165,21 @@ CREATE TABLE IF NOT EXISTS vapi_audit_logs (
 CREATE INDEX IF NOT EXISTS idx_vapi_audit_cart ON vapi_audit_logs(cart_id);
 CREATE INDEX IF NOT EXISTS idx_vapi_audit_created ON vapi_audit_logs(created_at);
 
+-- 11. CATEGORIES TABLE
+CREATE TABLE IF NOT EXISTS categories (
+    id VARCHAR(64) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    slug VARCHAR(100) UNIQUE NOT NULL,
+    description TEXT,
+    image TEXT,
+    display_order INT DEFAULT 1,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
@@ -178,9 +193,12 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE carts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vapi_audit_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if re-running to prevent "policy already exists" error
 DROP POLICY IF EXISTS "Allow Public Products Access" ON products;
+DROP POLICY IF EXISTS "Allow Public Categories Access" ON categories;
+
 DROP POLICY IF EXISTS "Allow Public Orders Access" ON orders;
 DROP POLICY IF EXISTS "Allow Public Enquiries Access" ON bespoke_enquiries;
 DROP POLICY IF EXISTS "Allow Public Slides Access" ON hero_slides;
@@ -193,6 +211,7 @@ DROP POLICY IF EXISTS "Allow Public Vapi Logs Access" ON vapi_audit_logs;
 
 -- Allow public read & write access for API endpoints
 CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow Public Categories Access" ON categories FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Orders Access" ON orders FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true) WITH CHECK (true);
@@ -202,6 +221,18 @@ CREATE POLICY "Allow Public Users Access" ON users FOR ALL USING (true) WITH CHE
 CREATE POLICY "Allow Public Login Attempts Access" ON login_attempts FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Carts Access" ON carts FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Allow Public Vapi Logs Access" ON vapi_audit_logs FOR ALL USING (true) WITH CHECK (true);
+
+-- Insert initial default categories
+INSERT INTO categories (id, name, slug, description, image, display_order)
+VALUES 
+    ('cat-rings', 'Rings', 'rings', 'Timeless engagement rings, diamond bands, and 22k pure gold statement rings handcrafted in the UK.', '/images/category-rings.jpg', 1),
+    ('cat-necklaces', 'Necklaces', 'necklaces', 'Intricate diamond pendants, royal gold chokers, and delicate chains made with immaculate precision.', '/images/category-necklaces.jpg', 2),
+    ('cat-earrings', 'Earrings', 'earrings', 'Dazzling diamond studs, chandelier jhumkas, and timeless gold hoops designed for unforgettable moments.', '/images/category-earrings.jpg', 3),
+    ('cat-bracelets', 'Bracelets', 'bracelets', 'Elegant tennis bracelets, gold charm bangles, and bespoke cuffs engineered for modern luxury.', '/images/category-bracelets.jpg', 4),
+    ('cat-bangles', 'Bangles', 'bangles', 'Traditional 22k gold bridal bangles, kada sets, and sleek modern stackable cuffs.', '/images/category-bracelets.jpg', 5),
+    ('cat-pendants', 'Pendants', 'pendants', 'Solitaire diamond pendants, bespoke birthstone designs, and 18k pure gold lockets.', '/images/category-necklaces.jpg', 6)
+ON CONFLICT (slug) DO NOTHING;
+
 
 -- Insert initial default config rows if they don't exist yet
 INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, headline_line3, description, primary_cta_text, primary_cta_href, hero_image, featured_title, featured_subtitle, featured_image)

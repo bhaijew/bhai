@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export interface CartItem {
   id: string;
@@ -46,10 +47,21 @@ export interface ProductItem {
   focusKeywords?: string[];
 }
 
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  display_order?: number;
+  is_active?: boolean;
+}
+
 interface ShopContextType {
   cart: CartItem[];
   wishlist: WishlistItem[];
   products: ProductItem[];
+  categories: CategoryItem[];
   addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeFromCart: (id: string) => void;
   updateCartQuantity: (id: string, delta: number) => void;
@@ -60,9 +72,15 @@ interface ShopContextType {
   toggleWishlist: (item: WishlistItem) => void;
   isInWishlist: (id: string) => boolean;
   clearWishlist: () => void;
-  addProduct: (product: ProductItem) => void;
-  deleteProduct: (id: string) => void;
+  addProduct: (product: ProductItem) => Promise<boolean>;
+  updateProduct: (product: ProductItem) => Promise<boolean>;
+  deleteProduct: (id: string) => Promise<boolean>;
   updateProductStock: (id: string, newStock: number) => void;
+  refreshProducts: () => Promise<void>;
+  addCategory: (category: Partial<CategoryItem>) => Promise<boolean>;
+  updateCategory: (category: CategoryItem) => Promise<boolean>;
+  deleteCategory: (id: string) => Promise<boolean>;
+  refreshCategories: () => Promise<void>;
   cartCount: number;
   wishlistCount: number;
   cartSubtotal: number;
@@ -73,61 +91,166 @@ const ShopContext = createContext<ShopContextType | undefined>(undefined);
 const CART_STORAGE_KEY = 'bhai_jeweller_cart';
 const WISHLIST_STORAGE_KEY = 'bhai_jeweller_wishlist';
 const PRODUCTS_STORAGE_KEY = 'bhai_jeweller_products';
+const CATEGORIES_STORAGE_KEY = 'bhai_jeweller_categories';
 
 export const DEFAULT_PRODUCTS: ProductItem[] = [];
+
+export const DEFAULT_CATEGORIES: CategoryItem[] = [
+  {
+    id: 'cat-rings',
+    name: 'Rings',
+    slug: 'rings',
+    description: 'Timeless engagement rings, diamond bands, and 22k pure gold statement rings handcrafted in the UK.',
+    image: '/images/category-rings.jpg',
+    display_order: 1,
+    is_active: true,
+  },
+  {
+    id: 'cat-necklaces',
+    name: 'Necklaces',
+    slug: 'necklaces',
+    description: 'Intricate diamond pendants, royal gold chokers, and delicate chains made with immaculate precision.',
+    image: '/images/category-necklaces.jpg',
+    display_order: 2,
+    is_active: true,
+  },
+  {
+    id: 'cat-earrings',
+    name: 'Earrings',
+    slug: 'earrings',
+    description: 'Dazzling diamond studs, chandelier jhumkas, and timeless gold hoops designed for unforgettable moments.',
+    image: '/images/category-earrings.jpg',
+    display_order: 3,
+    is_active: true,
+  },
+  {
+    id: 'cat-bracelets',
+    name: 'Bracelets',
+    slug: 'bracelets',
+    description: 'Elegant tennis bracelets, gold charm bangles, and bespoke cuffs engineered for modern luxury.',
+    image: '/images/category-bracelets.jpg',
+    display_order: 4,
+    is_active: true,
+  },
+  {
+    id: 'cat-bangles',
+    name: 'Bangles',
+    slug: 'bangles',
+    description: 'Traditional 22k gold bridal bangles, kada sets, and sleek modern stackable cuffs.',
+    image: '/images/category-bracelets.jpg',
+    display_order: 5,
+    is_active: true,
+  },
+  {
+    id: 'cat-pendants',
+    name: 'Pendants',
+    slug: 'pendants',
+    description: 'Solitaire diamond pendants, bespoke birthstone designs, and 18k pure gold lockets.',
+    image: '/images/category-necklaces.jpg',
+    display_order: 6,
+    is_active: true,
+  },
+];
 
 export function ShopProvider({ children }: { children: React.ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
   const [products, setProducts] = useState<ProductItem[]>(DEFAULT_PRODUCTS);
+  const [categories, setCategories] = useState<CategoryItem[]>(DEFAULT_CATEGORIES);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load from localStorage and sync live API products on mount
+  // Fetch live products
+  const refreshProducts = useCallback(async () => {
+    try {
+      const res = await fetch('/api/products');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setProducts(data.data);
+        try {
+          localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(data.data));
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.warn('Failed to refresh products:', err);
+    }
+  }, []);
+
+  // Fetch live categories
+  const refreshCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/categories');
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        setCategories(data.data);
+        try {
+          localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(data.data));
+        } catch (e) {}
+      }
+    } catch (err) {
+      console.warn('Failed to refresh categories:', err);
+    }
+  }, []);
+
+  // Initial load from storage & API
   useEffect(() => {
-    let localProds: ProductItem[] = [];
     try {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
       const savedWishlist = localStorage.getItem(WISHLIST_STORAGE_KEY);
       const savedProducts = localStorage.getItem(PRODUCTS_STORAGE_KEY);
+      const savedCategories = localStorage.getItem(CATEGORIES_STORAGE_KEY);
+
       if (savedCart) setCart(JSON.parse(savedCart));
       if (savedWishlist) setWishlist(JSON.parse(savedWishlist));
       if (savedProducts) {
-        const parsed = JSON.parse(savedProducts);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          localProds = parsed;
-          setProducts(parsed);
-        }
+        const parsedP = JSON.parse(savedProducts);
+        if (Array.isArray(parsedP)) setProducts(parsedP);
+      }
+      if (savedCategories) {
+        const parsedC = JSON.parse(savedCategories);
+        if (Array.isArray(parsedC) && parsedC.length > 0) setCategories(parsedC);
       }
     } catch (e) {
       console.error('Failed to load shop state from localStorage:', e);
     }
 
-    // Fetch live real products from API / Supabase SQL DB
-    fetch('/api/products')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && Array.isArray(data.data)) {
-          if (data.data.length > 0) {
-            setProducts(data.data);
-            try {
-              localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(data.data));
-            } catch (e) {}
-          } else if (localProds.length > 0) {
-            // Server DB is empty, sync local products back to server
-            localProds.forEach((prod) => {
-              fetch('/api/products', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(prod),
-              }).catch(() => {});
-            });
-          }
-        }
-      })
-      .catch((err) => console.error('Failed to fetch live products from API:', err));
-
+    refreshProducts();
+    refreshCategories();
     setIsLoaded(true);
-  }, []);
+  }, [refreshProducts, refreshCategories]);
+
+  // Real-time Supabase Realtime channel for instant multi-tab sync
+  useEffect(() => {
+    if (!supabase) return;
+
+    try {
+      const channel = supabase
+        .channel('realtime:shop_sync')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'products' },
+          () => {
+            refreshProducts();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'categories' },
+          () => {
+            refreshCategories();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        if (supabase) {
+          supabase.removeChannel(channel);
+        }
+      };
+
+    } catch (err) {
+      console.warn('Supabase Realtime subscription notice:', err);
+    }
+  }, [refreshProducts, refreshCategories]);
 
   // Sync cart to localStorage
   useEffect(() => {
@@ -151,6 +274,15 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {}
     }
   }, [products, isLoaded]);
+
+  // Sync categories to localStorage
+  useEffect(() => {
+    if (isLoaded && categories.length > 0) {
+      try {
+        localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories));
+      } catch (e) {}
+    }
+  }, [categories, isLoaded]);
 
   const addToCart = (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     setCart((prev) => {
@@ -210,7 +342,8 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
 
   const clearWishlist = () => setWishlist([]);
 
-  const addProduct = (newProd: ProductItem) => {
+  // Product CRUD
+  const addProduct = async (newProd: ProductItem): Promise<boolean> => {
     setProducts((prev) => {
       const updated = [newProd, ...prev.filter((p) => p.id !== newProd.id)];
       try {
@@ -218,9 +351,43 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {}
       return updated;
     });
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProd),
+      });
+      const data = await res.json();
+      return !!data.success;
+    } catch {
+      return false;
+    }
   };
 
-  const deleteProduct = (id: string) => {
+  const updateProduct = async (updatedProd: ProductItem): Promise<boolean> => {
+    setProducts((prev) => {
+      const updated = prev.map((p) => (p.id === updatedProd.id ? updatedProd : p));
+      try {
+        localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    try {
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProd),
+      });
+      const data = await res.json();
+      return !!data.success;
+    } catch {
+      return false;
+    }
+  };
+
+  const deleteProduct = async (id: string): Promise<boolean> => {
     setProducts((prev) => {
       const updated = prev.filter((p) => p.id !== id);
       try {
@@ -228,24 +395,109 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       } catch (e) {}
       return updated;
     });
-    fetch(`/api/products?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => {});
+
+    try {
+      const res = await fetch(`/api/products?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      return !!data.success;
+    } catch {
+      return false;
+    }
   };
 
   const updateProductStock = (id: string, newStock: number) => {
     setProducts((prev) => {
-      const updated = prev.map((p) => {
-        if (p.id === id) {
-          const stock = Math.max(0, newStock);
-          const status = stock > 0 ? (stock <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock';
-          return { ...p, stock, status };
-        }
-        return p;
-      });
+      const target = prev.find((p) => p.id === id);
+      if (!target) return prev;
+      const stock = Math.max(0, newStock);
+      const status = stock > 0 ? (stock <= 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock';
+      const updatedItem = { ...target, stock, status };
+
+      fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedItem),
+      }).catch(() => {});
+
+      const updated = prev.map((p) => (p.id === id ? updatedItem : p));
       try {
         localStorage.setItem(PRODUCTS_STORAGE_KEY, JSON.stringify(updated));
       } catch (e) {}
       return updated;
     });
+  };
+
+  // Category CRUD
+  const addCategory = async (catData: Partial<CategoryItem>): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(catData),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCategories((prev) => {
+          const updated = [...prev.filter((c) => c.id !== data.data.id && c.slug !== data.data.slug), data.data];
+          try {
+            localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  const updateCategory = async (catData: CategoryItem): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(catData),
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCategories((prev) => {
+          const updated = prev.map((c) => (c.id === catData.id ? data.data : c));
+          try {
+            localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  const deleteCategory = async (id: string): Promise<boolean> => {
+    try {
+      const res = await fetch(`/api/categories?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCategories((prev) => {
+          const updated = prev.filter((c) => c.id !== id);
+          try {
+            localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -258,6 +510,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         cart,
         wishlist,
         products,
+        categories,
         addToCart,
         removeFromCart,
         updateCartQuantity,
@@ -269,8 +522,14 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         isInWishlist,
         clearWishlist,
         addProduct,
+        updateProduct,
         deleteProduct,
         updateProductStock,
+        refreshProducts,
+        addCategory,
+        updateCategory,
+        deleteCategory,
+        refreshCategories,
         cartCount,
         wishlistCount,
         cartSubtotal,

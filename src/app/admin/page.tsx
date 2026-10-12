@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import ScrollReveal from '@/components/shared/ScrollReveal';
-import { useShop, ProductItem } from '@/context/ShopContext';
+import { useShop, ProductItem, CategoryItem } from '@/context/ShopContext';
+import { ProductEditModal } from '@/components/shared/ProductEditModal';
 
 // Initial Data States (Strictly 0 fake data by default - syncs live with Supabase Real-Time Database)
 const INITIAL_SLIDES: any[] = [];
@@ -14,12 +15,38 @@ const INITIAL_CUSTOMERS: any[] = [];
 
 export default function AdminDashboardPage() {
   // Real-time Shop Context
-  const { products, addProduct, deleteProduct: removeStoreProduct, updateProductStock } = useShop();
+  const {
+    products,
+    addProduct,
+    deleteProduct: removeStoreProduct,
+    updateProductStock,
+    categories,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+  } = useShop();
 
   // Theme State: Default is 'light' (White Theme) as requested!
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add-product' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'add-product' | 'categories' | 'slides' | 'orders' | 'enquiries' | 'customers' | 'goldrates' | 'settings'>('dashboard');
+
+  // Product Edit Modal State
+  const [editingAdminProduct, setEditingAdminProduct] = useState<ProductItem | null>(null);
+
+  // Category Management States
+  const [categoryForm, setCategoryForm] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    image: '/images/category-rings.jpg',
+    display_order: 1,
+  });
+  const [editingCategory, setEditingCategory] = useState<CategoryItem | null>(null);
+  const [catSaveSuccess, setCatSaveSuccess] = useState('');
+  const [catError, setCatError] = useState('');
+  const [catSaving, setCatSaving] = useState(false);
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -523,6 +550,99 @@ export default function AdminDashboardPage() {
     });
   };
 
+  // Category Submit & Delete Handlers
+  const handleCategorySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!categoryForm.name.trim()) {
+      setCatError('Category name is required.');
+      return;
+    }
+    setCatSaving(true);
+    setCatError('');
+    setCatSaveSuccess('');
+
+    try {
+      const slug = (
+        categoryForm.slug ||
+        categoryForm.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+      ).trim();
+
+      if (editingCategory) {
+        const ok = await updateCategory({
+          id: editingCategory.id,
+          name: categoryForm.name.trim(),
+          slug,
+          description: categoryForm.description,
+          image: categoryForm.image,
+          display_order: Number(categoryForm.display_order) || 1,
+          is_active: true,
+        });
+
+        if (ok) {
+          setCatSaveSuccess(`✓ Category "${categoryForm.name}" updated live!`);
+          setEditingCategory(null);
+          setCategoryForm({
+            name: '',
+            slug: '',
+            description: '',
+            image: '/images/category-rings.jpg',
+            display_order: categories.length + 1,
+          });
+        } else {
+          setCatError('Failed to update category.');
+        }
+      } else {
+        const ok = await addCategory({
+          id: `cat-${slug || Date.now()}`,
+          name: categoryForm.name.trim(),
+          slug,
+          description: categoryForm.description,
+          image: categoryForm.image,
+          display_order: Number(categoryForm.display_order) || categories.length + 1,
+          is_active: true,
+        });
+
+        if (ok) {
+          setCatSaveSuccess(`✓ Category "${categoryForm.name}" added and synced live!`);
+          setCategoryForm({
+            name: '',
+            slug: '',
+            description: '',
+            image: '/images/category-rings.jpg',
+            display_order: categories.length + 2,
+          });
+        } else {
+          setCatError('Failed to save category.');
+        }
+      }
+    } catch (err: any) {
+      setCatError(err?.message || 'Error occurred while saving category.');
+    } finally {
+      setCatSaving(false);
+      setTimeout(() => setCatSaveSuccess(''), 3500);
+    }
+  };
+
+  const handleDeleteCategory = async (cat: CategoryItem) => {
+    const productCount = products.filter(
+      (p) => p.category?.toLowerCase() === cat.name.toLowerCase()
+    ).length;
+
+    const warningMsg =
+      productCount > 0
+        ? `⚠️ Notice: ${productCount} active catalog items belong to "${cat.name}".\nAre you sure you want to delete this category from the database?`
+        : `Are you sure you want to delete "${cat.name}"?\nThis removes it from the live store and database.`;
+
+    if (!window.confirm(warningMsg)) return;
+
+    const ok = await deleteCategory(cat.id);
+    if (ok) {
+      setCatSaveSuccess(`✓ Category "${cat.name}" deleted.`);
+      setTimeout(() => setCatSaveSuccess(''), 3000);
+    }
+  };
+
+
   // Slider Banner Modal State
   const [isAddSlideOpen, setIsAddSlideOpen] = useState(false);
   const [newSlide, setNewSlide] = useState({
@@ -723,6 +843,18 @@ export default function AdminDashboardPage() {
       ),
       count: null,
     },
+    {
+      id: 'categories',
+      label: 'Categories Manager',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.386l4.636-2.732c.828-.487 1.002-1.568.303-2.268L11.16 3.659A2.25 2.25 0 009.568 3z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+        </svg>
+      ),
+      count: categories.length,
+    },
+
     {
       id: 'slides',
       label: 'Hero & Slider Banners',
@@ -1406,11 +1538,11 @@ export default function AdminDashboardPage() {
                   className={`text-xs px-3 py-2 rounded-[5px] focus:outline-none ${inputBg}`}
                 >
                   <option value="All">All Categories</option>
-                  <option value="Rings">Rings</option>
-                  <option value="Necklaces">Necklaces</option>
-                  <option value="Earrings">Earrings</option>
-                  <option value="Bracelets">Bracelets</option>
+                  {categories.map((c) => (
+                    <option key={c.id || c.slug} value={c.name}>{c.name}</option>
+                  ))}
                 </select>
+
 
                 {/* FEATURE 4: EXPORT INVENTORY CSV BUTTON */}
                 <button
@@ -1512,13 +1644,30 @@ export default function AdminDashboardPage() {
                             <span className="font-semibold">{p.images?.length || 1} imgs</span>
                           </td>
                           <td className="p-4 text-right">
-                            <button
-                              onClick={() => removeStoreProduct(p.id)}
-                              className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
-                            >
-                              Delete
-                            </button>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setEditingAdminProduct(p)}
+                                className="px-2.5 py-1 bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#dec29b]/50 flex items-center gap-1 shadow-2xs"
+                                title="Edit product"
+                              >
+                                <span>✏️</span>
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm(`Delete product "${p.name}"?\nThis will remove it from the catalog in real time.`)) {
+                                    removeStoreProduct(p.id);
+                                  }
+                                }}
+                                className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] transition-colors border border-red-300 dark:border-red-900"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
+
                         </tr>
                       ))
                     )}
@@ -1599,13 +1748,13 @@ export default function AdminDashboardPage() {
                             onChange={(e) => setAddForm({ ...addForm, category: e.target.value })}
                             className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
                           >
-                            <option value="Rings">Rings</option>
-                            <option value="Necklaces">Necklaces</option>
-                            <option value="Earrings">Earrings</option>
-                            <option value="Bracelets">Bracelets</option>
-                            <option value="Pendants">Pendants</option>
-                            <option value="Bangles">Bangles</option>
+                            {categories.map((c) => (
+                              <option key={c.id || c.slug} value={c.name}>
+                                {c.name}
+                              </option>
+                            ))}
                           </select>
+
                         </div>
 
                         <div>
@@ -1999,8 +2148,361 @@ export default function AdminDashboardPage() {
           </ScrollReveal>
         )}
 
+        {/* TAB: REAL-TIME CATEGORIES & COLLECTIONS MANAGER */}
+        {activeTab === 'categories' && (
+
+          <ScrollReveal direction="up" delay={100} className="space-y-6">
+            {/* KPI STAT CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#b38b40]`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Total Categories</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-2xl font-serif font-bold ${titleColor}`}>{categories.length}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">🗂️</span>
+                </div>
+                <p className={`text-[10px] ${subtitleColor} mt-1`}>Active storefront collections</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-emerald-500`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Active Status</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-2xl font-serif font-bold text-emerald-600 dark:text-emerald-400">
+                    {categories.filter(c => c.is_active !== false).length}
+                  </span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-emerald-100 dark:bg-emerald-950 text-emerald-600">✓</span>
+                </div>
+                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1">Live visible in catalog</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-sky-500`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Catalog Products</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className={`text-2xl font-serif font-bold ${titleColor}`}>{products.length}</span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-sky-100 dark:bg-sky-950 text-sky-600">💎</span>
+                </div>
+                <p className={`text-[10px] ${subtitleColor} mt-1`}>Total products distributed</p>
+              </div>
+
+              <div className={`${cardBg} p-4 rounded-[5px] border-l-4 border-[#dec29b]`}>
+                <p className={`text-[10px] ${subtitleColor} uppercase font-semibold tracking-wider`}>Database Sync</p>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-sm font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Supabase Live
+                  </span>
+                  <span className="text-base p-1.5 rounded-[5px] bg-[#dec29b]/20 text-[#8c6b2d]">⚡</span>
+                </div>
+                <p className={`text-[10px] ${subtitleColor} mt-1`}>Real-time auto replication</p>
+              </div>
+            </div>
+
+            {/* Notification Messages */}
+            {catSaveSuccess && (
+              <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 rounded-[5px] text-xs font-semibold flex items-center space-x-2 animate-bounce">
+                <span>{catSaveSuccess}</span>
+              </div>
+            )}
+            {catError && (
+              <div className="p-4 bg-red-100 border border-red-300 text-red-900 rounded-[5px] text-xs font-semibold flex items-center space-x-2">
+                <span>⚠️ {catError}</span>
+              </div>
+            )}
+
+            {/* MAIN TWO-COLUMN STUDIO: LEFT ADD/EDIT FORM, RIGHT REAL-TIME TABLE & CARDS */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* LEFT: ADD / EDIT CATEGORY FORM */}
+              <div className="lg:col-span-5 space-y-4">
+                <div className={`${cardBg} p-6 rounded-[5px] space-y-4 shadow-sm border border-[#ded3c5] dark:border-[#3a2c23]`}>
+                  <div className="flex items-center justify-between border-b border-current border-opacity-10 pb-3">
+                    <div>
+                      <h3 className={`font-serif text-base font-bold ${accentGold}`}>
+                        {editingCategory ? '✏️ Edit Category' : '➕ Add New Category'}
+                      </h3>
+                      <p className={`text-[11px] ${subtitleColor}`}>
+                        {editingCategory ? `Modifying: ${editingCategory.name}` : 'Instantly visible on storefront'}
+                      </p>
+                    </div>
+                    {editingCategory && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingCategory(null);
+                          setCategoryForm({
+                            name: '',
+                            slug: '',
+                            description: '',
+                            image: '/images/category-rings.jpg',
+                            display_order: categories.length + 1,
+                          });
+                        }}
+                        className={`text-xs px-2.5 py-1 rounded-[4px] border ${subtitleColor} hover:${titleColor}`}
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+
+                  <form onSubmit={handleCategorySubmit} className="space-y-3.5 text-xs">
+                    <div>
+                      <label className={`block text-[11px] font-semibold ${subtitleColor} mb-1`}>
+                        Category Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Bridal Sets, Rings, Polki..."
+                        value={categoryForm.name}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setCategoryForm(prev => ({
+                            ...prev,
+                            name: val,
+                            slug: !editingCategory ? val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : prev.slug,
+                          }));
+                        }}
+                        className={`w-full text-xs px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className={`block text-[11px] font-semibold ${subtitleColor} mb-1`}>
+                          Slug (URL Path)
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. bridal-sets"
+                          value={categoryForm.slug}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                          className={`w-full text-xs px-3.5 py-2.5 rounded-[5px] font-mono focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+
+                      <div>
+                        <label className={`block text-[11px] font-semibold ${subtitleColor} mb-1`}>
+                          Display Order
+                        </label>
+                        <input
+                          type="number"
+                          min="1"
+                          value={categoryForm.display_order}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, display_order: Number(e.target.value) })}
+                          className={`w-full text-xs px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Image URL & Preset Pickers */}
+                    <div>
+                      <label className={`block text-[11px] font-semibold ${subtitleColor} mb-1`}>
+                        Category Cover Image URL
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="/images/category-rings.jpg"
+                        value={categoryForm.image}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, image: e.target.value })}
+                        className={`w-full text-xs px-3.5 py-2.5 rounded-[5px] font-mono focus:outline-none mb-2 ${inputBg}`}
+                      />
+
+                      {/* Quick Presets */}
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                        <span className={`text-[10px] ${subtitleColor}`}>Quick Presets:</span>
+                        {[
+                          { label: 'Rings', url: '/images/category-rings.jpg' },
+                          { label: 'Necklaces', url: '/images/category-necklaces.jpg' },
+                          { label: 'Earrings', url: '/images/category-earrings.jpg' },
+                          { label: 'Bracelets', url: '/images/category-bracelets.jpg' },
+                        ].map((p) => (
+                          <button
+                            key={p.label}
+                            type="button"
+                            onClick={() => setCategoryForm({ ...categoryForm, image: p.url })}
+                            className={`px-2 py-0.5 rounded-[3px] text-[10px] border border-current border-opacity-20 hover:border-opacity-60 transition-all ${
+                              categoryForm.image === p.url ? 'bg-[#dec29b]/30 font-bold text-[#8c6b2d]' : subtitleColor
+                            }`}
+                          >
+                            {p.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className={`block text-[11px] font-semibold ${subtitleColor} mb-1`}>
+                        Description
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Exquisite handcrafted fine jewellery designs..."
+                        value={categoryForm.description}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                        className={`w-full text-xs px-3.5 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                      />
+                    </div>
+
+                    {/* Live Preview Card */}
+                    <div className="p-3 rounded-[5px] bg-[#f5efe6] dark:bg-[#1a120c] border border-[#dcd3c5] dark:border-[#3a2c23] flex items-center gap-3">
+                      <div className="relative w-12 h-12 rounded-[4px] overflow-hidden bg-[#e8ded4] dark:bg-[#281b13] flex-shrink-0">
+                        <Image
+                          src={categoryForm.image || '/images/category-rings.jpg'}
+                          alt="Preview"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-xs ${titleColor} truncate`}>
+                          {categoryForm.name || 'Untitled Category'}
+                        </p>
+                        <p className={`text-[10px] font-mono ${subtitleColor}`}>
+                          /shop?category={categoryForm.name || '...'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      disabled={catSaving}
+                      className={`w-full py-3 ${primaryBtn} font-bold text-xs uppercase tracking-wider rounded-[5px] shadow-md transition-all flex items-center justify-center gap-2`}
+                    >
+                      {catSaving ? (
+                        <>
+                          <div className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                          <span>Saving to Supabase...</span>
+                        </>
+                      ) : (
+                        <span>{editingCategory ? '✓ Update Category' : '🚀 Save & Publish Category'}</span>
+                      )}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* RIGHT: REAL-TIME CATEGORIES LIST & PRODUCT COUNTS */}
+              <div className="lg:col-span-7 space-y-4">
+                <div className={`${cardBg} rounded-[5px] overflow-hidden border border-[#ded3c5] dark:border-[#3a2c23]`}>
+                  <div className="p-4 border-b border-current border-opacity-10 flex items-center justify-between">
+                    <div>
+                      <h3 className={`font-serif text-base font-bold ${titleColor}`}>
+                        Active Categories Catalog ({categories.length})
+                      </h3>
+                      <p className={`text-[11px] ${subtitleColor}`}>
+                        Live synced with Supabase Real-Time database
+                      </p>
+                    </div>
+                    <Link
+                      href="/categories"
+                      target="_blank"
+                      className="px-3 py-1.5 rounded-[4px] bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] text-[11px] font-semibold transition-colors flex items-center gap-1"
+                    >
+                      <span>View Storefront Page</span>
+                      <span>&rarr;</span>
+                    </Link>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className={`${tableHeaderBg} uppercase tracking-wider font-semibold text-[10.5px]`}>
+                        <tr>
+                          <th className="p-3.5">Category</th>
+                          <th className="p-3.5">Slug</th>
+                          <th className="p-3.5">Catalog Products</th>
+                          <th className="p-3.5">Order</th>
+                          <th className="p-3.5 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className={`divide-y ${tableRowHover}`}>
+                        {categories.map((cat) => {
+                          const productCount = products.filter(
+                            (p) => p.category?.toLowerCase() === cat.name.toLowerCase()
+                          ).length;
+
+                          return (
+                            <tr key={cat.id || cat.slug} className="transition-colors">
+                              <td className="p-3.5 flex items-center gap-3">
+                                <div className="relative w-10 h-10 rounded-[5px] overflow-hidden bg-[#e8ded4] dark:bg-[#251a13] flex-shrink-0 border border-[#dcd3c5] dark:border-[#3a2c23]">
+                                  <Image
+                                    src={cat.image || '/images/category-rings.jpg'}
+                                    alt={cat.name}
+                                    fill
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <p className={`font-bold ${titleColor}`}>{cat.name}</p>
+                                  <p className={`text-[10px] ${subtitleColor} line-clamp-1 max-w-xs`}>
+                                    {cat.description || 'No description provided'}
+                                  </p>
+                                </div>
+                              </td>
+
+                              <td className={`p-3.5 font-mono text-[11px] ${subtitleColor}`}>
+                                {cat.slug}
+                              </td>
+
+                              <td className="p-3.5">
+                                <Link
+                                  href={`/shop?category=${encodeURIComponent(cat.name)}`}
+                                  target="_blank"
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[4px] bg-[#dec29b]/20 hover:bg-[#dec29b]/35 text-[#8c6b2d] dark:text-[#dec29b] text-[11px] font-semibold border border-[#dec29b]/30 transition-colors"
+                                  title="View items in this category"
+                                >
+                                  <span>{productCount}</span>
+                                  <span>items</span>
+                                  <span>↗</span>
+                                </Link>
+                              </td>
+
+                              <td className={`p-3.5 font-mono ${subtitleColor}`}>
+                                #{cat.display_order ?? 1}
+                              </td>
+
+                              <td className="p-3.5 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingCategory(cat);
+                                      setCategoryForm({
+                                        name: cat.name,
+                                        slug: cat.slug,
+                                        description: cat.description || '',
+                                        image: cat.image || '/images/category-rings.jpg',
+                                        display_order: cat.display_order || 1,
+                                      });
+                                    }}
+                                    className="px-2.5 py-1 bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8c6b2d] dark:text-[#dec29b] rounded-[5px] text-[10px] font-bold transition-colors border border-[#dec29b]/50 flex items-center gap-1 shadow-2xs"
+                                  >
+                                    <span>✏️</span>
+                                    <span>Edit</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteCategory(cat)}
+                                    className="px-2.5 py-1 bg-red-100 hover:bg-red-200 text-red-800 dark:bg-red-950/80 dark:hover:bg-red-900 dark:text-red-200 rounded-[5px] text-[10px] font-semibold transition-colors border border-red-300 dark:border-red-900"
+                                  >
+                                    Delete
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ScrollReveal>
+        )}
+
         {/* TAB 3: ADMIN ENVIRONMENT SLIDER & BANNER MANAGER */}
         {activeTab === 'slides' && (
+
           <ScrollReveal direction="up" delay={100} className="space-y-8">
             {/* REAL-TIME HERO SECTION EDITOR */}
             <div className={`${cardBg} rounded-[5px] p-6 space-y-6`}>
@@ -3434,6 +3936,14 @@ export default function AdminDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Real-time Product Edit Modal for Admin */}
+      <ProductEditModal
+        product={editingAdminProduct}
+        isOpen={!!editingAdminProduct}
+        onClose={() => setEditingAdminProduct(null)}
+      />
     </div>
   );
 }
+
