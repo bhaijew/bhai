@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import { useShop, ProductItem, CategoryItem } from '@/context/ShopContext';
 import { ProductEditModal } from '@/components/shared/ProductEditModal';
+import FormattedProductDescription from '@/components/shared/FormattedProductDescription';
 import {
   DashboardIcon,
   ProductsIcon,
@@ -2194,16 +2195,45 @@ export default function AdminDashboardPage() {
                       </div>
 
                       <div>
-                        <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                          Detailed Description &amp; Craftsmanship Details
-                        </label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className={`block text-xs font-semibold ${subtitleColor}`}>
+                            Detailed Description &amp; Craftsmanship Details
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const template = `Add timeless elegance to your look with this exquisite piece. Featuring master craftsmanship, delicate detailing and a brilliant finish, perfect for everyday wear or royal celebrations.
+
+**Product Details**
+- **Metal:** ${addForm.metal || '22ct Yellow Gold'}
+- **Style:** Handcrafted Luxury
+- **Design:** Royal Artisan Heritage
+- **Size:** ${addForm.size || 'Standard'}
+- **Weight:** ${addForm.weightGrams ? `${addForm.weightGrams}g` : '5.5g'}
+- **Fastening:** Secure Clasp
+- **Certification:** Authentic British Hallmark Certified
+
+A beautiful gift for birthdays, anniversaries or any special celebration.`;
+                              setAddForm(prev => ({ ...prev, description: template }));
+                            }}
+                            className="px-2.5 py-1 rounded text-[10.5px] font-semibold bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8f6d3a] transition-all flex items-center gap-1 shadow-2xs"
+                            title="Insert luxury description template with story, specifications & gift note"
+                          >
+                            <span>✨</span>
+                            <span>Insert Luxury Template</span>
+                          </button>
+                        </div>
                         <textarea
-                          rows={3}
-                          placeholder="Describe diamond cut, clarity, purity certifications, and bespoke design story..."
+                          rows={6}
+                          placeholder="Describe design story, metal purity, specifications, and gifting details..."
                           value={addForm.description}
                           onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
-                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                          className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none font-mono ${inputBg}`}
                         />
+                        <div className="flex items-center justify-between mt-1 text-[10px] text-gray-500">
+                          <span>Supports markdown: **Bold**, - **Key:** Value bullet lists, and paragraphs</span>
+                          <span>{addForm.description.length} chars</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -2488,6 +2518,22 @@ export default function AdminDashboardPage() {
                             ))}
                           </div>
                         </div>
+
+                        {/* LIVE PRODUCT REVIEW: BEAUTIFULLY FORMATTED DESCRIPTION */}
+                        {addForm.description && (
+                          <div className="pt-2 border-t border-[#e8dfd1]">
+                            <p className="text-[10px] font-bold text-[#8c7d6c] uppercase tracking-wider mb-1">
+                              Live Description Preview:
+                            </p>
+                            <div className="bg-[#fcfaf7] p-2 rounded border border-[#ebdccb]">
+                              <FormattedProductDescription
+                                description={addForm.description}
+                                productName={addForm.name}
+                                mode="compact"
+                              />
+                            </div>
+                          </div>
+                        )}
 
                         <div className="pt-2 flex items-center justify-between text-[10px] text-[#8c7d6c] border-t border-[#e8dfd1]">
                           <span>SKU: {addForm.sku || 'BJ-AUTO'}</span>

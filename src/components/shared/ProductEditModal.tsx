@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useShop, ProductItem } from '@/context/ShopContext';
 import { EditIcon, TrashIcon, XIcon, CheckIcon, CheckCircleIcon, AlertCircleIcon } from '@/components/admin/AdminIcons';
+import FormattedProductDescription from '@/components/shared/FormattedProductDescription';
 
 interface ProductEditModalProps {
   product: ProductItem | null;
@@ -321,15 +322,45 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
 
           {/* Description */}
           <div>
-            <label className="block text-[11px] font-semibold text-[#544537] mb-1 uppercase tracking-wider">
-              Product Description
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-semibold text-[#544537] uppercase tracking-wider">
+                Product Description &amp; Details
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const template = `Add timeless elegance to your look with this exquisite handcrafted jewellery piece. Featuring master craftsmanship, delicate detailing and a brilliant finish, perfect for everyday wear or royal celebrations.
+
+**Product Details**
+- **Metal:** ${formData.metal || '22ct Yellow Gold'}
+- **Style:** Handcrafted Luxury
+- **Design:** Royal Artisan Heritage
+- **Weight:** ${formData.weightGrams ? `${formData.weightGrams}g` : '5.5g'}
+- **Fastening:** Secure Clasp
+- **Certification:** Authentic British Hallmark Certified
+
+A beautiful gift for birthdays, anniversaries or any special celebration.`;
+                  setFormData({ ...formData, description: template });
+                }}
+                className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#dec29b]/25 hover:bg-[#dec29b]/40 text-[#8f6d3a] transition-colors"
+                title="Insert luxury description template"
+              >
+                ✨ Luxury Template
+              </button>
+            </div>
             <textarea
-              rows={3}
+              rows={5}
               value={formData.description || ''}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+              className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs font-mono outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
+              placeholder="Enter product description, markdown bullets (- **Key:** Value) and specifications..."
             />
+            {formData.description && (
+              <div className="mt-2 p-2.5 bg-gray-50 rounded border border-gray-200">
+                <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Live Preview:</p>
+                <FormattedProductDescription description={formData.description} productName={formData.name} mode="compact" />
+              </div>
+            )}
           </div>
 
           {/* Action Buttons */}

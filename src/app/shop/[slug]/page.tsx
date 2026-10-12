@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import { ProductEditModal } from '@/components/shared/ProductEditModal';
+import FormattedProductDescription from '@/components/shared/FormattedProductDescription';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -347,10 +348,13 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Short Description */}
-              <p className="text-xs sm:text-sm text-[#6b5c50] font-light leading-relaxed mt-3">
-                {productData.description}
-              </p>
+              {/* Beautiful Luxury Description & Specifications */}
+              <div className="mt-3.5 mb-2">
+                <FormattedProductDescription
+                  description={productData.description}
+                  productName={productData.name}
+                />
+              </div>
 
               {/* Trust Assurance Badges */}
               <div className="grid grid-cols-3 gap-2 py-3.5 my-4 border-y border-[#e8ded4] text-center">
@@ -439,8 +443,11 @@ export default function ProductDetailPage() {
                     <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'details' ? '−' : '+'}</span>
                   </button>
                   {openAccordion === 'details' && (
-                    <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn">
-                      {productData.description}
+                    <div className="mt-3 text-xs leading-relaxed animate-fadeIn">
+                      <FormattedProductDescription
+                        description={productData.description}
+                        productName={productData.name}
+                      />
                     </div>
                   )}
                 </div>
