@@ -6,34 +6,18 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
 import ScrollReveal from '@/components/shared/ScrollReveal';
-import { ProductEditModal } from '@/components/shared/ProductEditModal';
 import FormattedProductDescription from '@/components/shared/FormattedProductDescription';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const rawSlug = params?.slug as string | undefined;
-  const { addToCart, toggleWishlist, isInWishlist, products, deleteProduct } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, products } = useShop();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('7');
   const [openAccordion, setOpenAccordion] = useState<string | null>('details');
   const [addedToCart, setAddedToCart] = useState(false);
-
-  // Admin controls state
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetch('/api/auth/session')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.authenticated && data.user?.role === 'admin') {
-          setIsAdmin(true);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
 
   // Find dynamic product from store
@@ -177,56 +161,6 @@ export default function ProductDetailPage() {
             <span className="text-[#1c1510] font-normal truncate">{productData.name}</span>
           </nav>
         </ScrollReveal>
-
-        {/* ── Admin Terminal Controls Toolbar ── */}
-        {isAdmin && (
-          <div className="mb-6 p-4 rounded-[6px] bg-[#17110c] border border-[#dec29b]/60 text-[#f5efe8] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xl">
-            <div className="flex items-center gap-3">
-              <span className="text-xl p-2 rounded-full bg-[#241a13] border border-[#dec29b]/40">👑</span>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold font-mono uppercase tracking-wider text-[#dec29b]">Admin Product Manager</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                </div>
-                <p className="text-[11px] text-[#b8a798]">
-                  Directly edit or delete this item from the live catalog and Supabase database.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(true)}
-                className="px-4 py-2 rounded-[5px] bg-gradient-to-r from-[#b38b40] to-[#dec29b] text-[#140e0b] font-bold text-xs uppercase tracking-wider hover:brightness-110 active:scale-95 transition-all shadow-md flex items-center gap-1.5"
-              >
-                <span>✏️</span>
-                <span>Edit Product</span>
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  const targetId = currentProduct?.id || productData.id;
-                  if (window.confirm(`Are you sure you want to delete "${productData.name}"?\nThis cannot be undone.`)) {
-                    await deleteProduct(targetId);
-                    router.push('/shop');
-                  }
-                }}
-                className="px-3.5 py-2 rounded-[5px] bg-red-950/80 border border-red-800 text-red-200 hover:bg-red-900 text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <span>🗑️</span>
-                <span>Delete</span>
-              </button>
-              <Link
-                href="/admin"
-                className="px-3.5 py-2 rounded-[5px] bg-[#241a13] border border-[#dec29b]/40 text-[#dec29b] hover:bg-[#34261c] text-xs font-mono transition-colors"
-                title="Go to Admin Panel"
-              >
-                Admin Panel &rarr;
-              </Link>
-            </div>
-          </div>
-        )}
 
 
         {/* ── Main Product Detail Grid ── */}
@@ -608,15 +542,6 @@ export default function ProductDetailPage() {
 
       </div>
 
-      {/* Admin Product Edit Modal */}
-      {currentProduct && (
-        <ProductEditModal
-          product={currentProduct}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onDeleted={() => router.push('/shop')}
-        />
-      )}
     </main>
   );
 }
