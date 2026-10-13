@@ -365,8 +365,10 @@ export default function AdminDashboardPage() {
   });
   const [announcementSaveMsg, setAnnouncementSaveMsg] = useState(false);
 
-  // Fetch real-time database data from Supabase API endpoints on mount
+  // Fetch real-time database data from Supabase API endpoints only once admin is authorized
   useEffect(() => {
+    if (!isAdminAuthorized) return;
+
     fetch('/api/orders')
       .then((res) => res.json())
       .then((data) => {
@@ -426,7 +428,7 @@ export default function AdminDashboardPage() {
         }
       })
       .catch((err) => console.error('Error loading registered users from API:', err));
-  }, []);
+  }, [isAdminAuthorized]);
 
   // Filter states
   const [productCategory, setProductCategory] = useState('All');
