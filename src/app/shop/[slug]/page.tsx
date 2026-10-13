@@ -126,10 +126,12 @@ export default function ProductDetailPage() {
   }, [productData.sizes, productData.category]);
 
   useEffect(() => {
-    if (sizes.length > 0 && !sizes.includes(selectedSize)) {
-      setSelectedSize(productData.size || sizes[0]);
+    if (productData.size && sizes.includes(productData.size)) {
+      setSelectedSize(productData.size);
+    } else if (sizes.length > 0 && (!selectedSize || !sizes.includes(selectedSize))) {
+      setSelectedSize(sizes[0]);
     }
-  }, [sizes, productData.size, selectedSize]);
+  }, [sizes, productData.size]);
 
   const handleAddToCart = () => {
     addToCart({
@@ -313,93 +315,83 @@ export default function ProductDetailPage() {
           {/* ── Right Column: Info & Actions ── */}
           <div className="lg:col-span-5 flex flex-col justify-start">
             <ScrollReveal delay={100}>
+              {/* Category / Metal Tag & Live Showroom Status */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10.5px] font-semibold uppercase tracking-widest text-[#8c6d3d] bg-[#f5efe6] px-2.5 py-0.5 rounded-[4px] border border-[#e6dcce]">
+                  {productData.metal || 'Fine Jewellery'} • {productData.category}
+                </span>
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700 bg-emerald-50/90 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  In Stock • Bradford Boutique
+                </span>
+              </div>
+
               {/* Title */}
-              <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[#1c1510] font-normal leading-tight">
+              <h1 className="font-serif text-2xl sm:text-3xl lg:text-[32px] text-[#1c1510] font-normal leading-tight">
                 {productData.name}
               </h1>
 
               {/* Rating Stars & Reviews */}
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 pb-3 border-b border-[#ebdccb]/60">
                 <div className="flex gap-[2px]">
                   {[1, 2, 3, 4, 5].map((s) => (
-                    <svg key={s} className="w-3.5 h-3.5 text-[#dec29b]" fill="currentColor" viewBox="0 0 20 20">
+                    <svg key={s} className="w-3.5 h-3.5 text-[#c59d5f]" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   ))}
                 </div>
-                <span className="text-xs text-[#8a796c] font-light">({productData.reviewCount} reviews)</span>
+                <span className="text-xs text-[#8a796c] font-light">({productData.reviewCount} verified reviews)</span>
                 <span className="text-xs text-[#8a796c] font-light">• SKU: {productData.sku}</span>
               </div>
 
               {/* Price & Discount Badge */}
-              <div className="flex items-center gap-3 mt-3">
-                <span className="font-serif text-2xl sm:text-3xl font-medium text-[#1c1510]">
+              <div className="mt-3.5 flex flex-wrap items-baseline gap-3">
+                <span className="font-serif text-3xl sm:text-4xl font-normal text-[#1c1510] tracking-tight">
                   £{Number(productData.price).toLocaleString()}
                 </span>
                 {productData.originalPrice > productData.price && (
                   <>
-                    <span className="text-sm text-[#9a897b] line-through font-light">
+                    <span className="text-base text-[#9a897b] line-through font-light">
                       £{Number(productData.originalPrice).toLocaleString()}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-[5px] bg-[#dec29b]/25 border border-[#dec29b]/40 text-[#5a4329] text-[10.5px] font-semibold">
-                      {Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100)}% OFF
+                    <span className="px-2.5 py-0.5 rounded-[4px] bg-[#2b2118] text-[#e8dfd5] text-[10.5px] font-semibold uppercase tracking-wider shadow-2xs">
+                      Save {Math.round(((productData.originalPrice - productData.price) / productData.originalPrice) * 100)}%
                     </span>
                   </>
                 )}
+                <span className="w-full text-[11px] text-[#8a796c] block mt-0.5">
+                  Price inclusive of UK VAT • Complimentary Worldwide Insured Delivery
+                </span>
               </div>
 
-              {/* Beautiful Luxury Description & Specifications */}
-              <div className="mt-3.5 mb-2">
-                <FormattedProductDescription
-                  description={productData.description}
-                  productName={productData.name}
-                />
-              </div>
-
-              {/* Trust Assurance Badges */}
-              <div className="grid grid-cols-3 gap-2 py-3.5 my-4 border-y border-[#e8ded4] text-center">
-                <div className="flex flex-col items-center">
-                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h12l4 6-10 12L2 9l4-6z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 9h20M7 3l5 18 5-18" />
-                  </svg>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">{productData.metal}</span>
-                  <span className="text-[9px] text-[#8a796c] font-light">Hallmarked</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                  </svg>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">Certified</span>
-                  <span className="text-[9px] text-[#8a796c] font-light">Purity Guaranteed</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                  </svg>
-                  <span className="text-[10px] sm:text-[11px] font-medium text-[#1c1510] mt-0.5">Free</span>
-                  <span className="text-[9px] text-[#8a796c] font-light">Insured Shipping</span>
-                </div>
-              </div>
-
-              {/* Size Selector if relevant */}
-              <div className="mt-1">
-                <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="font-medium text-[#1c1510]">Size</span>
-                  <button type="button" onClick={() => toggleAccordion('sizeGuide')} className="text-[#9e7d56] hover:underline font-light text-[11px]">
-                    Size Guide
+              {/* ── 1. LUXURY SIZE SELECTOR (ABOVE BUTTONS) ── */}
+              <div className="mt-5 p-3.5 rounded-[6px] bg-[#f9f6f0] border border-[#e8ded0]">
+                <div className="flex items-center justify-between text-xs mb-2.5">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">Select Size:</span>
+                    <span className="text-[11px] font-bold text-[#8c6d3d] bg-white px-2.5 py-0.5 rounded-[4px] border border-[#dec29b]/60 shadow-2xs">
+                      {selectedSize || sizes[0]}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleAccordion('sizeGuide')}
+                    className="text-[#8c6d3d] hover:text-[#1c1510] text-[11px] font-medium tracking-wide underline underline-offset-2 transition-colors flex items-center gap-1"
+                  >
+                    <span>📏</span>
+                    <span>Size Guide</span>
                   </button>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap gap-2">
                   {sizes.map((s) => (
                     <button
                       key={s}
                       type="button"
                       onClick={() => setSelectedSize(s)}
-                      className={`w-9 h-9 rounded-[5px] text-xs font-light transition-all ${
+                      className={`min-w-[44px] h-10 px-3.5 rounded-[6px] text-xs transition-all flex items-center justify-center ${
                         selectedSize === s
-                          ? 'bg-[#1c1510] text-[#f5efe8] font-medium shadow-xs'
-                          : 'bg-[#f0e8dc] text-[#5e5146] hover:bg-[#e6dccf]'
+                          ? 'bg-[#1c1510] text-[#faf7f2] font-bold shadow-sm ring-1 ring-[#c59d5f]'
+                          : 'bg-white text-[#4a3b2f] border border-[#d8c8b8] hover:border-[#1c1510] hover:bg-[#fbf9f6]'
                       }`}
                     >
                       {s}
@@ -408,85 +400,131 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* Action Buttons: Add to Cart & Buy Now */}
-              <div className="flex flex-col gap-2.5 mt-5">
+              {/* ── 2. ACTION BUTTONS: ADD TO BAG & BUY NOW ── */}
+              <div className="flex flex-col gap-2.5 mt-4">
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  className="w-full py-3 rounded-[5px] bg-[#1c1510] text-[#f5efe8] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#33261d] active:scale-[0.99] transition-all shadow-md flex items-center justify-center gap-2"
+                  className="w-full py-3.5 rounded-[6px] bg-[#17120e] text-[#f7f2ea] hover:bg-[#2c2017] active:scale-[0.99] font-semibold text-xs sm:text-[13px] tracking-widest uppercase transition-all shadow-md flex items-center justify-center gap-2.5 border border-[#3b2d22]/40"
                 >
-                  <svg className="w-4 h-4 stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-[#dec29b] stroke-[1.8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.189-.578-1.119-1.243l1.263-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119.993z" />
                   </svg>
-                  <span>{addedToCart ? 'Added to Cart!' : 'Add to Cart'}</span>
+                  <span>{addedToCart ? '✓ Added to Bag!' : 'Add to Bag'}</span>
                 </button>
 
                 <Link
                   href="/checkout"
                   onClick={handleAddToCart}
-                  className="w-full py-3 rounded-[5px] bg-[#f0e8dc] text-[#1c1510] font-medium text-xs sm:text-sm tracking-wide hover:bg-[#e6dccf] active:scale-[0.99] transition-all text-center"
+                  className="w-full py-3.5 rounded-[6px] bg-gradient-to-r from-[#dec29b] to-[#c59d5f] hover:brightness-105 active:scale-[0.99] text-[#140e0a] font-bold text-xs sm:text-[13px] tracking-widest uppercase transition-all shadow-sm text-center border border-[#b88e4d]/40"
                 >
                   Buy Now
                 </Link>
+
+                {/* Luxury Guarantee Footnote */}
+                <p className="text-center text-[10.5px] text-[#8a796c] tracking-wide mt-0.5">
+                  🔒 100% Secure Checkout • 14-Day Hassle-Free Returns • Dispatched within 24 Hours
+                </p>
               </div>
 
-              {/* ── Product Accordions ── */}
-              <div className="mt-6 divide-y divide-[#e8ded4] border-y border-[#e8ded4]">
-                {/* Product Details */}
-                <div className="py-3">
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion('details')}
-                    className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
-                  >
-                    <span>Product Details</span>
-                    <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'details' ? '−' : '+'}</span>
-                  </button>
-                  {openAccordion === 'details' && (
-                    <div className="mt-3 text-xs leading-relaxed animate-fadeIn">
-                      <FormattedProductDescription
-                        description={productData.description}
-                        productName={productData.name}
-                      />
-                    </div>
-                  )}
+              {/* ── 3. TRUST ASSURANCE BADGES ── */}
+              <div className="grid grid-cols-3 gap-2 py-3.5 my-5 border-y border-[#e8ded4] text-center bg-[#faf7f2]/80">
+                <div className="flex flex-col items-center">
+                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 3h12l4 6-10 12L2 9l4-6z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2 9h20M7 3l5 18 5-18" />
+                  </svg>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-[#1c1510] mt-0.5">{productData.metal}</span>
+                  <span className="text-[9px] text-[#8a796c] font-light">UK Hallmarked</span>
                 </div>
+                <div className="flex flex-col items-center">
+                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-[#1c1510] mt-0.5">Certified Purity</span>
+                  <span className="text-[9px] text-[#8a796c] font-light">Authenticity Assured</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <svg className="w-4 h-4 text-[#9e7d56] mb-1" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                  </svg>
+                  <span className="text-[10px] sm:text-[11px] font-semibold text-[#1c1510] mt-0.5">Complimentary</span>
+                  <span className="text-[9px] text-[#8a796c] font-light">Insured Shipping</span>
+                </div>
+              </div>
 
-                {/* Material */}
-                <div className="py-3">
+              {/* ── 4. DETAILED DESCRIPTION & SPECIFICATIONS (COMES AFTER BUTTONS & BADGES) ── */}
+              <div className="mt-5 space-y-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#dec29b]" />
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-[#1c1510] font-mono">
+                    Craftsmanship &amp; Story
+                  </h3>
+                </div>
+                <FormattedProductDescription
+                  description={productData.description}
+                  productName={productData.name}
+                />
+              </div>
+
+              {/* ── 5. PRODUCT ACCORDIONS (AUTHENTICITY, PACKAGING & CARE) ── */}
+              <div className="mt-6 divide-y divide-[#e8ded4] border-y border-[#e8ded4]">
+                {/* Material & Hallmark Authenticity */}
+                <div className="py-3.5">
                   <button
                     type="button"
                     onClick={() => toggleAccordion('material')}
-                    className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
+                    className="w-full flex items-center justify-between text-left text-xs font-semibold text-[#1c1510]"
                   >
-                    <span>Material & Specifications</span>
+                    <span>Material &amp; Hallmark Authenticity</span>
                     <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'material' ? '−' : '+'}</span>
                   </button>
                   {openAccordion === 'material' && (
-                    <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
-                      <p>• Metal: {productData.metal}</p>
-                      <p>• Weight: {productData.weight}</p>
-                      <p>• Category: {productData.category}</p>
-                      <p>• Available Sizes: {sizes.join(', ')}</p>
-                      <p>• Certification: Authentic UK & International Hallmark Certified</p>
+                    <div className="mt-2.5 text-xs text-[#5a483a] font-light leading-relaxed animate-fadeIn space-y-1.5">
+                      <p>• <strong>Metal:</strong> {productData.metal || '9ct / 18ct / 22ct Solid Gold'}</p>
+                      <p>• <strong>Weight:</strong> {productData.weight || 'Standard'}</p>
+                      <p>• <strong>Category:</strong> {productData.category}</p>
+                      <p>• <strong>Available Sizes:</strong> {sizes.join(', ')}</p>
+                      <p>• <strong>Hallmark Certification:</strong> Independently tested &amp; verified by British Assay Offices.</p>
                     </div>
                   )}
                 </div>
 
-                {/* Shipping & Returns */}
-                <div className="py-3">
+                {/* Packaging & Delivery */}
+                <div className="py-3.5">
                   <button
                     type="button"
                     onClick={() => toggleAccordion('shipping')}
-                    className="w-full flex items-center justify-between text-left text-xs font-medium text-[#1c1510]"
+                    className="w-full flex items-center justify-between text-left text-xs font-semibold text-[#1c1510]"
                   >
-                    <span>Shipping & Returns</span>
+                    <span>Complimentary Packaging &amp; Delivery</span>
                     <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'shipping' ? '−' : '+'}</span>
                   </button>
                   {openAccordion === 'shipping' && (
-                    <div className="mt-2 text-xs text-[#6b5c50] font-light leading-relaxed animate-fadeIn space-y-1">
-                      <p>• Complimentary Insured Delivery across UK & Worldwide</p>
-                      <p>• 7-day hassle-free return and exchange policy</p>
+                    <div className="mt-2.5 text-xs text-[#5a483a] font-light leading-relaxed animate-fadeIn space-y-1.5">
+                      <p>• <strong>Complimentary Presentation:</strong> Delivered in Bhai Jeweller signature velvet box with protective sleeve.</p>
+                      <p>• <strong>Delivery:</strong> Fully insured Royal Mail Special Delivery (tracked &amp; signed).</p>
+                      <p>• <strong>Returns:</strong> 14-day hassle-free return or exchange guarantee.</p>
+                      <p>• <strong>Showroom Pickup:</strong> Free collection available at our Bradford boutique showroom.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Jewellery Care Guide */}
+                <div className="py-3.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleAccordion('care')}
+                    className="w-full flex items-center justify-between text-left text-xs font-semibold text-[#1c1510]"
+                  >
+                    <span>Jewellery Care &amp; Longevity</span>
+                    <span className="text-sm font-light text-[#8a796c]">{openAccordion === 'care' ? '−' : '+'}</span>
+                  </button>
+                  {openAccordion === 'care' && (
+                    <div className="mt-2.5 text-xs text-[#5a483a] font-light leading-relaxed animate-fadeIn space-y-1.5">
+                      <p>• Store in your provided velvet pouch away from moisture and direct sunlight.</p>
+                      <p>• Clean gently with warm water, mild soap, and a soft microfiber cloth.</p>
+                      <p>• Complimentary lifetime cleaning &amp; inspection available at Bhai Jeweller Bradford.</p>
                     </div>
                   )}
                 </div>

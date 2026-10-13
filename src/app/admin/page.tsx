@@ -2519,6 +2519,14 @@ A beautiful gift for birthdays, anniversaries or any special celebration.`;
                           </div>
                         </div>
 
+                        {/* Action Button: Add To Bag */}
+                        <button
+                          type="button"
+                          className="w-full py-2.5 bg-[#1c1510] text-[#faf7f2] text-xs font-semibold rounded-[5px] uppercase tracking-wider shadow-sm"
+                        >
+                          Add To Bag
+                        </button>
+
                         {/* LIVE PRODUCT REVIEW: BEAUTIFULLY FORMATTED DESCRIPTION */}
                         {addForm.description && (
                           <div className="pt-2 border-t border-[#e8dfd1]">
@@ -2539,13 +2547,6 @@ A beautiful gift for birthdays, anniversaries or any special celebration.`;
                           <span>SKU: {addForm.sku || 'BJ-AUTO'}</span>
                           <span>Images: {(addForm.primaryImage ? 1 : 0) + addForm.additionalImages.filter(img => img && img !== addForm.primaryImage).length}</span>
                         </div>
-
-                        <button
-                          type="button"
-                          className="mt-2 w-full py-2 bg-[#1c1510] text-[#faf7f2] text-xs font-semibold rounded-[5px] uppercase tracking-wider"
-                        >
-                          Add To Bag
-                        </button>
                       </div>
                     </div>
 
