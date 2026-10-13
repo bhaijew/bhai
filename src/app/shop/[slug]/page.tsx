@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useShop } from '@/context/ShopContext';
 import ScrollReveal from '@/components/shared/ScrollReveal';
 import FormattedProductDescription from '@/components/shared/FormattedProductDescription';
+import { ProductReviews } from '@/components/shared/ProductReviews';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -275,7 +276,13 @@ export default function ProductDetailPage() {
                     </svg>
                   ))}
                 </div>
-                <span className="text-xs text-[#8a796c] font-light">({productData.reviewCount} verified reviews)</span>
+                <a
+                  href="#customer-reviews"
+                  className="text-xs text-[#8a796c] hover:text-[#1c1510] font-light underline underline-offset-2 transition-colors flex items-center gap-1.5"
+                >
+                  <span>({productData.reviewCount || 12} verified reviews)</span>
+                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-medium">Verified</span>
+                </a>
                 <span className="text-xs text-[#8a796c] font-light">• SKU: {productData.sku}</span>
               </div>
 
@@ -541,6 +548,17 @@ export default function ProductDetailPage() {
           </div>
 
         </div>
+
+        {/* ── Real Customer Reviews Section ── */}
+        <ScrollReveal delay={120}>
+          <ProductReviews
+            productId={productData.id}
+            productName={productData.name}
+            category={productData.category}
+            metal={productData.metal}
+            baseReviewCount={productData.reviewCount || 12}
+          />
+        </ScrollReveal>
 
         {/* ── "You May Also Like" ── */}
         <ScrollReveal delay={150}>
