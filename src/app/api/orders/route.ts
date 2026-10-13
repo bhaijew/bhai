@@ -86,12 +86,22 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const customer = sanitizeString(body.customer, 100) || 'Valued Client';
-    const email = sanitizeEmail(body.email) || 'client@example.com';
-    const items = sanitizeString(body.items, 500) || 'Fine Jewelry Purchase';
+    const customer = sanitizeString(body.customer, 100);
+    const email = sanitizeEmail(body.email);
+    const items = sanitizeString(body.items, 1000);
     const amount = sanitizePrice(body.amount);
     const paymentMethod = sanitizeString(body.paymentMethod, 50) || 'Credit / Debit Card';
-    const address = sanitizeString(body.address, 300) || 'Bradford, UK';
+    const address = sanitizeString(body.address, 300);
+
+    if (!customer || !email || !address || !items || amount <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid order data: Customer name, valid email, delivery address, items, and positive order amount are required.',
+        },
+        { status: 400 }
+      );
+    }
 
     const newOrder = {
       id: body.id ? sanitizeString(body.id, 64) : `BJ-${Math.floor(10000 + Math.random() * 90000)}`,

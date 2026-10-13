@@ -4,10 +4,10 @@ import { requireAdmin } from '@/lib/auth';
 import { sanitizeString, sanitizeEmail, sanitizePhone } from '@/lib/sanitize';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabase as defaultSupabase } from '@/lib/supabase';
 
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = supabaseAdmin || defaultSupabase;
 
 // Clean in-memory fallback array (strictly 0 fake enquiries)
 let SERVER_ENQUIRIES_DB: any[] = [];

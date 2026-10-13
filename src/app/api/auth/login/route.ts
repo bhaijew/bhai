@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { hashPassword, signSession, SESSION_COOKIE_NAME } from '@/lib/auth';
+import { hashPassword, verifyPassword, signSession, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { sanitizeString } from '@/lib/sanitize';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
@@ -152,7 +152,7 @@ export async function POST(request: Request) {
           );
         }
 
-        if (foundUser.password_hash === inputHash) {
+        if (verifyPassword(password, foundUser.password_hash)) {
           isAuthenticated = true;
           userRole = foundUser.role === 'admin' ? 'admin' : 'client';
           userName = foundUser.full_name || userName;

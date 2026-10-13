@@ -21,10 +21,40 @@ const AUTH_SECRET =
 export const SESSION_COOKIE_NAME = 'bhai_auth_session';
 
 /**
- * Standard password hashing with SHA-256 and HMAC
+ * Enterprise password hashing with PBKDF2-SHA512 (100,000 iterations, random salt)
  */
 export function hashPassword(password: string): string {
-  return crypto.createHash('sha256').update(password + 'BHAI_JEWELLER_SALT_2026').digest('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+  return `pbkdf2$100000$${salt}$${hash}`;
+}
+
+/**
+ * Timing-safe password verification supporting both PBKDF2 and legacy SHA-256
+ */
+export function verifyPassword(password: string, storedHash: string): boolean {
+  if (!password || !storedHash) return false;
+
+  // Modern PBKDF2 hash format
+  if (storedHash.startsWith('pbkdf2$')) {
+    const parts = storedHash.split('$');
+    if (parts.length !== 4) return false;
+    const iterations = parseInt(parts[1], 10);
+    const salt = parts[2];
+    const originalHash = parts[3];
+    const derived = crypto.pbkdf2Sync(password, salt, iterations, 64, 'sha512').toString('hex');
+    const bufA = Buffer.from(derived);
+    const bufB = Buffer.from(originalHash);
+    if (bufA.length !== bufB.length) return false;
+    return crypto.timingSafeEqual(bufA, bufB);
+  }
+
+  // Legacy SHA-256 fallback with timing-safe comparison
+  const legacyHash = crypto.createHash('sha256').update(password + 'BHAI_JEWELLER_SALT_2026').digest('hex');
+  const bufA = Buffer.from(legacyHash);
+  const bufB = Buffer.from(storedHash);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 /**
@@ -127,8 +157,8 @@ export async function requireAdmin(
   if (request) {
     const adminKey = request.headers.get('x-admin-key');
     const authHeader = request.headers.get('authorization');
-    const expectedKey = process.env.ADMIN_PASSWORD || 'BhaiAdmin@Bradford2026!';
-    if (adminKey === expectedKey || authHeader === `Bearer ${expectedKey}`) {
+    const expectedKey = process.env.ADMIN_PASSWORD;
+    if (expectedKey && (adminKey === expectedKey || authHeader === `Bearer ${expectedKey}`)) {
       return {
         authorized: true,
         user: {

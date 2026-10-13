@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase as publicSupabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { sanitizeString } from '@/lib/sanitize';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 const supabase = supabaseAdmin || publicSupabase;
 
@@ -82,24 +84,41 @@ export async function GET(req: Request) {
 // POST /api/reviews
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    // Rate limit: max 5 reviews per 10 minutes per IP
+    const rateCheck = checkRateLimit(`review_${ip}`, 5, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Too many reviews submitted. Please wait ${rateCheck.resetSeconds} seconds before trying again.` },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { productId, name, location, rating, title, comment } = body;
 
-    if (!productId || !name || !comment) {
+    const cleanProductId = sanitizeString(productId, 64);
+    const cleanName = sanitizeString(name, 100);
+    const cleanLocation = sanitizeString(location || 'United Kingdom', 100);
+    const cleanTitle = sanitizeString(title || 'Customer Review', 150);
+    const cleanComment = sanitizeString(comment, 2000);
+
+    if (!cleanProductId || !cleanName || !cleanComment) {
       return NextResponse.json(
         { success: false, error: 'Product ID, Name, and Review Comment are required' },
         { status: 400 }
       );
     }
 
+    const parsedRating = Math.max(1, Math.min(5, Number(rating) || 5));
     const reviewId = `rev-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newReview = {
       id: reviewId,
-      name: name.trim(),
-      location: (location || 'United Kingdom').trim(),
-      rating: Math.max(1, Math.min(5, Number(rating) || 5)),
-      title: (title || 'Customer Review').trim(),
-      comment: comment.trim(),
+      name: cleanName,
+      location: cleanLocation,
+      rating: parsedRating,
+      title: cleanTitle,
+      comment: cleanComment,
       verified: true,
       helpfulCount: 0,
       date: 'Just now',
