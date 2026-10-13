@@ -20,6 +20,8 @@ export default function ProductDetailPage() {
   const [openAccordion, setOpenAccordion] = useState<string | null>('details');
   const [addedToCart, setAddedToCart] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [realReviewCount, setRealReviewCount] = useState(0);
+  const [realRating, setRealRating] = useState(0);
 
 
   // Find dynamic product from store
@@ -53,8 +55,8 @@ export default function ProductDetailPage() {
         metal: currentProduct.metal || '18k Gold',
         weight: currentProduct.weight || (currentProduct.weightGrams ? `${currentProduct.weightGrams}g` : '0.6g'),
         description: currentProduct.description || `Exquisite handcrafted ${currentProduct.metal || '18k gold'} ${currentProduct.name} designed by master artisans with hallmark certification.`,
-        rating: currentProduct.rating || 5,
-        reviewCount: currentProduct.reviewCount || 12,
+        rating: Number(currentProduct.rating) || 0,
+        reviewCount: Number(currentProduct.reviewCount) || 0,
         images: allImgs,
         slug: currentProduct.slug || currentProduct.id,
         sku: currentProduct.sku || `BJ-${currentProduct.id.slice(-4)}`,
@@ -74,8 +76,8 @@ export default function ProductDetailPage() {
       metal: '18k Solid Gold',
       weight: '4.2g',
       description: 'A timeless solitaire ring crafted in 18k solid gold with a brilliant-cut diamond. Elegant, classic and made to last forever.',
-      rating: 5,
-      reviewCount: 12,
+      rating: 0,
+      reviewCount: 0,
       images: [
         '/images/detail-ring-hero.jpg',
         '/images/detail-thumb-1.jpg',
@@ -269,20 +271,37 @@ export default function ProductDetailPage() {
 
               {/* Rating Stars & Reviews */}
               <div className="flex items-center gap-2 mt-2 pb-3 border-b border-[#ebdccb]/60">
-                <div className="flex gap-[2px]">
-                  {[1, 2, 3, 4, 5].map((s) => (
-                    <svg key={s} className="w-3.5 h-3.5 text-[#c59d5f]" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <a
-                  href="#customer-reviews"
-                  className="text-xs text-[#8a796c] hover:text-[#1c1510] font-light underline underline-offset-2 transition-colors flex items-center gap-1.5"
-                >
-                  <span>({productData.reviewCount || 12} verified reviews)</span>
-                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-medium">Verified</span>
-                </a>
+                {realReviewCount > 0 ? (
+                  <>
+                    <div className="flex gap-[2px]">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <svg
+                          key={s}
+                          className={`w-3.5 h-3.5 ${s <= Math.round(realRating) ? 'text-[#c59d5f]' : 'text-[#ded6c9]'}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <a
+                      href="#customer-reviews"
+                      className="text-xs text-[#8a796c] hover:text-[#1c1510] font-light underline underline-offset-2 transition-colors flex items-center gap-1.5"
+                    >
+                      <span>({realReviewCount} {realReviewCount === 1 ? 'review' : 'reviews'})</span>
+                      <span className="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 font-medium">Verified</span>
+                    </a>
+                  </>
+                ) : (
+                  <a
+                    href="#customer-reviews"
+                    className="text-xs text-[#8a796c] hover:text-[#1c1510] font-light underline underline-offset-2 transition-colors flex items-center gap-1.5"
+                  >
+                    <span className="text-[#c59d5f]">★</span>
+                    <span>No reviews yet • Be the first to review</span>
+                  </a>
+                )}
                 <span className="text-xs text-[#8a796c] font-light">• SKU: {productData.sku}</span>
               </div>
 
@@ -556,7 +575,10 @@ export default function ProductDetailPage() {
             productName={productData.name}
             category={productData.category}
             metal={productData.metal}
-            baseReviewCount={productData.reviewCount || 12}
+            onReviewsUpdated={(count, avg) => {
+              setRealReviewCount(count);
+              setRealRating(avg);
+            }}
           />
         </ScrollReveal>
 
