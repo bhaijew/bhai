@@ -164,10 +164,10 @@ export default function ProductDetailPage() {
 
 
         {/* ── Main Product Detail Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-14">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-14 items-start relative">
 
-          {/* ── Left Column: Product Gallery ── */}
-          <div className="lg:col-span-7 flex flex-col gap-3">
+          {/* ── Left Column: Product Gallery (Sticky on desktop until right column reaches bottom) ── */}
+          <div className="lg:col-span-7 lg:sticky lg:top-20 lg:self-start flex flex-col gap-3">
             <ScrollReveal delay={50}>
               {/* Main Image Container */}
               <div className="relative w-full aspect-[4/3] sm:aspect-[4/3] rounded-[5px] overflow-hidden bg-[#e8ded4] shadow-xs">
