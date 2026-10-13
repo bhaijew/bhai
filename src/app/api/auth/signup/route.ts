@@ -9,8 +9,16 @@ import { supabase as defaultSupabase } from '@/lib/supabase';
 
 const supabase = supabaseAdmin || defaultSupabase;
 
+import { validateRequestSecurity, isBotSubmission } from '@/lib/securityGuard';
+
 export async function POST(request: Request) {
   try {
+    // 1. Security Guard (Payload Size & CSRF Origin Check)
+    const securityCheck = validateRequestSecurity(request);
+    if (!securityCheck.valid) {
+      return securityCheck.errorResponse!;
+    }
+
     const ip = getClientIp(request);
     // Rate limit: Max 5 registration attempts per 15 minutes per IP
     const rateCheck = checkRateLimit(`signup_${ip}`, 5, 15 * 60 * 1000);
@@ -25,6 +33,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
+
+    // 2. Honeypot Bot Trap Check
+    if (isBotSubmission(body)) {
+      return NextResponse.json(
+        { success: false, error: 'Registration failed verification.' },
+        { status: 400 }
+      );
+    }
+
     const fullName = sanitizeString(body.fullName, 100);
     const email = sanitizeEmail(body.email);
     const phone = sanitizePhone(body.phone);
@@ -37,10 +54,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // Password strength check
-    if (password.length < 8) {
+    // 3. Strong Password Policy (Min 8 chars, at least 1 number, at least 1 letter)
+    const hasNumber = /[0-9]/.test(password);
+    const hasLetter = /[a-zA-Z]/.test(password);
+
+    if (password.length < 8 || !hasNumber || !hasLetter) {
       return NextResponse.json(
-        { success: false, error: 'Password must be at least 8 characters long.' },
+        {
+          success: false,
+          error: 'Password must be at least 8 characters long and contain both letters and numbers.',
+        },
         { status: 400 }
       );
     }

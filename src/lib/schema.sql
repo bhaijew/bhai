@@ -513,3 +513,51 @@ BEGIN
   EXCEPTION WHEN OTHERS THEN NULL;
   END;
 END $$;
+
+-- ============================================================
+-- AUTOMATED POSTGRESQL AUDIT TRIGGERS (Auto-update updated_at)
+-- ============================================================
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Apply triggers across tables with updated_at column
+DROP TRIGGER IF EXISTS trigger_products_updated_at ON products;
+CREATE TRIGGER trigger_products_updated_at
+BEFORE UPDATE ON products
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_categories_updated_at ON categories;
+CREATE TRIGGER trigger_categories_updated_at
+BEFORE UPDATE ON categories
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_hero_section_updated_at ON hero_section;
+CREATE TRIGGER trigger_hero_section_updated_at
+BEFORE UPDATE ON hero_section
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_announcement_bar_updated_at ON announcement_bar;
+CREATE TRIGGER trigger_announcement_bar_updated_at
+BEFORE UPDATE ON announcement_bar
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_users_updated_at ON users;
+CREATE TRIGGER trigger_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trigger_carts_updated_at ON carts;
+CREATE TRIGGER trigger_carts_updated_at
+BEFORE UPDATE ON carts
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();

@@ -82,8 +82,16 @@ export async function GET(req: Request) {
 }
 
 // POST /api/reviews
+import { validateRequestSecurity, isBotSubmission } from '@/lib/securityGuard';
+
 export async function POST(req: Request) {
   try {
+    // 1. Payload Size & CSRF Origin Guard
+    const securityCheck = validateRequestSecurity(req);
+    if (!securityCheck.valid) {
+      return securityCheck.errorResponse!;
+    }
+
     const ip = getClientIp(req);
     // Rate limit: max 5 reviews per 10 minutes per IP
     const rateCheck = checkRateLimit(`review_${ip}`, 5, 10 * 60 * 1000);
@@ -95,6 +103,15 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
+
+    // 2. Honeypot Bot Trap Check
+    if (isBotSubmission(body)) {
+      return NextResponse.json(
+        { success: false, error: 'Review submission failed verification.' },
+        { status: 400 }
+      );
+    }
+
     const { productId, name, location, rating, title, comment } = body;
 
     const cleanProductId = sanitizeString(productId, 64);

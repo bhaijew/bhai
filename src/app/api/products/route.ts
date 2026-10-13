@@ -99,8 +99,15 @@ export async function GET() {
   );
 }
 
+import { validateRequestSecurity } from '@/lib/securityGuard';
+
 export async function POST(request: Request) {
   try {
+    const securityCheck = validateRequestSecurity(request);
+    if (!securityCheck.valid) {
+      return securityCheck.errorResponse!;
+    }
+
     const auth = await requireAdmin(request);
     if (!auth.authorized) {
       return auth.errorResponse!;
@@ -263,6 +270,11 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const securityCheck = validateRequestSecurity(request);
+    if (!securityCheck.valid) {
+      return securityCheck.errorResponse!;
+    }
+
     const auth = await requireAdmin(request);
     if (!auth.authorized) {
       return auth.errorResponse!;

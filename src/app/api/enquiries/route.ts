@@ -54,8 +54,16 @@ export async function GET(request: Request) {
   });
 }
 
+import { validateRequestSecurity, isBotSubmission } from '@/lib/securityGuard';
+
 export async function POST(request: Request) {
   try {
+    // 1. Payload Size & CSRF Origin Guard
+    const securityCheck = validateRequestSecurity(request);
+    if (!securityCheck.valid) {
+      return securityCheck.errorResponse!;
+    }
+
     const ip = getClientIp(request);
     // Rate limit: Max 5 enquiries per 10 minutes per IP to block spam bots
     const rateCheck = checkRateLimit(`enquiry_${ip}`, 5, 10 * 60 * 1000);
@@ -70,12 +78,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const name = sanitizeString(body.name, 100) || 'Valued Client';
-    const email = sanitizeEmail(body.email) || 'client@example.com';
-    const phone = sanitizePhone(body.phone) || '+44 7700 900000';
+
+    // 2. Honeypot Bot Trap Check
+    if (isBotSubmission(body)) {
+      return NextResponse.json(
+        { success: false, error: 'Enquiry submission failed verification.' },
+        { status: 400 }
+      );
+    }
+
+    const name = sanitizeString(body.name, 100);
+    const email = sanitizeEmail(body.email);
+    const phone = sanitizePhone(body.phone);
     const service = sanitizeString(body.service, 100) || 'Bespoke Jewelry Customization';
     const budget = sanitizeString(body.budget, 50) || '£2,000 - £5,000';
     const message = sanitizeString(body.message, 2000);
+
+    if (!name || !email || !phone) {
+      return NextResponse.json(
+        { success: false, error: 'Name, valid email, and contact phone are required.' },
+        { status: 400 }
+      );
+    }
 
     const newEnquiry = {
       id: body.id ? sanitizeString(body.id, 64) : `ENQ-${Math.floor(100 + Math.random() * 900)}`,
