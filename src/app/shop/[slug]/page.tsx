@@ -18,6 +18,7 @@ export default function ProductDetailPage() {
   const [selectedSize, setSelectedSize] = useState('7');
   const [openAccordion, setOpenAccordion] = useState<string | null>('details');
   const [addedToCart, setAddedToCart] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
 
 
   // Find dynamic product from store
@@ -299,57 +300,111 @@ export default function ProductDetailPage() {
               </div>
 
               {/* ── 1. LUXURY WEIGHT & SIZE SELECTION (ABOVE BUTTONS) ── */}
-              <div className="mt-5 p-3.5 rounded-[6px] bg-[#f9f6f0] border border-[#e8ded0] space-y-3">
-                {/* Gold Weight Display Bar */}
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#ebdccb]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-base select-none">⚖️</span>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">
-                      Metal / Gold Weight:
-                    </span>
+              <div className="mt-5 rounded-[8px] border border-[#ebdccb] bg-[#fbf9f5] p-3.5 sm:p-4 space-y-3.5 shadow-[0_2px_8px_rgba(28,21,16,0.03)]">
+                
+                {/* Gold / Metal Weight Bar */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-[#f4ece0] border border-[#dec29b]/70 flex items-center justify-center text-[#8c6d3d] flex-shrink-0 shadow-2xs">
+                      {/* Scale / Weight Balance Icon */}
+                      <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0l-3-3m3 3l3-3M3.75 7.5h16.5M6 10.5l-2.25 4.5h4.5L6 10.5zm12 0l-2.25 4.5h4.5L18 10.5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-semibold tracking-wider uppercase text-[#5a483a] block">
+                        Metal / Gold Weight
+                      </span>
+                      <span className="text-[10px] text-[#9c8979] font-light">
+                        UK Assay Certified Standard
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-[#1c1510] bg-white px-2.5 py-1 rounded-[4px] border border-[#dec29b]/70 shadow-2xs font-mono">
+
+                  <div className="flex items-center gap-1.5 bg-white border border-[#dec5a2] px-3 py-1 rounded-[5px] shadow-2xs">
+                    <span className="font-serif text-sm sm:text-base font-semibold text-[#1c1510] tracking-tight">
                       {productData.weight || '0.6g'}
                     </span>
-                    <span className="text-[10px] text-[#8c7d6c] font-light">(Estimated)</span>
+                    <span className="text-[10px] uppercase tracking-wider text-[#9e7d56] font-semibold bg-[#faf5ed] px-1.5 py-0.5 rounded border border-[#ecd9be]/60">
+                      Solid Gold
+                    </span>
                   </div>
                 </div>
 
-                {/* Size Selector */}
-                <div>
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">Select Size:</span>
-                      <span className="text-[11px] font-bold text-[#8c6d3d] bg-white px-2.5 py-0.5 rounded-[4px] border border-[#dec29b]/60 shadow-2xs">
+                {/* Subtle Divider */}
+                <div className="h-px w-full bg-[#ede3d4]" />
+
+                {/* Size Selection */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[#5a483a]">
+                        Size:
+                      </span>
+                      <span className="text-xs font-serif font-bold text-[#1c1510] bg-white px-2 py-0.5 rounded-[4px] border border-[#dec29b]/70 shadow-2xs">
                         {selectedSize || sizes[0]}
                       </span>
                     </div>
+
+                    {/* Size Guide Trigger */}
                     <button
                       type="button"
-                      onClick={() => toggleAccordion('sizeGuide')}
-                      className="text-[#8c6d3d] hover:text-[#1c1510] text-[11px] font-medium tracking-wide underline underline-offset-2 transition-colors flex items-center gap-1"
+                      onClick={() => setShowSizeGuide((prev) => !prev)}
+                      className="group inline-flex items-center gap-1.5 text-[11.5px] font-medium text-[#8c6d3d] hover:text-[#1c1510] transition-colors"
                     >
-                      <span>📏</span>
-                      <span>Size Guide</span>
+                      <svg className="w-3.5 h-3.5 text-[#8c6d3d] group-hover:text-[#1c1510] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+                      </svg>
+                      <span className="underline underline-offset-2">Size Guide</span>
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {sizes.map((s) => (
+
+                  {/* Size Guide Collapsible Helper */}
+                  {showSizeGuide && (
+                    <div className="p-3 bg-white rounded-[6px] border border-[#e8ded0] text-[11px] text-[#5c493b] leading-relaxed animate-fadeIn space-y-1">
+                      <p className="font-semibold text-[#1c1510]">Bhai Jeweller Sizing Guide:</p>
+                      <p>• <strong>Studs &amp; Earrings:</strong> Sizing specifies diameter across the piece (e.g. 6mm diameter stud).</p>
+                      <p>• <strong>Rings:</strong> Standard British ring sizes. Complimentary ring re-sizing available at our Bradford showroom.</p>
+                      <p>• Need a custom size? Contact our master jewellers directly on <strong>01274 728888</strong>.</p>
+                    </div>
+                  )}
+
+                  {/* Size Pills */}
+                  {sizes.length > 1 ? (
+                    <div className="flex flex-wrap gap-2 pt-0.5">
+                      {sizes.map((s) => {
+                        const isSelected = selectedSize === s;
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setSelectedSize(s)}
+                            className={`min-w-[42px] h-9 px-3.5 rounded-[5px] text-xs transition-all flex items-center justify-center font-medium ${
+                              isSelected
+                                ? 'bg-[#1c1510] text-[#faf7f2] font-semibold shadow-xs border border-[#1c1510] ring-1 ring-[#c59d5f]/80'
+                                : 'bg-white text-[#4a3b2f] border border-[#d8c8b8] hover:border-[#9e7d56] hover:bg-[#faf6f0]'
+                            }`}
+                          >
+                            {s}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2.5 pt-0.5">
                       <button
-                        key={s}
                         type="button"
-                        onClick={() => setSelectedSize(s)}
-                        className={`min-w-[44px] h-10 px-3.5 rounded-[6px] text-xs transition-all flex items-center justify-center ${
-                          selectedSize === s
-                            ? 'bg-[#1c1510] text-[#faf7f2] font-bold shadow-sm ring-1 ring-[#c59d5f]'
-                            : 'bg-white text-[#4a3b2f] border border-[#d8c8b8] hover:border-[#1c1510] hover:bg-[#fbf9f6]'
-                        }`}
+                        onClick={() => setSelectedSize(sizes[0])}
+                        className="h-8 px-3.5 rounded-[5px] text-xs font-semibold bg-[#1c1510] text-[#faf7f2] border border-[#1c1510] ring-1 ring-[#c59d5f]/80 shadow-xs flex items-center gap-2"
                       >
-                        {s}
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#c59d5f]" />
+                        <span>{sizes[0]}</span>
                       </button>
-                    ))}
-                  </div>
+                      <span className="text-[11px] text-[#8c7d6c] font-light">
+                        Standard Stud Fitting • Ready to Dispatch
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
