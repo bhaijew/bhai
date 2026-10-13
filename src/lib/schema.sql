@@ -30,10 +30,15 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for fast lookup
+-- Indexes for high-performance querying and filtering
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
+CREATE INDEX IF NOT EXISTS idx_products_is_featured ON products(is_featured);
+CREATE INDEX IF NOT EXISTS idx_products_price ON products(price);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_metal ON products(metal);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_products_name_unique ON products (LOWER(TRIM(name)));
 ALTER TABLE products ADD COLUMN IF NOT EXISTS size VARCHAR(50) DEFAULT 'Standard';
 ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes JSONB DEFAULT '[]'::jsonb;
@@ -52,7 +57,9 @@ CREATE TABLE IF NOT EXISTS orders (
 );
 
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customer_email);
-CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(order_status);
+CREATE INDEX IF NOT EXISTS idx_orders_total_amount ON orders(total_amount);
 
 -- 3. BESPOKE ENQUIRIES TABLE
 CREATE TABLE IF NOT EXISTS bespoke_enquiries (
@@ -68,6 +75,8 @@ CREATE TABLE IF NOT EXISTS bespoke_enquiries (
 );
 
 CREATE INDEX IF NOT EXISTS idx_enquiries_email ON bespoke_enquiries(client_email);
+CREATE INDEX IF NOT EXISTS idx_enquiries_status ON bespoke_enquiries(enquiry_status);
+CREATE INDEX IF NOT EXISTS idx_enquiries_created_at ON bespoke_enquiries(created_at DESC);
 
 -- 4. HERO SLIDES / BANNER TABLE
 CREATE TABLE IF NOT EXISTS hero_slides (
@@ -81,6 +90,9 @@ CREATE TABLE IF NOT EXISTS hero_slides (
     display_order INT DEFAULT 1,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_hero_slides_status ON hero_slides(status);
+CREATE INDEX IF NOT EXISTS idx_hero_slides_order ON hero_slides(display_order);
 
 -- 5. HERO SECTION CONFIG TABLE
 CREATE TABLE IF NOT EXISTS hero_section (
@@ -132,8 +144,12 @@ CREATE TABLE IF NOT EXISTS login_attempts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_login_ip ON login_attempts(ip_address);
 CREATE INDEX IF NOT EXISTS idx_login_email ON login_attempts(email_attempted);
+CREATE INDEX IF NOT EXISTS idx_login_status ON login_attempts(status);
+CREATE INDEX IF NOT EXISTS idx_login_ip_attempted ON login_attempts(ip_address, attempted_at DESC);
 
 -- 9. CARTS & ABANDONED CART RECOVERY TABLE
 CREATE TABLE IF NOT EXISTS carts (
@@ -157,7 +173,8 @@ CREATE TABLE IF NOT EXISTS carts (
 CREATE INDEX IF NOT EXISTS idx_carts_customer_id ON carts(customer_id);
 CREATE INDEX IF NOT EXISTS idx_carts_customer_email ON carts(customer_email);
 CREATE INDEX IF NOT EXISTS idx_carts_status ON carts(status);
-CREATE INDEX IF NOT EXISTS idx_carts_last_activity ON carts(last_activity_at);
+CREATE INDEX IF NOT EXISTS idx_carts_recovery ON carts(recovery_status);
+CREATE INDEX IF NOT EXISTS idx_carts_last_activity ON carts(last_activity_at DESC);
 
 -- 10. VAPI AUDIT LOGS TABLE
 CREATE TABLE IF NOT EXISTS vapi_audit_logs (
@@ -174,7 +191,7 @@ CREATE TABLE IF NOT EXISTS vapi_audit_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_vapi_audit_cart ON vapi_audit_logs(cart_id);
-CREATE INDEX IF NOT EXISTS idx_vapi_audit_created ON vapi_audit_logs(created_at);
+CREATE INDEX IF NOT EXISTS idx_vapi_audit_created ON vapi_audit_logs(created_at DESC);
 
 -- 11. CATEGORIES TABLE
 CREATE TABLE IF NOT EXISTS categories (
@@ -190,6 +207,8 @@ CREATE TABLE IF NOT EXISTS categories (
 );
 
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
+CREATE INDEX IF NOT EXISTS idx_categories_active ON categories(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_order ON categories(display_order);
 
 -- 12. REVIEWS TABLE (Real Customer Reviews)
 CREATE TABLE IF NOT EXISTS reviews (
@@ -207,7 +226,9 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
-CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
+CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reviews_prod_created ON reviews(product_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_reviews_verified ON reviews(is_verified);
 
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
