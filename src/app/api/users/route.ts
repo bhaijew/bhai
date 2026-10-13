@@ -2,15 +2,10 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { requireAdmin } from '@/lib/auth';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '';
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_ANON_KEY ||
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  '';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabase as publicSupabase } from '@/lib/supabase';
 
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = supabaseAdmin || publicSupabase;
 
 // In-memory fallback overrides for user status (active | inactive | banned)
 export const USER_STATUS_STORE: Map<string, { status: string; isBanned: boolean }> = new Map();

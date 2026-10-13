@@ -4,13 +4,10 @@ import { hashPassword, signSession, SESSION_COOKIE_NAME } from '@/lib/auth';
 import { sanitizeString } from '@/lib/sanitize';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  '';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabase as defaultSupabase } from '@/lib/supabase';
 
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = supabaseAdmin || defaultSupabase;
 
 // In-memory security tracker
 const MEMORY_SECURITY_STORE: Map<string, { failedCount: number; lockUntil: number | null }> = new Map();

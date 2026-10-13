@@ -3,14 +3,10 @@ import { createClient } from '@supabase/supabase-js';
 import { getSessionUser, requireAdmin } from '@/lib/auth';
 import { sanitizeString, sanitizeEmail, sanitizePrice } from '@/lib/sanitize';
 import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
+import { supabase as publicSupabase } from '@/lib/supabase';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  '';
-
-const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+const supabase = supabaseAdmin || publicSupabase;
 
 // Clean in-memory fallback array (strictly 0 fake orders)
 let SERVER_ORDERS_DB: any[] = [];

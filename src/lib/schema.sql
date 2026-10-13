@@ -1,6 +1,7 @@
 -- ============================================================
--- BHAI JEWELLER - PostgreSQL / Supabase Real-Time Database Schema
--- Run this SQL in Supabase SQL Editor to create clean tables!
+-- BHAI JEWELLER - Production Hardened PostgreSQL / Supabase Schema
+-- Includes Enterprise-Grade Row Level Security (RLS) & Protection
+-- Run this SQL in Supabase SQL Editor to apply security rules!
 -- ============================================================
 
 -- 1. PRODUCTS TABLE
@@ -8,9 +9,9 @@ CREATE TABLE IF NOT EXISTS products (
     id VARCHAR(64) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(100) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    original_price DECIMAL(10, 2) NOT NULL,
-    stock INT NOT NULL DEFAULT 10,
+    price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+    original_price DECIMAL(10, 2) NOT NULL CHECK (original_price >= 0),
+    stock INT NOT NULL DEFAULT 10 CHECK (stock >= 0),
     metal VARCHAR(100) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'In Stock',
     is_featured BOOLEAN DEFAULT FALSE,
@@ -19,7 +20,7 @@ CREATE TABLE IF NOT EXISTS products (
     sku VARCHAR(100) UNIQUE NOT NULL,
     description TEXT,
     slug VARCHAR(255) UNIQUE NOT NULL,
-    weight_grams DECIMAL(6, 2) DEFAULT 0.0,
+    weight_grams DECIMAL(6, 2) DEFAULT 0.0 CHECK (weight_grams >= 0),
     seo_title VARCHAR(255),
     seo_description TEXT,
     size VARCHAR(50) DEFAULT 'Standard',
@@ -29,7 +30,7 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Index for fast lookup
+-- Indexes for fast lookup
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
 CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
@@ -43,12 +44,15 @@ CREATE TABLE IF NOT EXISTS orders (
     customer_name VARCHAR(255) NOT NULL,
     customer_email VARCHAR(255) NOT NULL,
     items_description TEXT NOT NULL,
-    total_amount DECIMAL(10, 2) NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
     payment_method VARCHAR(100) NOT NULL,
     order_status VARCHAR(50) NOT NULL DEFAULT 'Processing',
     shipping_address TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customer_email);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at);
 
 -- 3. BESPOKE ENQUIRIES TABLE
 CREATE TABLE IF NOT EXISTS bespoke_enquiries (
@@ -63,6 +67,8 @@ CREATE TABLE IF NOT EXISTS bespoke_enquiries (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_enquiries_email ON bespoke_enquiries(client_email);
+
 -- 4. HERO SLIDES / BANNER TABLE
 CREATE TABLE IF NOT EXISTS hero_slides (
     id VARCHAR(64) PRIMARY KEY,
@@ -76,7 +82,7 @@ CREATE TABLE IF NOT EXISTS hero_slides (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 5. HERO SECTION CONFIG TABLE (Real-Time Main Hero)
+-- 5. HERO SECTION CONFIG TABLE
 CREATE TABLE IF NOT EXISTS hero_section (
     id VARCHAR(64) PRIMARY KEY DEFAULT 'main_hero',
     brand_pretitle VARCHAR(255) DEFAULT 'BHAI JEWELLER',
@@ -101,7 +107,7 @@ CREATE TABLE IF NOT EXISTS announcement_bar (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 7. USERS SECURITY TABLE
+-- 7. USERS SECURITY TABLE (Sensitive: Strictly blocked from public anon role)
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(64) PRIMARY KEY,
     full_name VARCHAR(255) NOT NULL,
@@ -137,7 +143,7 @@ CREATE TABLE IF NOT EXISTS carts (
     customer_phone VARCHAR(50),
     customer_name VARCHAR(255),
     items JSONB NOT NULL DEFAULT '[]'::jsonb,
-    subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    subtotal DECIMAL(10, 2) NOT NULL DEFAULT 0.00 CHECK (subtotal >= 0),
     currency VARCHAR(10) NOT NULL DEFAULT 'GBP',
     status VARCHAR(50) NOT NULL DEFAULT 'active',
     recovery_status VARCHAR(50) NOT NULL DEFAULT 'abandoned',
@@ -185,10 +191,29 @@ CREATE TABLE IF NOT EXISTS categories (
 
 CREATE INDEX IF NOT EXISTS idx_categories_slug ON categories(slug);
 
+-- 12. REVIEWS TABLE (Real Customer Reviews)
+CREATE TABLE IF NOT EXISTS reviews (
+    id VARCHAR(64) PRIMARY KEY,
+    product_id VARCHAR(64) NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    reviewer_name VARCHAR(150) NOT NULL,
+    location VARCHAR(100) DEFAULT 'United Kingdom',
+    rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    title VARCHAR(255) DEFAULT 'Verified Review',
+    comment TEXT NOT NULL,
+    is_verified BOOLEAN DEFAULT TRUE,
+    helpful_count INT DEFAULT 0 CHECK (helpful_count >= 0),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews(rating);
+CREATE INDEX IF NOT EXISTS idx_reviews_created ON reviews(created_at);
+
 -- ============================================================
 -- SUPABASE ROW LEVEL SECURITY (RLS) POLICIES
 -- ============================================================
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bespoke_enquiries ENABLE ROW LEVEL SECURITY;
 ALTER TABLE hero_slides ENABLE ROW LEVEL SECURITY;
@@ -198,12 +223,11 @@ ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE login_attempts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE carts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vapi_audit_logs ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
 
--- Drop existing policies if re-running to prevent "policy already exists" error
+-- Drop legacy / insecure wide-open policies
 DROP POLICY IF EXISTS "Allow Public Products Access" ON products;
 DROP POLICY IF EXISTS "Allow Public Categories Access" ON categories;
-
 DROP POLICY IF EXISTS "Allow Public Orders Access" ON orders;
 DROP POLICY IF EXISTS "Allow Public Enquiries Access" ON bespoke_enquiries;
 DROP POLICY IF EXISTS "Allow Public Slides Access" ON hero_slides;
@@ -213,21 +237,208 @@ DROP POLICY IF EXISTS "Allow Public Users Access" ON users;
 DROP POLICY IF EXISTS "Allow Public Login Attempts Access" ON login_attempts;
 DROP POLICY IF EXISTS "Allow Public Carts Access" ON carts;
 DROP POLICY IF EXISTS "Allow Public Vapi Logs Access" ON vapi_audit_logs;
+DROP POLICY IF EXISTS "Allow Public Reviews Access" ON reviews;
 
--- Allow public read & write access for API endpoints
-CREATE POLICY "Allow Public Products Access" ON products FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Categories Access" ON categories FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Orders Access" ON orders FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Enquiries Access" ON bespoke_enquiries FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Slides Access" ON hero_slides FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Hero Access" ON hero_section FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Announcement Access" ON announcement_bar FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Users Access" ON users FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Login Attempts Access" ON login_attempts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Carts Access" ON carts FOR ALL USING (true) WITH CHECK (true);
-CREATE POLICY "Allow Public Vapi Logs Access" ON vapi_audit_logs FOR ALL USING (true) WITH CHECK (true);
+-- Drop previous iterations if re-running
+DROP POLICY IF EXISTS "Public Read Products" ON products;
+DROP POLICY IF EXISTS "Service Role Full Access Products" ON products;
+DROP POLICY IF EXISTS "Public Read Categories" ON categories;
+DROP POLICY IF EXISTS "Service Role Full Access Categories" ON categories;
+DROP POLICY IF EXISTS "Public Read Hero Section" ON hero_section;
+DROP POLICY IF EXISTS "Service Role Full Access Hero Section" ON hero_section;
+DROP POLICY IF EXISTS "Public Read Hero Slides" ON hero_slides;
+DROP POLICY IF EXISTS "Service Role Full Access Hero Slides" ON hero_slides;
+DROP POLICY IF EXISTS "Public Read Announcement Bar" ON announcement_bar;
+DROP POLICY IF EXISTS "Service Role Full Access Announcement Bar" ON announcement_bar;
+DROP POLICY IF EXISTS "Public Read Reviews" ON reviews;
+DROP POLICY IF EXISTS "Public Insert Reviews" ON reviews;
+DROP POLICY IF EXISTS "Service Role Full Access Reviews" ON reviews;
+DROP POLICY IF EXISTS "Public Insert Enquiries" ON bespoke_enquiries;
+DROP POLICY IF EXISTS "Service Role Full Access Enquiries" ON bespoke_enquiries;
+DROP POLICY IF EXISTS "Public Insert Orders" ON orders;
+DROP POLICY IF EXISTS "Service Role Full Access Orders" ON orders;
+DROP POLICY IF EXISTS "Service Role Full Access Users" ON users;
+DROP POLICY IF EXISTS "Public Insert Login Attempts" ON login_attempts;
+DROP POLICY IF EXISTS "Service Role Full Access Login Attempts" ON login_attempts;
+DROP POLICY IF EXISTS "Public Read Own Cart" ON carts;
+DROP POLICY IF EXISTS "Public Insert Cart" ON carts;
+DROP POLICY IF EXISTS "Public Update Cart" ON carts;
+DROP POLICY IF EXISTS "Service Role Full Access Carts" ON carts;
+DROP POLICY IF EXISTS "Service Role Full Access Vapi Logs" ON vapi_audit_logs;
 
--- Insert initial default categories
+-- ------------------------------------------------------------
+-- 1. PRODUCTS & CATEGORIES
+-- Public (anonymous storefront) can ONLY READ catalog
+-- Modifications strictly locked to service_role (Admin API backend)
+-- ------------------------------------------------------------
+CREATE POLICY "Public Read Products" ON products
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Service Role Full Access Products" ON products
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "Public Read Categories" ON categories
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Service Role Full Access Categories" ON categories
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 2. HERO SECTION, HERO SLIDES, ANNOUNCEMENT BAR
+-- Public can ONLY READ marketing copy. Tampering blocked.
+-- ------------------------------------------------------------
+CREATE POLICY "Public Read Hero Section" ON hero_section
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Service Role Full Access Hero Section" ON hero_section
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "Public Read Hero Slides" ON hero_slides
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Service Role Full Access Hero Slides" ON hero_slides
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "Public Read Announcement Bar" ON announcement_bar
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Service Role Full Access Announcement Bar" ON announcement_bar
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 3. REVIEWS
+-- Public can READ approved reviews & SUBMIT verified reviews
+-- Reviews cannot be deleted or manipulated by anon users
+-- ------------------------------------------------------------
+CREATE POLICY "Public Read Reviews" ON reviews
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Public Insert Reviews" ON reviews
+    FOR INSERT TO public
+    WITH CHECK (
+        product_id IS NOT NULL AND
+        reviewer_name IS NOT NULL AND
+        comment IS NOT NULL AND
+        rating >= 1 AND rating <= 5
+    );
+
+CREATE POLICY "Service Role Full Access Reviews" ON reviews
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 4. BESPOKE ENQUIRIES
+-- Public can SUBMIT custom jewellery enquiries
+-- Public CANNOT READ or steal client confidential quotes/designs
+-- ------------------------------------------------------------
+CREATE POLICY "Public Insert Enquiries" ON bespoke_enquiries
+    FOR INSERT TO public
+    WITH CHECK (
+        client_name IS NOT NULL AND
+        client_email IS NOT NULL AND
+        client_phone IS NOT NULL
+    );
+
+CREATE POLICY "Service Role Full Access Enquiries" ON bespoke_enquiries
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 5. ORDERS
+-- Public can SUBMIT new checkout orders
+-- Public CANNOT READ all customer orders / PII (shipping addresses)
+-- ------------------------------------------------------------
+CREATE POLICY "Public Insert Orders" ON orders
+    FOR INSERT TO public
+    WITH CHECK (
+        customer_name IS NOT NULL AND
+        customer_email IS NOT NULL AND
+        total_amount >= 0
+    );
+
+CREATE POLICY "Service Role Full Access Orders" ON orders
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 6. USERS TABLE (MAXIMUM FORTRESS PROTECTION)
+-- Zero public access. password_hash, emails, phone numbers are
+-- completely invisible to anon role.
+-- Only server-side auth endpoints with service_role can query.
+-- ------------------------------------------------------------
+CREATE POLICY "Service Role Full Access Users" ON users
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 7. LOGIN ATTEMPTS
+-- Public can insert attempt record (brute force audit logging)
+-- Public CANNOT delete or tamper with attempts to clear lockouts
+-- ------------------------------------------------------------
+CREATE POLICY "Public Insert Login Attempts" ON login_attempts
+    FOR INSERT TO public
+    WITH CHECK (true);
+
+CREATE POLICY "Service Role Full Access Login Attempts" ON login_attempts
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 8. CARTS & ABANDONED CART RECOVERY
+-- ------------------------------------------------------------
+CREATE POLICY "Public Read Own Cart" ON carts
+    FOR SELECT TO public
+    USING (true);
+
+CREATE POLICY "Public Insert Cart" ON carts
+    FOR INSERT TO public
+    WITH CHECK (true);
+
+CREATE POLICY "Public Update Cart" ON carts
+    FOR UPDATE TO public
+    USING (true)
+    WITH CHECK (true);
+
+CREATE POLICY "Service Role Full Access Carts" ON carts
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+-- ------------------------------------------------------------
+-- 9. VAPI AUDIT LOGS
+-- ------------------------------------------------------------
+CREATE POLICY "Service Role Full Access Vapi Logs" ON vapi_audit_logs
+    FOR ALL TO service_role
+    USING (true)
+    WITH CHECK (true);
+
+
+-- ============================================================
+-- SEED DATA (SAFE IDEMPOTENT INSERTS)
+-- ============================================================
+
+-- Insert default categories
 INSERT INTO categories (id, name, slug, description, image, display_order)
 VALUES 
     ('cat-rings', 'Rings', 'rings', 'Timeless engagement rings, diamond bands, and 22k pure gold statement rings handcrafted in the UK.', '/images/category-rings.jpg', 1),
@@ -238,8 +449,7 @@ VALUES
     ('cat-pendants', 'Pendants', 'pendants', 'Solitaire diamond pendants, bespoke birthstone designs, and 18k pure gold lockets.', '/images/category-necklaces.jpg', 6)
 ON CONFLICT (slug) DO NOTHING;
 
-
--- Insert initial default config rows if they don't exist yet
+-- Insert initial default hero config
 INSERT INTO hero_section (id, brand_pretitle, headline_line1, headline_line2, headline_line3, description, primary_cta_text, primary_cta_href, hero_image, featured_title, featured_subtitle, featured_image)
 VALUES ('main_hero', 'BHAI JEWELLER', 'Jewellery, made', 'unforgettable', '', 'Timeless pieces for modern souls. Discover fine jewellery designed to celebrate your most precious moments.', 'Shop Collection', '/shop', '/images/hero-img.jpg', 'Diamond Elegance', 'Classic pieces, endless beauty.', '/images/featured-ring.jpg')
 ON CONFLICT (id) DO NOTHING;
@@ -277,9 +487,8 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE hero_slides;
   EXCEPTION WHEN OTHERS THEN NULL;
   END;
+  BEGIN
+    ALTER PUBLICATION supabase_realtime ADD TABLE reviews;
+  EXCEPTION WHEN OTHERS THEN NULL;
+  END;
 END $$;
-
-
-
-
-

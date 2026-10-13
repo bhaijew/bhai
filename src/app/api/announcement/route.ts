@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase as publicSupabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { requireAdmin } from '@/lib/auth';
+
+const supabase = supabaseAdmin || publicSupabase;
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
