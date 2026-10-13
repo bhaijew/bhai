@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useShop, WishlistItem, ProductItem } from '@/context/ShopContext';
 import { ScrollReveal } from '@/components/shared/ScrollReveal';
-import { ProductEditModal } from '@/components/shared/ProductEditModal';
 
 function ShopContent() {
   const searchParams = useSearchParams();
@@ -14,28 +13,12 @@ function ShopContent() {
   const initialSearch = searchParams.get('search') || searchParams.get('q') || '';
   const initialCategory = searchParams.get('category') || 'All';
 
-  const { addToCart, toggleWishlist, isInWishlist, products, categories: storeCategories, deleteProduct } = useShop();
+  const { addToCart, toggleWishlist, isInWishlist, products, categories: storeCategories } = useShop();
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
   const [searchQuery, setSearchQuery] = useState<string>(initialSearch);
   const [sortBy, setSortBy] = useState<string>('featured');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [addedCartMap, setAddedCartMap] = useState<Record<string, boolean>>({});
-
-  // Admin state for in-place edit/delete
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
-
-  // Check admin session
-  useEffect(() => {
-    fetch('/api/auth/session')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.authenticated && data.user?.role === 'admin') {
-          setIsAdmin(true);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   // Dynamic categories list
   const categoryList = useMemo(() => {
@@ -395,38 +378,6 @@ function ShopContent() {
                     >
                       {addedCartMap[p.id] ? '✓ Added to Cart' : 'Add to Cart'}
                     </button>
-
-                    {/* Admin Live Controls */}
-                    {isAdmin && (
-                      <div className="flex items-center gap-1.5 pt-1.5 mt-0.5 border-t border-[#ede5db]">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setEditingProduct(p);
-                          }}
-                          className="flex-1 py-1 px-2 rounded-[4px] bg-[#1a120c] text-[#dec29b] border border-[#dec29b]/40 hover:bg-[#281b11] text-[10px] font-mono font-semibold flex items-center justify-center gap-1 transition-colors"
-                        >
-                          <span>✏️</span>
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={async (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            if (window.confirm(`Delete "${p.name}"?\nThis removes it from the catalog in real time.`)) {
-                              await deleteProduct(p.id);
-                            }
-                          }}
-                          className="py-1 px-2 rounded-[4px] bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 text-[10px] font-mono font-semibold flex items-center justify-center transition-colors"
-                          title="Delete product"
-                        >
-                          <span>🗑️</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </Link>
               </ScrollReveal>
@@ -502,12 +453,6 @@ function ShopContent() {
         </section>
       </ScrollReveal>
 
-      {/* Admin Product Edit Modal */}
-      <ProductEditModal
-        product={editingProduct}
-        isOpen={!!editingProduct}
-        onClose={() => setEditingProduct(null)}
-      />
     </main>
   );
 }
