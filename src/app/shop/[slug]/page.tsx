@@ -550,28 +550,50 @@ export default function ProductDetailPage() {
             </h2>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5">
-              {products.filter(p => p.id !== productData.id).slice(0, 4).map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/shop/${item.slug || item.id}`}
-                  className="group flex flex-col bg-white rounded-[5px] overflow-hidden border border-[#ede5db] p-2.5 hover:shadow-md transition-all"
-                >
-                  <div className="relative aspect-square rounded-[5px] overflow-hidden bg-[#f5efe7]">
-                    <Image
-                      src={item.image || (item.images && item.images[0]) || '/images/shop-prod-2.jpg'}
-                      alt={item.name}
-                      fill
-                      loading="lazy"
-                      sizes="200px"
-                      className="object-cover group-hover:scale-105 transition-transform"
-                    />
-                  </div>
-                  <h3 className="font-serif text-xs sm:text-sm font-medium text-[#1c1510] mt-2 group-hover:text-[#9e7d56] transition-colors truncate">
-                    {item.name}
-                  </h3>
-                  <p className="text-xs font-semibold text-[#1c1510] mt-0.5">£{Number(item.price).toFixed(2)}</p>
-                </Link>
-              ))}
+              {products.filter(p => p.id !== productData.id).slice(0, 4).map((item) => {
+                const itemImgs = [
+                  item.image,
+                  ...(Array.isArray(item.images) ? item.images : []),
+                ].filter((img): img is string => Boolean(img) && typeof img === 'string' && img.trim().length > 0);
+                const uniqueItemImgs = Array.from(new Set(itemImgs));
+                const itemPrimary = uniqueItemImgs[0] || item.image || '/images/shop-prod-2.jpg';
+                const itemSecondary = uniqueItemImgs.length > 1 ? uniqueItemImgs[1] : null;
+
+                return (
+                  <Link
+                    key={item.id}
+                    href={`/shop/${item.slug || item.id}`}
+                    className="group flex flex-col bg-white rounded-[5px] overflow-hidden border border-[#ede5db] p-2.5 hover:shadow-md transition-all"
+                  >
+                    <div className="relative aspect-square rounded-[5px] overflow-hidden bg-[#f5efe7]">
+                      <Image
+                        src={itemPrimary}
+                        alt={item.name}
+                        fill
+                        loading="lazy"
+                        sizes="200px"
+                        className={`object-cover transition-all duration-700 ease-out group-hover:scale-105 ${
+                          itemSecondary ? 'group-hover:opacity-0' : ''
+                        }`}
+                      />
+                      {itemSecondary && (
+                        <Image
+                          src={itemSecondary}
+                          alt={`${item.name} - Alternate view`}
+                          fill
+                          loading="lazy"
+                          sizes="200px"
+                          className="absolute inset-0 object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-105 pointer-events-none"
+                        />
+                      )}
+                    </div>
+                    <h3 className="font-serif text-xs sm:text-sm font-medium text-[#1c1510] mt-2 group-hover:text-[#9e7d56] transition-colors truncate">
+                      {item.name}
+                    </h3>
+                    <p className="text-xs font-semibold text-[#1c1510] mt-0.5">£{Number(item.price).toFixed(2)}</p>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </ScrollReveal>

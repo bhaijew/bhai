@@ -305,7 +305,16 @@ function ShopContent() {
           </ScrollReveal>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6 pt-6">
-            {filteredProducts.map((p, idx) => (
+            {filteredProducts.map((p, idx) => {
+              const allImgs = [
+                p.image,
+                ...(Array.isArray(p.images) ? p.images : []),
+              ].filter((img): img is string => Boolean(img) && typeof img === 'string' && img.trim().length > 0);
+              const uniqueImgs = Array.from(new Set(allImgs));
+              const primaryImage = uniqueImgs[0] || p.image || '/images/detail-ring-hero.jpg';
+              const secondaryImage = uniqueImgs.length > 1 ? uniqueImgs[1] : null;
+
+              return (
               <ScrollReveal key={p.id} delay={idx * 60} direction="up">
                 <Link
                   href={`/shop/${p.slug || p.id}`}
@@ -314,13 +323,26 @@ function ShopContent() {
                   {/* Product Image + Heart Wishlist Button */}
                   <div className="relative w-full aspect-square bg-[#f5efe7] overflow-hidden">
                     <Image
-                      src={p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg'}
+                      src={primaryImage}
                       alt={p.name}
                       fill
                       loading="lazy"
                       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
-                      className="object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-out"
+                      className={`object-cover transition-all duration-700 ease-out group-hover:scale-[1.06] ${
+                        secondaryImage ? 'group-hover:opacity-0' : ''
+                      }`}
                     />
+
+                    {secondaryImage && (
+                      <Image
+                        src={secondaryImage}
+                        alt={`${p.name} - Alternate view`}
+                        fill
+                        loading="lazy"
+                        sizes="(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 260px"
+                        className="absolute inset-0 object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-[1.06] pointer-events-none"
+                      />
+                    )}
 
                     {/* Subtle Luxury Hallmark Badge */}
                     <span className="absolute top-2.5 left-2.5 z-10 text-[8.5px] sm:text-[9.5px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full bg-white/95 backdrop-blur-md text-[#805f32] border border-[#dec29b]/40 shadow-2xs">
@@ -432,7 +454,8 @@ function ShopContent() {
                   </div>
                 </Link>
               </ScrollReveal>
-            ))}
+            );
+          })}
           </div>
         )}
 

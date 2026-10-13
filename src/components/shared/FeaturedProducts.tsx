@@ -12,6 +12,7 @@ interface DisplayProduct {
   purity: string;
   price: number;
   image: string;
+  secondaryImage?: string | null;
   alt: string;
   href: string;
 }
@@ -60,8 +61,21 @@ function ProductCard({ product }: { product: DisplayProduct }) {
             fill
             loading="lazy"
             sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 220px"
-            className="object-cover group-hover:scale-[1.04] transition-transform duration-500 ease-out"
+            className={`object-cover transition-all duration-700 ease-out group-hover:scale-[1.06] ${
+              product.secondaryImage ? 'group-hover:opacity-0' : ''
+            }`}
           />
+
+          {product.secondaryImage && (
+            <Image
+              src={product.secondaryImage}
+              alt={`${product.alt} - Alternate view`}
+              fill
+              loading="lazy"
+              sizes="(max-width: 640px) 150px, (max-width: 1024px) 200px, 220px"
+              className="absolute inset-0 object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out group-hover:scale-[1.06] pointer-events-none"
+            />
+          )}
 
           {/* Heart Button */}
           <button
@@ -177,16 +191,27 @@ export function FeaturedProducts() {
       return { row1Products: [], row2Products: [] };
     }
 
-    const mapped: DisplayProduct[] = products.map((p: ProductItem) => ({
-      id: p.id,
-      name: p.name,
-      metal: p.metal || p.category || 'Gold',
-      purity: p.category === 'Rings' ? '875 (21ct)' : (p.metal || '750 (18k)'),
-      price: Number(p.price),
-      image: p.image || (p.images && p.images[0]) || '/images/detail-ring-hero.jpg',
-      alt: p.name,
-      href: `/shop/${p.slug || p.id}`,
-    }));
+    const mapped: DisplayProduct[] = products.map((p: ProductItem) => {
+      const allImgs = [
+        p.image,
+        ...(Array.isArray(p.images) ? p.images : []),
+      ].filter((img): img is string => Boolean(img) && typeof img === 'string' && img.trim().length > 0);
+      const uniqueImgs = Array.from(new Set(allImgs));
+      const primary = uniqueImgs[0] || p.image || '/images/detail-ring-hero.jpg';
+      const secondary = uniqueImgs.length > 1 ? uniqueImgs[1] : null;
+
+      return {
+        id: p.id,
+        name: p.name,
+        metal: p.metal || p.category || 'Gold',
+        purity: p.category === 'Rings' ? '875 (21ct)' : (p.metal || '750 (18k)'),
+        price: Number(p.price),
+        image: primary,
+        secondaryImage: secondary,
+        alt: p.name,
+        href: `/shop/${p.slug || p.id}`,
+      };
+    });
 
     if (mapped.length <= 1) {
       return { row1Products: mapped, row2Products: [] };
