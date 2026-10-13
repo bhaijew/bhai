@@ -284,13 +284,17 @@ export function ProductEditModal({ product, isOpen, onClose, onDeleted }: Produc
 
             <div>
               <label className="block text-[11px] font-semibold text-[#544537] mb-1 uppercase tracking-wider">
-                Weight (Grams)
+                Gold / Metal Weight (Grams)
               </label>
               <input
-                type="number"
-                step="0.1"
-                value={formData.weightGrams || 5}
-                onChange={(e) => setFormData({ ...formData, weightGrams: Number(e.target.value) })}
+                type="text"
+                placeholder="e.g. 0.6g or 5.5"
+                value={formData.weight || (formData.weightGrams != null ? `${formData.weightGrams}g` : '0.6g')}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  const num = parseFloat(raw.replace(/[^\d.]/g, '')) || 0;
+                  setFormData({ ...formData, weightGrams: num, weight: raw });
+                }}
                 className="w-full px-3.5 py-2.5 rounded-md bg-white border border-gray-300 text-[#1a130e] text-xs outline-none focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900"
               />
             </div>

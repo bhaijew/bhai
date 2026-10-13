@@ -65,7 +65,7 @@ export default function ProductDetailPage() {
         price: currentProduct.price,
         originalPrice: currentProduct.originalPrice || currentProduct.price,
         metal: currentProduct.metal || '18k Gold',
-        weight: currentProduct.weightGrams ? `${currentProduct.weightGrams}g` : '4.5g',
+        weight: currentProduct.weight || (currentProduct.weightGrams ? `${currentProduct.weightGrams}g` : '0.6g'),
         description: currentProduct.description || `Exquisite handcrafted ${currentProduct.metal || '18k gold'} ${currentProduct.name} designed by master artisans with hallmark certification.`,
         rating: currentProduct.rating || 5,
         reviewCount: currentProduct.reviewCount || 12,
@@ -364,39 +364,58 @@ export default function ProductDetailPage() {
                 </span>
               </div>
 
-              {/* ── 1. LUXURY SIZE SELECTOR (ABOVE BUTTONS) ── */}
-              <div className="mt-5 p-3.5 rounded-[6px] bg-[#f9f6f0] border border-[#e8ded0]">
-                <div className="flex items-center justify-between text-xs mb-2.5">
+              {/* ── 1. LUXURY WEIGHT & SIZE SELECTION (ABOVE BUTTONS) ── */}
+              <div className="mt-5 p-3.5 rounded-[6px] bg-[#f9f6f0] border border-[#e8ded0] space-y-3">
+                {/* Gold Weight Display Bar */}
+                <div className="flex items-center justify-between pb-2.5 border-b border-[#ebdccb]">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">Select Size:</span>
-                    <span className="text-[11px] font-bold text-[#8c6d3d] bg-white px-2.5 py-0.5 rounded-[4px] border border-[#dec29b]/60 shadow-2xs">
-                      {selectedSize || sizes[0]}
+                    <span className="text-base select-none">⚖️</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">
+                      Metal / Gold Weight:
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => toggleAccordion('sizeGuide')}
-                    className="text-[#8c6d3d] hover:text-[#1c1510] text-[11px] font-medium tracking-wide underline underline-offset-2 transition-colors flex items-center gap-1"
-                  >
-                    <span>📏</span>
-                    <span>Size Guide</span>
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-[#1c1510] bg-white px-2.5 py-1 rounded-[4px] border border-[#dec29b]/70 shadow-2xs font-mono">
+                      {productData.weight || '0.6g'}
+                    </span>
+                    <span className="text-[10px] text-[#8c7d6c] font-light">(Estimated)</span>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {sizes.map((s) => (
+
+                {/* Size Selector */}
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#1c1510]">Select Size:</span>
+                      <span className="text-[11px] font-bold text-[#8c6d3d] bg-white px-2.5 py-0.5 rounded-[4px] border border-[#dec29b]/60 shadow-2xs">
+                        {selectedSize || sizes[0]}
+                      </span>
+                    </div>
                     <button
-                      key={s}
                       type="button"
-                      onClick={() => setSelectedSize(s)}
-                      className={`min-w-[44px] h-10 px-3.5 rounded-[6px] text-xs transition-all flex items-center justify-center ${
-                        selectedSize === s
-                          ? 'bg-[#1c1510] text-[#faf7f2] font-bold shadow-sm ring-1 ring-[#c59d5f]'
-                          : 'bg-white text-[#4a3b2f] border border-[#d8c8b8] hover:border-[#1c1510] hover:bg-[#fbf9f6]'
-                      }`}
+                      onClick={() => toggleAccordion('sizeGuide')}
+                      className="text-[#8c6d3d] hover:text-[#1c1510] text-[11px] font-medium tracking-wide underline underline-offset-2 transition-colors flex items-center gap-1"
                     >
-                      {s}
+                      <span>📏</span>
+                      <span>Size Guide</span>
                     </button>
-                  ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setSelectedSize(s)}
+                        className={`min-w-[44px] h-10 px-3.5 rounded-[6px] text-xs transition-all flex items-center justify-center ${
+                          selectedSize === s
+                            ? 'bg-[#1c1510] text-[#faf7f2] font-bold shadow-sm ring-1 ring-[#c59d5f]'
+                            : 'bg-white text-[#4a3b2f] border border-[#d8c8b8] hover:border-[#1c1510] hover:bg-[#fbf9f6]'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 

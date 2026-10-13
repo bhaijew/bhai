@@ -38,30 +38,34 @@ export async function GET() {
           const uniqueImgs = Array.from(new Set(rawImgs));
           const primaryImg = uniqueImgs[0] || '/images/detail-ring-hero.jpg';
           const finalImagesList = uniqueImgs.length > 0 ? uniqueImgs : [primaryImg];
+          const rawWeightVal = p.weight_grams != null ? Number(p.weight_grams) : 0;
+          const weightKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('weight:'));
+          const parsedWeightStr = rawWeightVal > 0 ? `${rawWeightVal}g` : (weightKeyword ? weightKeyword.replace('weight:', '').trim() : '');
 
           return {
-            id: p.id,
-            name: p.name,
-            category: p.category,
-            price: Number(p.price),
-            originalPrice: Number(p.original_price || p.price),
-            stock: Number(p.stock),
-            metal: p.metal,
-            status: p.status,
-            isFeatured: p.is_featured,
-            image: primaryImg,
-            images: finalImagesList,
-            sku: p.sku,
-            description: p.description,
-            slug: p.slug,
-            weightGrams: Number(p.weight_grams || 0),
-            size: parsedSize,
-            sizes: parsedSizes,
-            seoTitle: p.seo_title,
-            seoDescription: p.seo_description,
-            focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')),
-          };
-        });
+              id: p.id,
+              name: p.name,
+              category: p.category,
+              price: Number(p.price),
+              originalPrice: Number(p.original_price || p.price),
+              stock: Number(p.stock),
+              metal: p.metal,
+              status: p.status,
+              isFeatured: p.is_featured,
+              image: primaryImg,
+              images: finalImagesList,
+              sku: p.sku,
+              description: p.description,
+              slug: p.slug,
+              weightGrams: rawWeightVal > 0 ? rawWeightVal : (parseFloat(parsedWeightStr) || 0),
+              weight: parsedWeightStr || (rawWeightVal > 0 ? `${rawWeightVal}g` : undefined),
+              size: parsedSize,
+              sizes: parsedSizes,
+              seoTitle: p.seo_title,
+              seoDescription: p.seo_description,
+              focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:') && !k.startsWith('weight:')),
+            };
+          });
 
         // Keep fallback synchronized with database
         SERVER_PRODUCTS_DB = [...mappedProducts];
@@ -155,13 +159,17 @@ export async function POST(request: Request) {
       : (body.size ? [body.size] : []);
     const primarySize = body.size || (parsedSizes[0] || 'Standard');
 
+    const cleanWeightNum = parseFloat(String(body.weightGrams || body.weight || existingItem?.weight_grams || 0).replace(/[^\d.]/g, '')) || 0;
+    const cleanWeightStr = body.weight || (cleanWeightNum > 0 ? `${cleanWeightNum}g` : '');
+
     const keywordsWithoutSizes = (Array.isArray(body.focusKeywords) ? body.focusKeywords : (existingItem?.focus_keywords || [productName.toLowerCase()])).filter(
-      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')
+      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:') && !k.startsWith('weight:')
     );
     const keywordsPayload = [
       ...keywordsWithoutSizes,
       ...(primarySize ? [`size:${primarySize}`] : []),
       ...(parsedSizes.length > 0 ? [`sizes:${parsedSizes.join(',')}`] : []),
+      ...(cleanWeightStr ? [`weight:${cleanWeightStr}`] : []),
     ];
 
     const newProduct = {
@@ -179,7 +187,8 @@ export async function POST(request: Request) {
       sku: resolvedSku,
       description: body.description || existingItem?.description || '',
       slug: resolvedSlug,
-      weightGrams: Number(body.weightGrams || existingItem?.weight_grams || 5.0),
+      weightGrams: cleanWeightNum,
+      weight: cleanWeightStr,
       size: primarySize,
       sizes: parsedSizes,
       seoTitle: body.seoTitle || existingItem?.seo_title || `${productName} | Bhai Jeweller`,

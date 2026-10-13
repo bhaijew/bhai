@@ -542,7 +542,7 @@ export default function AdminDashboardPage() {
       stock: String(p.stock ?? 10),
       metal: p.metal || '18k Yellow Gold',
       sku: p.sku || '',
-      weightGrams: String(p.weightGrams || '5.0'),
+      weightGrams: p.weightGrams ? String(p.weightGrams) : (p.weight ? p.weight.replace(/g$/i, '').trim() : '0.6'),
       size: defaultSize,
       sizesText: defaultSizesText,
       description: p.description || '',
@@ -695,7 +695,8 @@ export default function AdminDashboardPage() {
         sku: autoSku,
         description: addForm.description || `Exquisite handcrafted ${addForm.metal} ${addForm.category.toLowerCase()} designed by master artisans.`,
         slug: generatedSlug,
-        weightGrams: Number(addForm.weightGrams || 5.0),
+        weightGrams: parseFloat(String(addForm.weightGrams || '0.6').replace(/[^\d.]/g, '')) || 0.6,
+        weight: `${parseFloat(String(addForm.weightGrams || '0.6').replace(/[^\d.]/g, '')) || 0.6}g`,
         size: primarySize,
         sizes: parsedSizes.length > 0 ? parsedSizes : [primarySize],
         seoTitle: addForm.seoTitle || `${trimmedName} | Bhai Jeweller`,
@@ -2129,17 +2130,43 @@ export default function AdminDashboardPage() {
                         </div>
 
                         <div>
-                          <label className={`block text-xs font-semibold ${subtitleColor} mb-1`}>
-                            Metal Weight (Grams)
-                          </label>
-                          <input
-                            type="number"
-                            step="0.1"
-                            placeholder="6.5"
-                            value={addForm.weightGrams}
-                            onChange={(e) => setAddForm({ ...addForm, weightGrams: e.target.value })}
-                            className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
-                          />
+                          <div className="flex justify-between items-center mb-1">
+                            <label className={`text-xs font-semibold ${subtitleColor}`}>
+                              Gold / Metal Weight (Grams) *
+                            </label>
+                            <span className="text-[10px] text-gray-500 font-mono">e.g. 0.6g, 5.5g</span>
+                          </div>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              placeholder="e.g. 0.6g or 5.5"
+                              value={addForm.weightGrams}
+                              onChange={(e) => setAddForm({ ...addForm, weightGrams: e.target.value })}
+                              className={`w-full text-xs px-4 py-2.5 rounded-[5px] focus:outline-none ${inputBg}`}
+                            />
+                            <span className="absolute right-3 top-2.5 text-xs text-gray-400 select-none">grams</span>
+                          </div>
+                          {/* Quick 1-click Weight Presets */}
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {[
+                              { label: '0.6g (Studs/Pendants)', val: '0.6' },
+                              { label: '1.5g (Light Rings)', val: '1.5' },
+                              { label: '3.5g (Standard)', val: '3.5' },
+                              { label: '5.5g (Heavy Rings)', val: '5.5' },
+                              { label: '8.0g (Chains)', val: '8.0' },
+                              { label: '15.0g (Bangles)', val: '15.0' },
+                              { label: '25.0g (Bridal)', val: '25.0' },
+                            ].map((preset) => (
+                              <button
+                                key={preset.label}
+                                type="button"
+                                onClick={() => setAddForm({ ...addForm, weightGrams: preset.val })}
+                                className="px-2 py-0.5 rounded-[3px] text-[10px] border border-gray-300 hover:border-gray-900 transition-all text-gray-700 bg-white dark:bg-gray-800 dark:text-gray-200"
+                              >
+                                {preset.label}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
 
@@ -2490,6 +2517,15 @@ A beautiful gift for birthdays, anniversaries or any special celebration.`;
                               £{Number(addForm.originalPrice).toLocaleString()}
                             </span>
                           )}
+                        </div>
+
+                        {/* LIVE PRODUCT REVIEW: GOLD WEIGHT BADGE */}
+                        <div className="pt-2 border-t border-[#e8dfd1] flex items-center justify-between text-[10px]">
+                          <span className="font-semibold text-[#8c7d6c] uppercase tracking-wider">Metal / Gold Weight:</span>
+                          <span className="font-bold text-[#1c1510] bg-[#f5efe6] px-2 py-0.5 rounded-[3px] border border-[#e6dcce] flex items-center gap-1 font-mono">
+                            <span>⚖️</span>
+                            <span>{addForm.weightGrams ? `${String(addForm.weightGrams).replace(/g$/i, '').trim()}g` : '0.6g'}</span>
+                          </span>
                         </div>
 
                         {/* LIVE PRODUCT REVIEW: SIZE SELECTION PILLS */}

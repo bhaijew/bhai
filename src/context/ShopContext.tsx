@@ -41,9 +41,10 @@ export interface ProductItem {
   slug: string;
   size?: string;
   sizes?: string[];
+  weight?: string;
+  weightGrams?: number;
   rating?: number;
   reviewCount?: number;
-  weightGrams?: number;
   seoTitle?: string;
   seoDescription?: string;
   focusKeywords?: string[];
@@ -293,6 +294,10 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
             const primaryImg = uniqueImgs[0] || '/images/detail-ring-hero.jpg';
             const finalImagesList = uniqueImgs.length > 0 ? uniqueImgs : [primaryImg];
 
+            const rawWeightVal = p.weight_grams != null ? Number(p.weight_grams) : 0;
+            const weightKeyword = rawKeywords.find((k: any) => typeof k === 'string' && k.startsWith('weight:'));
+            const parsedWeightStr = rawWeightVal > 0 ? `${rawWeightVal}g` : (weightKeyword ? weightKeyword.replace('weight:', '').trim() : '');
+
             return {
               id: p.id,
               name: p.name,
@@ -308,12 +313,13 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
               sku: p.sku || `BJ-${p.id}`,
               description: p.description || '',
               slug: p.slug || p.id,
-              weightGrams: Number(p.weight_grams || 0),
+              weightGrams: rawWeightVal > 0 ? rawWeightVal : (parseFloat(parsedWeightStr) || 0),
+              weight: parsedWeightStr || (rawWeightVal > 0 ? `${rawWeightVal}g` : undefined),
               size: parsedSize,
               sizes: parsedSizes,
               seoTitle: p.seo_title,
               seoDescription: p.seo_description,
-              focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')),
+              focusKeywords: rawKeywords.filter((k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:') && !k.startsWith('weight:')),
             };
           });
 
@@ -577,13 +583,18 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
 
+    const cleanWeightNum = typeof resolvedProd.weightGrams === 'number'
+      ? resolvedProd.weightGrams
+      : (parseFloat(String(resolvedProd.weightGrams || resolvedProd.weight || 0).replace(/[^\d.]/g, '')) || 0);
+
     const keywordsWithoutSizes = (resolvedProd.focusKeywords || []).filter(
-      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:')
+      (k: any) => typeof k === 'string' && !k.startsWith('size:') && !k.startsWith('sizes:') && !k.startsWith('weight:')
     );
     const keywordsPayload = [
       ...keywordsWithoutSizes,
       ...(resolvedProd.size ? [`size:${resolvedProd.size}`] : []),
       ...(resolvedProd.sizes && resolvedProd.sizes.length > 0 ? [`sizes:${resolvedProd.sizes.join(',')}`] : []),
+      ...(resolvedProd.weight || cleanWeightNum > 0 ? [`weight:${resolvedProd.weight || `${cleanWeightNum}g`}`] : []),
     ];
 
     let ok = false;
