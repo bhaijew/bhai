@@ -249,30 +249,6 @@ function ShopContent() {
           </div>
         </ScrollReveal>
 
-        {/* ── Admin Mode Banner ── */}
-        {isAdmin && (
-
-          <div className="mb-6 p-4 rounded-[6px] bg-[#17110c] border border-[#dec29b]/50 text-[#f5efe8] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
-            <div className="flex items-center gap-3">
-              <span className="text-xl p-2 rounded-full bg-[#241a13] border border-[#dec29b]/30">👑</span>
-              <div>
-                <p className="text-xs font-bold text-[#dec29b] uppercase tracking-wider font-mono">
-                  Administrator Live Catalog Controls
-                </p>
-                <p className="text-[11px] text-[#b8a798]">
-                  Edit or delete products in real-time directly from product cards below.
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/admin"
-              className="px-4 py-2 rounded-[5px] bg-gradient-to-r from-[#b38b40] to-[#dec29b] text-[#140e0b] text-xs font-mono font-bold uppercase tracking-wider hover:brightness-110 transition-all shadow-md flex items-center gap-1.5"
-            >
-              <span>Admin Terminal</span>
-              <span>&rarr;</span>
-            </Link>
-          </div>
-        )}
 
         {/* ── Product Grid or Clean Empty State ── */}
         {filteredProducts.length === 0 ? (
