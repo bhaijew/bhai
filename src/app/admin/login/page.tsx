@@ -196,7 +196,7 @@ export default function AdminLoginPage() {
                     type="text"
                     required
                     disabled={isBlocked || authLoading}
-                    placeholder="admin@bhaijeweller.com"
+                    placeholder="admin@bhai.com"
                     value={identifier}
                     onChange={(e) => setIdentifier(e.target.value)}
                     className="w-full px-4 py-3 rounded-[5px] bg-white border border-gray-300 text-gray-900 placeholder-gray-400 text-xs font-mono outline-none focus:border-gray-900 focus:ring-1 focus:ring-gray-900 transition-all disabled:opacity-50"

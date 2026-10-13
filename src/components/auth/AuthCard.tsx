@@ -95,7 +95,12 @@ export default function AuthCard({ initialMode = 'login' }: AuthCardProps) {
 
       if (data.success) {
         setLoggedIn(true);
-        if (data.user?.role === 'admin' || loginIdentifier === 'admin@bhaijeweller.com') {
+        if (
+          data.user?.role === 'admin' ||
+          loginIdentifier === 'admin@bhai.com' ||
+          loginIdentifier === 'admin' ||
+          loginIdentifier === 'admin@bhaijeweller.com'
+        ) {
           setTimeout(() => {
             window.location.href = '/admin';
           }, 800);

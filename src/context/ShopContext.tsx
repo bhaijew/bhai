@@ -646,7 +646,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
         body: JSON.stringify({ ...resolvedProd, focusKeywords: keywordsPayload }),
       });
@@ -744,7 +744,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
         body: JSON.stringify({ ...cleanProd, focusKeywords: keywordsPayload }),
       });
@@ -782,7 +782,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`/api/products?id=${encodeURIComponent(id)}&_t=${Date.now()}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
       });
       const data = await res.json();
@@ -817,7 +817,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
         body: JSON.stringify(updatedItem),
       }).catch(() => {});
@@ -833,7 +833,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
         body: JSON.stringify(catData),
       });
@@ -861,7 +861,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
         body: JSON.stringify(catData),
       });
@@ -888,7 +888,7 @@ export function ShopProvider({ children }: { children: React.ReactNode }) {
       const res = await fetch(`/api/categories?id=${encodeURIComponent(id)}&_t=${Date.now()}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-key': 'BhaiAdmin@Bradford2026!',
+          'x-admin-key': 'admin123',
         },
       });
       const data = await res.json();
